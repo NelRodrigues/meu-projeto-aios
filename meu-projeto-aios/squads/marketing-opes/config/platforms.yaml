@@ -1,0 +1,140 @@
+---
+# Configuração de Plataformas
+# Marketing OPEs Squad
+
+platforms:
+  instagram:
+    id: "instagram"
+    name: "Instagram"
+    frequency: "3x por semana"
+    optimal_posting_times:
+      - "08:00"  # Manhã
+      - "12:00"  # Meio-dia
+      - "19:00"  # Noite
+
+    content_types:
+      - "carousel"
+      - "reel"
+      - "post"
+      - "story"
+      - "igtv"
+
+    character_limits:
+      caption: 2200
+      hashtags_recommended: 30
+
+    metrics:
+      - "impressions"
+      - "reach"
+      - "engagement_rate"
+      - "saves"
+      - "shares"
+      - "followers_growth"
+
+  linkedin:
+    id: "linkedin"
+    name: "LinkedIn"
+    frequency: "5x por semana"
+    optimal_posting_times:
+      - "07:00"  # Início do dia
+      - "12:00"  # Pausa para almoço
+      - "17:00"  # Fim do dia laboral
+
+    content_types:
+      - "post"
+      - "article"
+      - "document"
+      - "video"
+
+    character_limits:
+      post: 3000
+      article: 100000
+
+    metrics:
+      - "impressions"
+      - "engagement_rate"
+      - "clicks"
+      - "followers_growth"
+
+  tiktok:
+    id: "tiktok"
+    name: "TikTok"
+    frequency: "2x por semana"
+    optimal_posting_times:
+      - "06:00"
+      - "13:00"
+      - "19:00"
+
+    content_types:
+      - "video"
+      - "duet"
+      - "stitch"
+
+    character_limits:
+      caption: 2200
+
+    metrics:
+      - "views"
+      - "engagement_rate"
+      - "shares"
+      - "followers_growth"
+
+  youtube:
+    id: "youtube"
+    name: "YouTube"
+    frequency: "1x por semana"
+    optimal_posting_times:
+      - "14:00"  # Tarde
+
+    content_types:
+      - "video"
+      - "shorts"
+      - "livestream"
+
+    character_limits:
+      title: 100
+      description: 5000
+      tags: 500
+
+    metrics:
+      - "views"
+      - "watch_time"
+      - "engagement_rate"
+      - "subscribers_growth"
+
+  email:
+    id: "email"
+    name: "Email Newsletter"
+    frequency: "1x por semana"
+    optimal_sending_times:
+      - "09:00"
+      - "19:00"
+
+    content_types:
+      - "newsletter"
+      - "promotion"
+      - "educational"
+
+    metrics:
+      - "open_rate"
+      - "click_rate"
+      - "unsubscribe_rate"
+      - "conversions"
+
+# Integrações
+integrations:
+  instagram:
+    api: "meta-graph-api"
+    auth: "oauth2"
+
+  linkedin:
+    api: "linkedin-api-v2"
+    auth: "oauth2"
+
+  tiktok:
+    api: "tiktok-api"
+    auth: "oauth2"
+
+  youtube:
+    api: "youtube-data-api-v3"
+    auth: "oauth2"

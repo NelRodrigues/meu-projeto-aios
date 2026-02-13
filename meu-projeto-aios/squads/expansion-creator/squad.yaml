@@ -1,0 +1,47 @@
+name: expansion-creator
+version: 1.0.0
+description: "Create custom AIOS expansion packs for any domain"
+author: "Synkra AIOS Team"
+license: MIT
+slashPrefix: expansionCreator
+
+aios:
+  minVersion: "2.1.0"
+  type: squad
+
+components:
+  agents:
+    - expansion-creator.md
+  tasks:
+    - expansion-creator-create-pack.md
+    - expansion-creator-create-agent.md
+    - expansion-creator-create-task.md
+    - expansion-creator-create-template.md
+    - expansion-creator-validate-pack.md
+    - expansion-creator-list-packs.md
+  workflows:
+    - expansion-creator-workflow.md
+  checklists:
+    - expansion-creator-quality-checklist.md
+  templates:
+    - expansion-pack-template.md
+  scripts: []
+  tools: []
+
+config:
+  extends: extend
+  coding-standards: ../../docs/framework/CODING-STANDARDS.md
+  tech-stack: ../../docs/framework/TECH-STACK.md
+  source-tree: ../../docs/framework/SOURCE-TREE.md
+
+dependencies:
+  node: []
+  python: []
+  squads:
+    - squad-creator
+
+tags:
+  - aios-extension
+  - pack-creation
+  - automation
+  - development-tools

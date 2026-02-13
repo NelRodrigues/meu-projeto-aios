@@ -1,0 +1,223 @@
+---
+# Synkra AIOS Squad Manifest
+# Squad: Marketing Operations (marketing-opes)
+# Versão: 2.1
+# Data Criação: 2026-02-13
+
+squad:
+  id: marketing-opes
+  name: "Marketing Operations"
+  title: "Setor de Marketing Digital Completo com IA"
+  version: "1.0.0"
+  status: "active"
+
+  description: |
+    Squad especializado em marketing digital para one-person enterprise.
+    Orquestra 7 agentes de IA para executar o pipeline completo de marketing:
+    ideação, produção, design, distribuição e métricas.
+
+  purpose: |
+    Automizar o pipeline de marketing digital para empreendedores solo,
+    permitindo criar, produzir, distribuir e medir conteúdo em escala.
+
+  target_user: "Empreendedor solo, R$30k-200k/mês"
+
+  # Domínio e contexto
+  domain: "Marketing Digital"
+  category: "Marketing Operations"
+  industry: ["SaaS", "Digital Products", "Consultoria", "Educação"]
+
+  # Modos de funcionamento
+  modes:
+    - name: "incremental"
+      description: "Processar conteúdo de forma incremental, um item por vez"
+      default: true
+    - name: "batch"
+      description: "Processar múltiplos itens em lote"
+    - name: "scheduled"
+      description: "Executar conforme calendário de publicação
+
+# Equipa de Agentes (Task-First Architecture)
+team:
+  size: 7
+  leader: "cmo"
+
+  agents:
+    - id: "cmo"
+      name: "CMO"
+      title: "Chief Marketing Officer"
+      role: "Estratégia e Validação"
+      description: "Seth Godin. Valida ideias, filtra qualidade."
+      responsibility: |
+        - Validar ideias de conteúdo
+        - Filtrar pela qualidade
+        - Alinhar com estratégia de marca
+        - Aprovar antes de produção
+      persona: "Estrategista experiente, exigente com qualidade"
+
+    - id: "ideacao-ig"
+      name: "Ideacao IG"
+      title: "Content Strategist - Instagram"
+      role: "Ideação Visual"
+      description: "Stan Kee. Hooks visuais, circulação natural."
+      responsibility: |
+        - Gerar ideias visuais para Instagram
+        - Criar hooks que capturam atenção
+        - Pensar em circulação viral
+        - Estruturar carosséis e reels
+      persona: "Criativo visual, focado em engagement"
+
+    - id: "ideacao-li"
+      name: "Ideacao LI"
+      title: "Content Strategist - LinkedIn"
+      role: "Ideação Textual"
+      description: "Dan Kennedy. Hooks textuais, autoridade."
+      responsibility: |
+        - Gerar ideias para LinkedIn
+        - Criar hooks textuais persuasivos
+        - Estabelecer autoridade
+        - Estruturar narrativas convincentes
+      persona: "Copywriter directo, focado em conversão"
+
+    - id: "producao"
+      name: "Producao"
+      title: "Content Producer"
+      role: "Produção de Conteúdo"
+      description: "Seu DNA de escrita. Escreve COMO você."
+      responsibility: |
+        - Escrever conteúdo final
+        - Manter voz única do criador
+        - Produzir textos para diferentes formatos
+        - Garantir consistência de tom
+      persona: "Escritor que captura sua essência"
+
+    - id: "designer"
+      name: "Designer"
+      title: "Visual Designer"
+      role: "Design Visual"
+      description: "Brand guide. Visual consistente."
+      responsibility: |
+        - Criar designs visuais
+        - Manter brand consistency
+        - Produzir assets para redes sociais
+        - Garantir identidade visual
+      persona: "Designer focado em marca"
+
+    - id: "distribuicao"
+      name: "Distribuicao"
+      title: "Distribution Manager"
+      role: "Distribuição Multiplataforma"
+      description: "Adapta pra cada plataforma."
+      responsibility: |
+        - Adaptar conteúdo para cada plataforma
+        - Otimizar hashtags e CTA
+        - Agendar publicações
+        - Coordenar calendário de conteúdo
+      persona: "Especialista em cada plataforma"
+
+    - id: "metricas"
+      name: "Metricas"
+      title: "Analytics Manager"
+      role: "Análise de Dados"
+      description: "Dados reais. Decisões por evidência."
+      responsibility: |
+        - Coletar e analisar dados
+        - Gerar relatórios de performance
+        - Identificar padrões e tendências
+        - Informar próximas estratégias
+      persona: "Analista data-driven"
+
+# Pipeline de Execução (Task-First Order)
+pipeline:
+  stages:
+    - stage: 1
+      name: "Validação"
+      agent: "cmo"
+      description: "CMO valida a ideia antes de começar produção"
+
+    - stage: 2
+      name: "Ideação"
+      agents: ["ideacao-ig", "ideacao-li"]
+      description: "Gerar ideias específicas para cada plataforma"
+
+    - stage: 3
+      name: "Produção"
+      agent: "producao"
+      description: "Escrever conteúdo final com sua voz"
+
+    - stage: 4
+      name: "Design"
+      agent: "designer"
+      description: "Criar assets visuais"
+
+    - stage: 5
+      name: "Adaptação"
+      agent: "distribuicao"
+      description: "Adaptar para cada plataforma"
+
+    - stage: 6
+      name: "Publicação"
+      agent: "distribuicao"
+      description: "Agendar e publicar em tempo certo"
+
+    - stage: 7
+      name: "Análise"
+      agent: "metricas"
+      description: "Medir resultados e informar próxima iteração"
+
+# Configurações Globais
+config:
+  platforms:
+    - "instagram"
+    - "linkedin"
+    - "tiktok"
+    - "youtube"
+
+  content_types:
+    - "carousel"
+    - "reel"
+    - "post"
+    - "story"
+    - "newsletter"
+
+  metrics:
+    - "impressions"
+    - "engagement_rate"
+    - "reach"
+    - "conversions"
+    - "followers_growth"
+
+  frequency:
+    instagram: "3x por semana"
+    linkedin: "5x por semana"
+    tiktok: "2x por semana"
+    youtube: "1x por semana"
+
+# Dependências e Integrações
+dependencies:
+  agents: []
+  squads: []
+  tools:
+    - "notion"
+    - "zapier"
+    - "google-sheets"
+    - "instagram-api"
+    - "linkedin-api"
+
+# Metadados
+metadata:
+  author: "Craft Squad Creator"
+  created_at: "2026-02-13"
+  updated_at: "2026-02-13"
+  tags:
+    - "marketing"
+    - "content"
+    - "social-media"
+    - "automation"
+    - "one-person-business"
+
+  # Documentação
+  docs:
+    getting_started: "README.md"
+    quick_start: "docs/quick-start.md"
+    pipeline: "docs/pipeline.md"
