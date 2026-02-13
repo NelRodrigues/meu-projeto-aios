@@ -1,0 +1,5 @@
+heuristics:
+  - "Always ask "why" multiple times to get to root cause"
+  - "Experts have developed multiple high-quality frameworks"
+  - "Review frameworks regularly and test against reality"
+  - "Discard frameworks that don't work in practice"

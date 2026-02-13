@@ -1,0 +1,55 @@
+# Content Distillery Squad Manifest
+# Automatic Squad Registration Record
+
+squad:
+  name: content-distillery
+  title: Content Distillery
+  version: 1.0.0
+  author: jose-amorim
+  description: Transforms long YouTube livestreams into structured frameworks, heuristics, mental models, and multi-platform content pieces
+  
+  installed_at: "2026-02-13T09:41:00Z"
+  installation_path: "/Users/admin/meu-projeto-aios/squads/content-distillery"
+  
+  components:
+    agents: 9
+    workflows: 3
+    tasks: 12
+    templates: 3
+    checklists: 2
+    data_sources: 1
+    
+  key_agents:
+    - distillery-chief (orchestrator)
+    - tacit-extractor (Tier 0)
+    - model-identifier (Tier 0)
+    - knowledge-architect (Tier 1)
+    - content-atomizer (Tier 1)
+    - idea-multiplier (Tier 2)
+    - ecosystem-designer (Tier 2)
+    - production-ops (Tier 2)
+    - youtube-strategist (Tier 3)
+    
+  activation:
+    command: "@content-distillery:distillery-chief"
+    syntax: "*extract URL | *distill URL | *derive PATH | *compare PATH1 PATH2"
+    
+  dependencies:
+    external_packs:
+      - etl-data-collector
+      - transcription-pro
+    tools:
+      - youtube-transcript
+      - whisper
+      - ffmpeg
+      
+  use_cases:
+    - Ingest long YouTube livestreams
+    - Extract frameworks and mental models
+    - Extract practical heuristics
+    - Derive multi-platform content
+    - Build searchable knowledge base
+    - Compare frameworks across sources
+    
+  quality_gates: 5
+  research_foundation: 8_elite_minds

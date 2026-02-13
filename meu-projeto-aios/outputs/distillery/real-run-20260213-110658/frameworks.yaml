@@ -1,0 +1,21 @@
+frameworks:
+  - name: "OODA Loop"
+    author: "John Boyd"
+    description: "Observe, Orient, Decide, Act"
+    domain: "Decision-making"
+    applications: ["Military strategy", "Business", "Personal decisions"]
+  - name: "Pareto Principle"
+    author: "Vilfredo Pareto"
+    description: "80/20 rule - vital few vs trivial many"
+    domain: "Prioritization"
+    applications: ["Productivity", "Business focus", "Resource allocation"]
+  - name: "First Principles Thinking"
+    author: "Elon Musk"
+    description: "Break problems to fundamental truths"
+    domain: "Problem-solving"
+    applications: ["Innovation", "Learning", "Breakthrough thinking"]
+  - name: "Eisenhower Matrix"
+    author: "Dwight Eisenhower"
+    description: "Important vs Urgent prioritization"
+    domain: "Time management"
+    applications: ["Task management", "Strategic planning"]

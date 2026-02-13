@@ -1,0 +1,18 @@
+{
+  "video_id": "3ks_AcYdDVQ",
+  "timestamp": "2026-02-13T09:54:47.565Z",
+  "transcript_length": 1360,
+  "frameworks_extracted": 4,
+  "heuristics_extracted": 4,
+  "summary_layers": 5,
+  "content_ideas": 6,
+  "platform_pieces": 5,
+  "output_directory": "./outputs/distillery/test-run",
+  "files_generated": [
+    "frameworks.yaml",
+    "heuristics.yaml",
+    "progressive-summary.md",
+    "content-ideas.yaml",
+    "content-pieces.yaml"
+  ]
+}

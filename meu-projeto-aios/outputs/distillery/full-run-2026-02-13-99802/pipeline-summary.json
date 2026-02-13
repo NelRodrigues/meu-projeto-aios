@@ -1,0 +1,16 @@
+{
+  "video_id": "3ks_AcYdDVQ",
+  "timestamp": "2026-02-13T10:09:59.809Z",
+  "phases_completed": 6,
+  "frameworks_extracted": 4,
+  "heuristics_extracted": 5,
+  "content_ideas": 10,
+  "twitter_pieces": 6,
+  "linkedin_pieces": 3,
+  "blog_pieces": 1,
+  "youtube_titles": 4,
+  "youtube_descriptions": 2,
+  "youtube_tags": 10,
+  "total_content_pieces": 14,
+  "output_directory": "outputs/distillery/full-run-2026-02-13-99802"
+}
