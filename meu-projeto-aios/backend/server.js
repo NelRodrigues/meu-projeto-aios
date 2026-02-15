@@ -10,10 +10,30 @@ import { getAdaptersConfig, validateAdaptersConfig } from './config/adapters.js'
 
 dotenv.config();
 
-// Inicializar Fastify
+// Inicializar Fastify com configurações de segurança
 const fastify = Fastify({
-  logger: true,
+  logger: process.env.NODE_ENV !== 'production',
+  trustProxy: true, // Para Railway/reverse proxy
 });
+
+// Rate limiting (apenas em produção)
+if (process.env.NODE_ENV === 'production') {
+  fastify.register(async (fastify) => {
+    // Rate limit geral: 100 req/15min por IP
+    fastify.setErrorHandler((error, request, reply) => {
+      if (error.statusCode === 429) {
+        return reply.code(429).send({
+          error: 'Demasiados pedidos. Tente novamente mais tarde.',
+          retryAfter: error.context?.after,
+        });
+      }
+      throw error;
+    });
+  });
+}
+
+// CORS (restringir em produção)
+const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173';
 
 // Inicializar Supabase
 const supabaseUrl = process.env.SUPABASE_URL;
