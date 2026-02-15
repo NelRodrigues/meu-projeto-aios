@@ -4,6 +4,8 @@ import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import { AdapterFactory } from './adapters/AdapterFactory.js';
 import { MetricsAggregator } from './services/MetricsAggregator.js';
+import { AIInsightsGenerator } from './services/AIInsightsGenerator.js';
+import { AIChat } from './services/AIChat.js';
 import { getAdaptersConfig, validateAdaptersConfig } from './config/adapters.js';
 
 dotenv.config();
@@ -33,6 +35,14 @@ if (supabaseUrl && supabaseServiceKey) {
 let metricsAggregator = null;
 if (supabaseAdmin) {
   metricsAggregator = new MetricsAggregator(supabaseAdmin, fastify.log);
+}
+
+// Inicializar AIInsightsGenerator e AIChat
+let aiInsightsGenerator = null;
+let aiChat = null;
+if (supabaseAdmin) {
+  aiInsightsGenerator = new AIInsightsGenerator();
+  aiChat = new AIChat();
 }
 
 // Inicializar adaptadores
@@ -149,6 +159,33 @@ fastify.get('/api/insights', async (request, reply) => {
   }
 });
 
+// Endpoint: Gerar insights sob demanda
+fastify.post('/api/insights/generate', async (request, reply) => {
+  try {
+    if (!aiInsightsGenerator) {
+      return reply.status(503).send({ error: 'Serviço de IA não disponível' });
+    }
+
+    // Executar geração de insights assincronamente
+    (async () => {
+      try {
+        await aiInsightsGenerator.generateInsights();
+      } catch (err) {
+        fastify.log.error('Erro ao gerar insights:', err);
+      }
+    })();
+
+    return reply.send({
+      message: 'Geração de insights iniciada',
+      status: 'processing',
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: 'Erro ao iniciar geração de insights' });
+  }
+});
+
 // Endpoint: Descartar insight
 fastify.post('/api/insights/:id/dismiss', async (request, reply) => {
   try {
@@ -176,26 +213,42 @@ fastify.post('/api/insights/:id/dismiss', async (request, reply) => {
   }
 });
 
-// Endpoint: Chat com IA (placeholder)
+// Endpoint: Chat com IA (integração com Claude API)
 fastify.post('/api/chat', async (request, reply) => {
   try {
-    const { conversationId, message } = request.body;
+    const { conversationId: providedId, message } = request.body;
 
     if (!message) {
       return reply.status(400).send({ error: 'Mensagem é obrigatória' });
     }
 
-    // TODO: Implementar integração com Claude API
-    const response = {
-      conversationId,
-      message: 'Resposta de IA - implementação em curso',
-      timestamp: new Date().toISOString(),
-    };
+    if (!aiChat) {
+      return reply.status(503).send({ error: 'Serviço de IA não disponível' });
+    }
 
+    // Usar conversationId fornecido ou criar novo
+    let conversationId = providedId;
+
+    if (!conversationId) {
+      const { data: newConversation } = await supabaseAdmin
+        .from('ai_conversations')
+        .insert({ messages: [] })
+        .select()
+        .single();
+
+      conversationId = newConversation?.id;
+
+      if (!conversationId) {
+        return reply.status(500).send({ error: 'Erro ao criar conversa' });
+      }
+    }
+
+    // Processar mensagem com IA
+    const response = await aiChat.processMessage(conversationId, message);
     return reply.send(response);
   } catch (error) {
     fastify.log.error(error);
-    return reply.status(500).send({ error: 'Erro interno do servidor' });
+    return reply.status(500).send({ error: 'Erro ao processar mensagem de IA' });
   }
 });
 
@@ -420,6 +473,19 @@ const start = async () => {
     });
     fastify.log.info('⏰ Cron job configurado: Agregação de métricas às 23:59');
 
+    // Cron job: Gerar insights de IA diariamente às 08:00
+    cron.schedule('0 8 * * *', async () => {
+      if (aiInsightsGenerator) {
+        try {
+          fastify.log.info('🤖 Iniciando geração automática de insights...');
+          await aiInsightsGenerator.generateInsights();
+        } catch (err) {
+          fastify.log.error('Erro ao gerar insights automáticos:', err);
+        }
+      }
+    });
+    fastify.log.info('⏰ Cron job configurado: Geração de insights às 08:00');
+
     // Iniciar servidor
     await fastify.listen({ port, host: '0.0.0.0' });
     console.log(`🚀 Servidor iniciado em porta ${port}`);
@@ -428,6 +494,7 @@ const start = async () => {
     console.log(`   GET  /api/metrics/latest`);
     console.log(`   GET  /api/metrics/history`);
     console.log(`   GET  /api/insights`);
+    console.log(`   POST /api/insights/generate`);
     console.log(`   POST /api/insights/:id/dismiss`);
     console.log(`   POST /api/chat`);
     console.log(`   POST /api/sync/:source`);

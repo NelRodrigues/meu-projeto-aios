@@ -4,7 +4,13 @@ import { useMetricsStore } from '../store/metricsStore';
 import { createClient } from '@supabase/supabase-js';
 import KPICard from '../components/KPICard';
 import InsightsPanel from '../components/InsightsPanel';
+import AIInsightsPanel from '../components/AIInsightsPanel';
+import ChatInterface from '../components/ChatInterface';
+import useAIInsights from '../hooks/useAIInsights';
 import '../styles/dashboard.css';
+import '../styles/ai-insights-panel.css';
+import '../styles/chat-interface.css';
+import '../styles/chat-message.css';
 import { Users, TrendingUp, DollarSign, CheckCircle, LogOut } from 'lucide-react';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://seu-projeto.supabase.co';
@@ -16,6 +22,11 @@ export default function Dashboard() {
   const { metrics, loading, fetchLatestMetrics } = useMetricsStore();
   const [insights, setInsights] = useState([]);
   const [realtimeUpdates, setRealtimeUpdates] = useState(0);
+  const {
+    insights: aiInsights,
+    loading: aiLoading,
+    dismissInsight,
+  } = useAIInsights();
 
   // Inicializar e fazer subscribe ao Realtime
   useEffect(() => {
@@ -133,6 +144,15 @@ export default function Dashboard() {
           <InsightsPanel insights={insights} />
         </section>
 
+        {/* Painel de Insights de IA */}
+        <section className="ai-insights-section">
+          <AIInsightsPanel
+            insights={aiInsights}
+            onDismiss={dismissInsight}
+            loading={aiLoading}
+          />
+        </section>
+
         {/* Status de Sincronização */}
         <section className="status-section">
           <div className="status-card">
@@ -146,6 +166,9 @@ export default function Dashboard() {
           </div>
         </section>
       </main>
+
+      {/* Chatbot de IA Flutuante */}
+      <ChatInterface />
     </div>
   );
 }
