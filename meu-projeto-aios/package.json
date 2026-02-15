@@ -1,0 +1,27 @@
+{
+  "name": "meu-projeto-aios",
+  "version": "1.0.0",
+  "description": "Control Tower Executivo - Marca Digital",
+  "main": "index.js",
+  "scripts": {
+    "build:all": "npm run build:frontend",
+    "build:frontend": "cd frontend && npm install && npm run build",
+    "build:backend": "cd backend && npm install",
+    "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm run dev\"",
+    "start": "vercel dev",
+    "test": "echo \"No tests yet\""
+  },
+  "keywords": ["control-tower", "dashboard", "api", "ai"],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.24.3",
+    "@supabase/supabase-js": "^2.95.3",
+    "dotenv": "^17.3.1"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "vercel": "^33.0.0"
+  }
+}
