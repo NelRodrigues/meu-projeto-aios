@@ -1,0 +1,140 @@
+/* Estilos para Gráficos Recharts */
+
+.chart-wrapper {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.chart-title {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.chart-empty {
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+}
+
+/* Tooltip customizado */
+.custom-tooltip {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.custom-tooltip .label {
+  margin: 0 0 8px 0;
+  font-weight: 600;
+  color: #333;
+  font-size: 13px;
+}
+
+.custom-tooltip .value,
+.custom-tooltip .percentage {
+  margin: 4px 0;
+  color: #666;
+  font-size: 12px;
+}
+
+.custom-tooltip .monthly {
+  color: #3b82f6;
+}
+
+.custom-tooltip .annual {
+  color: #a855f7;
+}
+
+.custom-tooltip .percentage {
+  color: #10b981;
+  font-weight: 600;
+}
+
+/* Stats abaixo dos gráficos */
+.chart-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+.stat-item {
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stat-item.without-color {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.stat-color {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-name {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 500;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  margin: 4px 0 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Grid de gráficos */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-wrapper {
+    padding: 16px;
+  }
+
+  .chart-stats {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+}
