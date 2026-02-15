@@ -2,6 +2,9 @@ import Fastify from 'fastify';
 import cron from 'node-cron';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
+import { AdapterFactory } from './adapters/AdapterFactory.js';
+import { MetricsAggregator } from './services/MetricsAggregator.js';
+import { getAdaptersConfig, validateAdaptersConfig } from './config/adapters.js';
 
 dotenv.config();
 
@@ -24,6 +27,24 @@ if (supabaseUrl && supabaseKey) {
 
 if (supabaseUrl && supabaseServiceKey) {
   supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+}
+
+// Inicializar MetricsAggregator
+let metricsAggregator = null;
+if (supabaseAdmin) {
+  metricsAggregator = new MetricsAggregator(supabaseAdmin, fastify.log);
+}
+
+// Inicializar adaptadores
+const adaptersConfig = getAdaptersConfig();
+const adaptersErrors = validateAdaptersConfig(adaptersConfig);
+const adapters = {};
+
+if (adaptersErrors.length > 0) {
+  console.warn('⚠️  Avisos de configuração de adaptadores:');
+  adaptersErrors.forEach(err => console.warn(`  - ${err}`));
+} else {
+  console.log('✅ Adaptadores configurados:', Object.keys(adaptersConfig).join(', '));
 }
 
 // Health Check Endpoint
@@ -183,12 +204,71 @@ fastify.post('/api/sync/:source', async (request, reply) => {
   try {
     const { source } = request.params;
 
-    // TODO: Implementar lógica de sync com adaptadores
+    if (!adaptersConfig[source]) {
+      return reply.status(404).send({
+        error: `Adaptador não encontrado: ${source}`,
+        available: Object.keys(adaptersConfig),
+      });
+    }
+
+    if (!adapters[source]) {
+      return reply.status(503).send({
+        error: `Adaptador não inicializado: ${source}`,
+      });
+    }
+
+    // Executar sync assincronamente
+    const adapter = adapters[source];
+
+    (async () => {
+      try {
+        const result = await adapter.sync();
+        // Log o resultado para debug
+        fastify.log.info(`Sync de ${source} concluído:`, result);
+
+        // Salvar log de sincronização
+        if (supabaseAdmin) {
+          await supabaseAdmin.from('data_sync_logs').insert({
+            source,
+            status: result.success ? 'success' : 'failed',
+            records_synced: result.recordsSynced || 0,
+            errors: result.errors || [],
+            completed_at: new Date().toISOString(),
+          });
+        }
+      } catch (err) {
+        fastify.log.error(`Erro em sync de ${source}:`, err);
+      }
+    })();
+
     return reply.send({
       message: `Sync iniciado para ${source}`,
-      status: 'pending',
+      status: 'running',
       timestamp: new Date().toISOString(),
     });
+  } catch (error) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: 'Erro interno do servidor' });
+  }
+});
+
+// Endpoint: Status dos adaptadores
+fastify.get('/api/adapters/status', async (request, reply) => {
+  try {
+    const status = {};
+
+    for (const [name, config] of Object.entries(adaptersConfig)) {
+      status[name] = {
+        ...config,
+        initialized: !!adapters[name],
+      };
+
+      if (adapters[name]) {
+        status[name].adapterStatus = adapters[name].getStatus();
+      }
+    }
+
+    return reply.send(status);
   } catch (error) {
     fastify.log.error(error);
     return reply.status(500).send({ error: 'Erro interno do servidor' });
@@ -274,22 +354,89 @@ async function aggregateDailyMetrics() {
   }
 }
 
-// Cron job: Agregar métricas diariamente às 23:59
-cron.schedule('59 23 * * *', aggregateDailyMetrics);
-
-// Opcional: Agregar imediatamente ao iniciar (comentado para testes)
-// aggregateDailyMetrics();
-
-// Iniciar servidor
+// Iniciar servidor e configurar cron jobs
 const start = async () => {
   try {
     const port = parseInt(process.env.PORT) || 3000;
+
+    // Inicializar adaptadores
+    fastify.log.info('🔧 Inicializando adaptadores...');
+    for (const [name, config] of Object.entries(adaptersConfig)) {
+      try {
+        const adapter = AdapterFactory.createAdapter(
+          name,
+          config,
+          supabaseAdmin,
+          fastify.log
+        );
+
+        adapters[name] = adapter;
+        fastify.log.info(`✅ Adaptador ${name} pronto`);
+      } catch (err) {
+        fastify.log.warn(`⚠️  Não foi possível inicializar ${name}:`, err.message);
+      }
+    }
+
+    // Setup cron jobs para sincronização de adaptadores
+    fastify.log.info('📅 Configurando cron jobs de sincronização...');
+
+    for (const [name, config] of Object.entries(adaptersConfig)) {
+      if (adapters[name] && config.cronSchedule) {
+        const adapter = adapters[name];
+
+        cron.schedule(config.cronSchedule, async () => {
+          try {
+            fastify.log.info(`🔄 Iniciando sync programado de ${name}...`);
+            const result = await adapter.sync();
+
+            // Salvar log
+            if (supabaseAdmin) {
+              await supabaseAdmin.from('data_sync_logs').insert({
+                source: name,
+                status: result.success ? 'success' : 'failed',
+                records_synced: result.recordsSynced || 0,
+                errors: result.errors || [],
+                completed_at: new Date().toISOString(),
+              });
+            }
+          } catch (err) {
+            fastify.log.error(`❌ Erro em sync programado de ${name}:`, err);
+          }
+        });
+
+        fastify.log.info(`⏰ Cron job configurado para ${name}: ${config.cronSchedule}`);
+      }
+    }
+
+    // Cron job: Agregar métricas diariamente às 23:59
+    cron.schedule('59 23 * * *', async () => {
+      if (metricsAggregator) {
+        try {
+          await metricsAggregator.aggregateDailyMetrics();
+        } catch (err) {
+          fastify.log.error('Erro ao agregar métricas:', err);
+        }
+      }
+    });
+    fastify.log.info('⏰ Cron job configurado: Agregação de métricas às 23:59');
+
+    // Iniciar servidor
     await fastify.listen({ port, host: '0.0.0.0' });
     console.log(`🚀 Servidor iniciado em porta ${port}`);
+    console.log(`🎯 Endpoints disponíveis:`);
+    console.log(`   GET  /health`);
+    console.log(`   GET  /api/metrics/latest`);
+    console.log(`   GET  /api/metrics/history`);
+    console.log(`   GET  /api/insights`);
+    console.log(`   POST /api/insights/:id/dismiss`);
+    console.log(`   POST /api/chat`);
+    console.log(`   POST /api/sync/:source`);
+    console.log(`   GET  /api/adapters/status`);
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
   }
 };
 
+// Chamar função start() para inicializar
 start();
