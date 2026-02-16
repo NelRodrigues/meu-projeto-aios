@@ -7,13 +7,21 @@ import { sendJSON, sendError } from './lib/handlers.js';
 
 export default async function handler(req, res) {
   try {
-    // Testar conexão com Supabase
-    const { data, error } = await supabase
-      .from('metrics_snapshots')
-      .select('id')
-      .limit(1);
+    let dbStatus = 'not-configured';
 
-    const dbStatus = error ? 'disconnected' : 'connected';
+    // Testar conexão com Supabase se disponível
+    if (supabase) {
+      try {
+        const { error } = await supabase
+          .from('metrics_snapshots')
+          .select('id')
+          .limit(1);
+
+        dbStatus = error ? 'disconnected' : 'connected';
+      } catch (err) {
+        dbStatus = 'error';
+      }
+    }
 
     return sendJSON(res, {
       status: 'ok',
