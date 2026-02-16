@@ -1,6 +1,18 @@
 {
-  "buildCommand": "npm run build:all && cd api && npm install",
-  "outputDirectory": "frontend/dist",
+  "buildCommand": "npm run build:all",
+  "builds": [
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "frontend/dist"
+      }
+    }
+  ],
   "routes": [
     {
       "src": "/api/(.*)",
