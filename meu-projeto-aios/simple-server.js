@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import cron from 'node-cron';
-import { getClients, getProjects, getMetrics, getAIInsights, addClient, subscribeToClients, subscribeToProjects, subscribeToMetrics, subscribeToInsights, supabase } from './supabase-client.js';
+import { getClients, getProjects, getMetrics, getAIInsights, addClient, subscribeToClients, subscribeToProjects, subscribeToMetrics, subscribeToInsights, supabase, supabaseAdmin } from './supabase-client.js';
 import DataSyncOrchestrator from './data-sync.js';
 import AdapterFactory from './adapter-factory.js';
 import AIInsightsGenerator from './ai-insights-generator.js';
@@ -176,16 +176,16 @@ const server = http.createServer(async (req, res) => {
   // GET /api/tasks - Listar tarefas do ClickUp
   if (req.url === '/api/tasks' && req.method === 'GET') {
     try {
-      if (!supabase) {
+      if (!supabaseAdmin) {
         throw new Error('Supabase not connected');
       }
 
-      // Buscar tarefas com seus clientes associados
-      const { data: tasks, error: tasksError } = await supabase
+      // Buscar tarefas com suas atribuições
+      // Usar supabaseAdmin para contornar RLS policies (apenas leitura)
+      const { data: tasks, error: tasksError } = await supabaseAdmin
         .from('tasks')
         .select(`
           *,
-          client:clients(id, name),
           assignments:task_assignments(assignee_name, assignee_email, assignee_id)
         `)
         .order('due_date', { ascending: true, nullsFirst: false });
@@ -563,7 +563,7 @@ server.listen(PORT, async () => {
   // Inicializar Data Sync Orchestrator
   console.log('🔧 Inicializando Data Sync Orchestrator...');
   try {
-    dataSync = new DataSyncOrchestrator(supabase);
+    dataSync = new DataSyncOrchestrator(supabase, supabaseAdmin);
 
     // Registar adaptadores disponíveis (se configurados)
     const hasZohoCRM = process.env.ZOHO_ACCESS_TOKEN || process.env.ZOHO_REFRESH_TOKEN;

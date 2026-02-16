@@ -12,8 +12,9 @@ import AdapterFactory from './adapter-factory.js';
  * Orquestrador de sincronização de dados
  */
 export class DataSyncOrchestrator {
-  constructor(supabaseClient) {
-    this.db = supabaseClient;
+  constructor(supabaseClient, supabaseAdminClient = null) {
+    this.db = supabaseAdminClient || supabaseClient; // Usar admin client se disponível, senão usar client normal
+    this.supabasePublic = supabaseClient; // Guardar client público para queries de leitura
     this.adapters = new Map();
     this.jobs = new Map();
     this.syncLogs = [];
@@ -119,11 +120,11 @@ export class DataSyncOrchestrator {
    *
    * @param {string} adapterName - Nome do adaptador
    * @param {string} tableName - Tabela destino
-   * @param {string} schedule - Schedule do cron (ex: '0 */4 * * *' para 4h/4h)
+   * @param {string} schedule - Schedule do cron (ex: cron format para 4h/4h)
    * @param {string} jobName - Nome único do job (opcional)
    *
    * @example
-   * orchestrator.scheduleSyncJob('zoho-crm', 'clients', '0 */4 * * *', 'zoho-4h');
+   * orchestrator.scheduleSyncJob('zoho-crm', 'clients', schedule, 'zoho-4h');
    */
   scheduleSyncJob(adapterName, tableName, schedule, jobName) {
     try {

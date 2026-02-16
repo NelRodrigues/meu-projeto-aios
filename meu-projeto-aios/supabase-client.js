@@ -5,6 +5,7 @@ dotenv.config();
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   console.error('❌ Variáveis Supabase não configuradas. Verifique .env');
@@ -12,6 +13,18 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 }
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Supabase client com service role key para operações administrativas (sync de dados)
+export const supabaseAdmin = SUPABASE_SERVICE_KEY
+  ? createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+  : supabase; // Fallback para anon key se service key não estiver configurada
+
+// Log de inicialização
+if (SUPABASE_SERVICE_KEY) {
+  console.log('✅ Supabase Admin Client inicializado (service key disponível)');
+} else {
+  console.warn('⚠️  Supabase Service Key não configurada. Usando anon key para sync (pode ter problemas de RLS)');
+}
 
 // Dados de fallback locais
 const fallbackClients = [
