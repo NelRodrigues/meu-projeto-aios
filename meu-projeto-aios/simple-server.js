@@ -173,6 +173,54 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // GET /api/tasks - Listar tarefas do ClickUp
+  if (req.url === '/api/tasks' && req.method === 'GET') {
+    try {
+      if (!supabase) {
+        throw new Error('Supabase not connected');
+      }
+
+      // Buscar tarefas com seus clientes associados
+      const { data: tasks, error: tasksError } = await supabase
+        .from('tasks')
+        .select(`
+          *,
+          client:clients(id, name),
+          assignments:task_assignments(assignee_name, assignee_email, assignee_id)
+        `)
+        .order('due_date', { ascending: true, nullsFirst: false });
+
+      if (tasksError) {
+        throw tasksError;
+      }
+
+      // Extrair lista de assignees únicos
+      const assigneesSet = new Set();
+      if (tasks) {
+        tasks.forEach(task => {
+          if (task.assignments) {
+            task.assignments.forEach(a => {
+              if (a.assignee_name) {
+                assigneesSet.add(a.assignee_name);
+              }
+            });
+          }
+        });
+      }
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        tasks: tasks || [],
+        assignees: Array.from(assigneesSet)
+      }));
+    } catch (error) {
+      console.error('Erro ao buscar tarefas:', error);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: error.message || 'Erro ao buscar tarefas' }));
+    }
+    return;
+  }
+
   // API Add Client (POST)
   if (req.url === '/api/clients' && req.method === 'POST') {
     let body = '';
@@ -341,6 +389,8 @@ const server = http.createServer(async (req, res) => {
         let tableName = 'clients';
         if (source.includes('sheets') || source.includes('revenue')) {
           tableName = 'revenues';
+        } else if (source.includes('clickup') || source.includes('task')) {
+          tableName = 'tasks';
         }
 
         const result = await dataSync.syncAdapter(source, tableName);
@@ -488,6 +538,7 @@ server.listen(PORT, async () => {
   console.log('║  • GET /api/metrics/latest                  ║');
   console.log('║  • GET /api/clients                         ║');
   console.log('║  • GET /api/projects                        ║');
+  console.log('║  • GET /api/tasks (ClickUp)                 ║');
   console.log('║  • GET /api/insights                        ║');
   console.log('║  • POST /api/clients (add)                  ║');
   console.log('║                                              ║');
@@ -546,6 +597,24 @@ server.listen(PORT, async () => {
       console.log('✅ Google Sheets sync agendado (6h/6h)');
     } else {
       console.log('⚠️  Google Sheets não configurado (faltam environment variables)');
+    }
+
+    // Verificar se ClickUp está configurado
+    const hasClickUp = process.env.CLICKUP_API_TOKEN && process.env.CLICKUP_LIST_ID;
+
+    if (hasClickUp) {
+      dataSync.addAdapter('clickup', 'clickup', {
+        apiToken: process.env.CLICKUP_API_TOKEN,
+        teamId: process.env.CLICKUP_TEAM_ID,
+        spaceId: process.env.CLICKUP_SPACE_ID,
+        listId: process.env.CLICKUP_LIST_ID
+      });
+
+      // Agendar sync a cada 3 horas
+      dataSync.scheduleSyncJob('clickup', 'tasks', '0 */3 * * *', 'clickup-3h');
+      console.log('✅ ClickUp sync agendado (3h/3h)');
+    } else {
+      console.log('⚠️  ClickUp não configurado (faltam environment variables)');
     }
 
     console.log('✅ Data Sync Orchestrator inicializado');

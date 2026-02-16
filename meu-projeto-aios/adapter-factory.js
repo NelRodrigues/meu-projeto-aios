@@ -6,6 +6,7 @@
 
 import ZohoCRMAdapter from './zoho-crm-adapter.js';
 import GoogleSheetsAdapter from './google-sheets-adapter.js';
+import ClickUpAdapter from './clickup-adapter.js';
 
 /**
  * Factory para criar adaptadores de fontes de dados
@@ -16,7 +17,8 @@ export class AdapterFactory {
    */
   static TYPES = {
     ZOHO_CRM: 'zoho-crm',
-    GOOGLE_SHEETS: 'google-sheets'
+    GOOGLE_SHEETS: 'google-sheets',
+    CLICKUP: 'clickup'
   };
 
   /**
@@ -40,6 +42,9 @@ export class AdapterFactory {
 
       case this.TYPES.GOOGLE_SHEETS:
         return new GoogleSheetsAdapter(config);
+
+      case this.TYPES.CLICKUP:
+        return new ClickUpAdapter(config);
 
       default:
         throw new Error(`Tipo de adaptador desconhecido: ${type}`);
