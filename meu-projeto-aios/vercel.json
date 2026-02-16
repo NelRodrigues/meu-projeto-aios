@@ -1,9 +1,14 @@
 {
-  "root": "frontend",
-  "buildCommand": "npm install && npm run build",
-  "outputDirectory": "dist",
-  "env": {
-    "VITE_SUPABASE_URL": "@supabase_url",
-    "VITE_SUPABASE_ANON_KEY": "@supabase_anon_key"
-  }
+  "buildCommand": "cd frontend && npm install && npm run build && cd ..",
+  "outputDirectory": "frontend/dist",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/index.html"
+    }
+  ]
 }
