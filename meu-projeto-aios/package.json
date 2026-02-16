@@ -4,11 +4,10 @@
   "description": "Control Tower Executivo - Marca Digital",
   "main": "server.js",
   "scripts": {
-    "build:all": "npm run build:frontend && cd api && npm install",
+    "build": "npm run build:frontend && cd api && npm install",
     "build:frontend": "cd frontend && npm install && npm run build",
-    "build:backend": "cd api && npm install",
-    "dev": "node server.js",
     "start": "node server.js",
+    "dev": "node server.js",
     "test": "echo \"No tests yet\""
   },
   "keywords": ["control-tower", "dashboard", "api", "ai"],
