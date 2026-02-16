@@ -1,12 +1,6 @@
 {
   "buildCommand": "npm run build:all",
   "outputDirectory": "frontend/dist",
-  "functions": {
-    "api/**/*.js": {
-      "memory": 512,
-      "maxDuration": 30
-    }
-  },
   "env": {
     "VITE_API_URL": "@vite-api-url",
     "VITE_SUPABASE_URL": "@vite-supabase-url",
