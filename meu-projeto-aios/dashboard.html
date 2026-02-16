@@ -1135,12 +1135,33 @@
 
     function renderAIInsights(insightsData) {
       const container = document.getElementById('insightsList');
-      container.innerHTML = insightsData.map(insight => `
-        <div class="insight-card" onclick="dismissInsight(this)">
-          <strong>${insight.icon} ${insight.title}</strong>
-          <p>${insight.description}</p>
-        </div>
-      `).join('');
+      if (!insightsData || insightsData.length === 0) {
+        container.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">Nenhum insight disponível</p>';
+        return;
+      }
+
+      const severityIcons = {
+        'critical': '🔴',
+        'high': '🟠',
+        'medium': '🟡',
+        'low': '🟢'
+      };
+
+      container.innerHTML = insightsData.map((insight, idx) => {
+        const icon = severityIcons[insight.severity] || '💡';
+        const dismissedClass = insight.is_dismissed ? 'dismissed' : '';
+        return `
+          <div class="insight-card ${dismissedClass}" onclick="dismissInsight(this, '${insight.id || idx}')">
+            <strong>${icon} ${insight.title}</strong>
+            <p>${insight.description}</p>
+            ${insight.actionItems && insight.actionItems.length > 0 ? `
+              <div style="font-size: 0.85em; margin-top: 8px; color: #666;">
+                <strong>Acções:</strong> ${insight.actionItems.join(', ')}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
     }
 
     // AI Insights Sidebar Functions
@@ -1152,15 +1173,49 @@
       document.getElementById('aiInsightsSidebar').classList.remove('open');
     }
 
-    function dismissInsight(element) {
+    function dismissInsight(element, insightId) {
       element.style.animation = 'slideOut 0.3s ease';
       setTimeout(() => element.remove(), 300);
+    }
+
+    // Trigger insights generation
+    async function generateInsightsNow() {
+      const btn = event.target;
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '⏳ Gerando...';
+
+      try {
+        const response = await fetch('/api/insights/generate', { method: 'POST' });
+        const result = await response.json();
+
+        if (result.success) {
+          console.log(`✅ ${result.insightsSaved} insights gerados`);
+          loadAIInsights(); // Recarregar insights
+          btn.textContent = '✅ Insights gerados!';
+        } else {
+          console.error('Erro ao gerar insights:', result.error);
+          btn.textContent = '❌ Erro';
+        }
+      } catch (error) {
+        console.error('Erro ao gerar insights:', error);
+        btn.textContent = '❌ Erro de conexão';
+      } finally {
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }, 2000);
+      }
     }
 
     // Chatbot Functions
     let chatHistory = [
       { role: 'bot', message: 'Olá! 👋 Sou o Gestor IA. Como posso ajudar com os seus negócios?' }
     ];
+
+    // Gerar ID único para conversa
+    let conversationId = 'conv-' + Math.random().toString(36).substring(2, 9);
+    let chatIsLoading = false;
 
     function renderChatMessages() {
       const container = document.getElementById('chatMessages');
@@ -1180,7 +1235,7 @@
     }
 
     function handleChatKeypress(event) {
-      if (event.key === 'Enter') {
+      if (event.key === 'Enter' && !chatIsLoading) {
         sendChatMessage();
       }
     }
@@ -1189,28 +1244,45 @@
       const input = document.getElementById('chatInput');
       const message = input.value.trim();
 
-      if (!message) return;
+      if (!message || chatIsLoading) return;
 
       // Add user message
       chatHistory.push({ role: 'user', message });
       renderChatMessages();
       input.value = '';
+      chatIsLoading = true;
 
-      // Simulate AI response
-      const responses = [
-        'Ótima pergunta! Segundo os últimos dados, a receita cresceu 15% este mês.',
-        'Recomendo iniciar um novo projecto com o cliente Acme Corporation para maximizar a receita.',
-        'A taxa de satisfação dos clientes mantém-se excelente em 8/10. Ótimo trabalho!',
-        'Os projectos estão no bom caminho. Marketing Campaign Q1 está 65% concluído.',
-        'Com 3 clientes activos e receita de $8,000/mês, a empresa está numa boa posição de crescimento.'
-      ];
+      try {
+        // Chamar API de chat
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            conversationId,
+            message
+          })
+        });
 
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+        const result = await response.json();
 
-      setTimeout(() => {
-        chatHistory.push({ role: 'bot', message: randomResponse });
+        if (result.success) {
+          chatHistory.push({ role: 'bot', message: result.message });
+        } else {
+          chatHistory.push({
+            role: 'bot',
+            message: '❌ Desculpe, houve um erro ao processar a sua mensagem. Tente novamente.'
+          });
+        }
+      } catch (error) {
+        console.error('Erro ao enviar mensagem:', error);
+        chatHistory.push({
+          role: 'bot',
+          message: '⚠️ Falha na conexão com o servidor de IA. Verifique a sua conexão.'
+        });
+      } finally {
+        chatIsLoading = false;
         renderChatMessages();
-      }, 1000);
+      }
     }
 
     // Init on Load

@@ -2,9 +2,12 @@ import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import cron from 'node-cron';
 import { getClients, getProjects, getMetrics, getAIInsights, addClient, subscribeToClients, subscribeToProjects, subscribeToMetrics, subscribeToInsights, supabase } from './supabase-client.js';
 import DataSyncOrchestrator from './data-sync.js';
 import AdapterFactory from './adapter-factory.js';
+import AIInsightsGenerator from './ai-insights-generator.js';
+import AIChatService from './ai-chat.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,6 +16,10 @@ const PORT = process.env.PORT || 3000;
 
 // Data Sync Orchestrator
 let dataSync = null;
+
+// AI Services
+let insightsGenerator = null;
+let chatService = null;
 
 // Clientes SSE conectados
 const clients = new Set();
@@ -362,6 +369,106 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // AI Insights Endpoints
+
+  // POST /api/insights/generate - Gerar insights de IA
+  if (req.url === '/api/insights/generate' && req.method === 'POST') {
+    try {
+      if (!insightsGenerator) {
+        throw new Error('Insights generator not initialized');
+      }
+
+      (async () => {
+        const metrics = await getMetrics();
+        const result = await insightsGenerator.generateAndSaveInsights(metrics, supabase);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(result));
+      })();
+    } catch (error) {
+      console.error('Erro ao gerar insights:', error);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: error.message }));
+    }
+    return;
+  }
+
+  // POST /api/chat - Chat com IA
+  if (req.url === '/api/chat' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+    req.on('end', async () => {
+      try {
+        if (!chatService) {
+          throw new Error('Chat service not initialized');
+        }
+
+        const { conversationId, message } = JSON.parse(body);
+        if (!conversationId || !message) {
+          throw new Error('conversationId e message são obrigatórios');
+        }
+
+        const metrics = await getMetrics();
+        const response = await chatService.sendMessage(conversationId, message, metrics, supabase);
+
+        // Salvar conversa
+        await chatService.saveConversation(conversationId, supabase);
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(response));
+      } catch (error) {
+        console.error('Erro ao processar chat:', error);
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: false,
+          error: error.message,
+          message: 'Erro ao processar mensagem'
+        }));
+      }
+    });
+    return;
+  }
+
+  // GET /api/chat/:conversationId - Histórico de chat
+  if (req.url.startsWith('/api/chat/') && req.method === 'GET') {
+    try {
+      if (!chatService) {
+        throw new Error('Chat service not initialized');
+      }
+
+      const conversationId = req.url.replace('/api/chat/', '');
+      const history = chatService.getConversationHistory(conversationId);
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ data: history }));
+    } catch (error) {
+      console.error('Erro ao buscar histórico de chat:', error);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: error.message }));
+    }
+    return;
+  }
+
+  // GET /api/ai/status - Status dos serviços de IA
+  if (req.url === '/api/ai/status' && req.method === 'GET') {
+    try {
+      const status = {
+        insightsGenerator: insightsGenerator ? insightsGenerator.getStatus() : null,
+        chatService: chatService ? chatService.getStatus() : null,
+        apiKey: !!process.env.ANTHROPIC_API_KEY
+      };
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(status));
+    } catch (error) {
+      console.error('Erro ao buscar status de IA:', error);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: error.message }));
+    }
+    return;
+  }
+
   // 404
   res.writeHead(404, { 'Content-Type': 'text/plain' });
   res.end('404 - Página não encontrada');
@@ -448,4 +555,87 @@ server.listen(PORT, async () => {
     console.warn('⚠️  Erro ao inicializar Data Sync:', error.message);
     console.log('   Sistema continuará sem sincronização automática');
   }
+
+  // Inicializar AI Services (Phase 3)
+  console.log('\n🧠 Inicializando AI Services (Phase 3)...');
+  try {
+    if (!process.env.ANTHROPIC_API_KEY) {
+      console.warn('⚠️  ANTHROPIC_API_KEY não configurada. AI Services desactivados.');
+    } else {
+      // Inicializar Insights Generator
+      insightsGenerator = new AIInsightsGenerator({
+        model: 'claude-3-5-sonnet-20241022'
+      });
+      console.log('✅ AI Insights Generator inicializado');
+
+      // Inicializar Chat Service
+      chatService = new AIChatService({
+        model: 'claude-3-5-sonnet-20241022'
+      });
+      console.log('✅ AI Chat Service inicializado');
+
+      // Agendar cron job para insights diários às 08:00
+      try {
+        const insightsJob = cron.schedule('0 8 * * *', async () => {
+          console.log('\n🧠 [CRON] Gerando insights diários...');
+          try {
+            const metrics = await getMetrics();
+            const result = await insightsGenerator.generateAndSaveInsights(metrics, supabase);
+            console.log(`✅ Insights gerados: ${result.insightsSaved} salvos`);
+
+            // Notificar clientes SSE de novos insights
+            insightsClients.forEach(client => {
+              client.res.write(`data: ${JSON.stringify({
+                type: 'insights',
+                event: 'INSERT',
+                timestamp: new Date().toISOString(),
+                data: result.insights
+              })}\n\n`);
+            });
+          } catch (error) {
+            console.error('❌ Erro ao gerar insights agendados:', error.message);
+          }
+        });
+
+        // Teste imediato se houver variável de ambiente DEBUG
+        if (process.env.DEBUG_INSIGHTS === 'true') {
+          console.log('🧪 [DEBUG] Executando geração de insights para teste...');
+          try {
+            const metrics = await getMetrics();
+            await insightsGenerator.generateAndSaveInsights(metrics, supabase);
+          } catch (error) {
+            console.warn('⚠️  Erro no teste de insights:', error.message);
+          }
+        }
+
+        console.log('✅ Cron job de insights agendado (diariamente às 08:00)');
+      } catch (error) {
+        console.warn('⚠️  Erro ao agendar cron job de insights:', error.message);
+      }
+
+      // Limpeza automática de conversas antigas (a cada 6 horas)
+      setInterval(() => {
+        chatService.cleanupOldConversations(24);
+      }, 6 * 60 * 60 * 1000);
+
+      console.log('✅ Limpeza automática de conversas agendada');
+    }
+  } catch (error) {
+    console.warn('⚠️  Erro ao inicializar AI Services:', error.message);
+    console.log('   Sistema continuará sem IA (endpoints desactivados)');
+  }
+
+  // Atualizar banner final
+  console.log('\n');
+  console.log('╔════════════════════════════════════════════════════╗');
+  console.log('║  🚀 SISTEMA COMPLETO - PRONTO PARA OPERAÇÃO       ║');
+  console.log('║                                                    ║');
+  console.log('║  ✅ Real-time Subscriptions        (Phase 1)      ║');
+  console.log('║  ✅ Data Adapters (Zoho, Sheets)  (Phase 2)      ║');
+  console.log('║  ✅ AI Insights & Chat             (Phase 3)      ║');
+  console.log('║                                                    ║');
+  console.log('║  📊 Dashboard: http://localhost:3000             ║');
+  console.log('║  🔗 Docs: http://localhost:3000/docs (coming)    ║');
+  console.log('╚════════════════════════════════════════════════════╝');
+  console.log('');
 });
