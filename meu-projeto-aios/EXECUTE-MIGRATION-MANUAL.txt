@@ -1,0 +1,143 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║  INSTRUÇÕES PARA EXECUTAR A MIGRATION SQL - ClickUp Integration Phase 5   ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+
+📋 PASSO 1: Abrir Supabase Dashboard
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Abrir: https://app.supabase.com
+2. Seleccionar o projecto "nvkcsojyjwzpiqwvmzwi"
+
+
+📋 PASSO 2: Ir para SQL Editor
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Menu lateral esquerdo: "SQL Editor"
+2. Botão: "+ New Query" (ou New)
+3. Uma nova aba abre com editor SQL em branco
+
+
+📋 PASSO 3: Copiar e Colar o SQL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Copie TUDO abaixo e cole no editor SQL:
+
+────────────────────────────────────────────────────────────────────────────
+
+-- Migration: Add ClickUp Tasks Tables
+-- Created: 2026-02-16
+-- Purpose: Add tasks and task_assignments tables for ClickUp integration
+
+-- ============================================
+-- Tabela: tasks
+-- ============================================
+CREATE TABLE IF NOT EXISTS tasks (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  external_id TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  description TEXT,
+  client_id UUID REFERENCES clients(id),
+  status TEXT NOT NULL DEFAULT 'open',
+  priority INTEGER DEFAULT 3,
+  due_date TIMESTAMPTZ,
+  start_date TIMESTAMPTZ,
+  time_estimate INTEGER,
+  time_tracked INTEGER,
+  tags TEXT[],
+  metadata JSONB DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Índices para tasks
+CREATE INDEX IF NOT EXISTS idx_tasks_external_id ON tasks(external_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
+CREATE INDEX IF NOT EXISTS idx_tasks_client_id ON tasks(client_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_due_date ON tasks(due_date);
+CREATE INDEX IF NOT EXISTS idx_tasks_priority ON tasks(priority);
+
+-- ============================================
+-- Tabela: task_assignments
+-- ============================================
+CREATE TABLE IF NOT EXISTS task_assignments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  task_id TEXT NOT NULL REFERENCES tasks(external_id) ON DELETE CASCADE,
+  assignee_name TEXT NOT NULL,
+  assignee_email TEXT,
+  assignee_id TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(task_id, assignee_id)
+);
+
+-- Índices para task_assignments
+CREATE INDEX IF NOT EXISTS idx_task_assignments_task_id ON task_assignments(task_id);
+CREATE INDEX IF NOT EXISTS idx_task_assignments_assignee_name ON task_assignments(assignee_name);
+CREATE INDEX IF NOT EXISTS idx_task_assignments_assignee_email ON task_assignments(assignee_email);
+
+-- ============================================
+-- Function: get_task_stats()
+-- ============================================
+CREATE OR REPLACE FUNCTION get_task_stats()
+RETURNS TABLE(
+  total BIGINT,
+  open BIGINT,
+  in_progress BIGINT,
+  review BIGINT,
+  completed BIGINT,
+  closed BIGINT,
+  overdue BIGINT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    COUNT(*) as total,
+    COUNT(*) FILTER (WHERE status = 'open') as open,
+    COUNT(*) FILTER (WHERE status = 'in_progress') as in_progress,
+    COUNT(*) FILTER (WHERE status = 'review') as review,
+    COUNT(*) FILTER (WHERE status = 'completed') as completed,
+    COUNT(*) FILTER (WHERE status = 'closed') as closed,
+    COUNT(*) FILTER (WHERE due_date < NOW() AND status NOT IN ('completed', 'closed')) as overdue
+  FROM tasks;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ============================================
+-- RLS Policies for tasks
+-- ============================================
+ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow read access to all authenticated users" ON tasks
+  FOR SELECT
+  USING (auth.role() = 'authenticated');
+
+-- ============================================
+-- RLS Policies for task_assignments
+-- ============================================
+ALTER TABLE task_assignments ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow read access to all authenticated users" ON task_assignments
+  FOR SELECT
+  USING (auth.role() = 'authenticated');
+
+-- ============================================
+-- Comentários para documentação
+-- ============================================
+COMMENT ON TABLE tasks IS 'Tarefas sincronizadas do ClickUp. Atualizado a cada 3 horas via adaptador.';
+COMMENT ON TABLE task_assignments IS 'Atribuição de tarefas a colaboradores (assignees do ClickUp).';
+COMMENT ON FUNCTION get_task_stats() IS 'Retorna estatísticas agregadas de tarefas (total, por status, atrasadas).';
+
+────────────────────────────────────────────────────────────────────────────
+
+
+📋 PASSO 4: Executar o Query
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Clicar no botão azul "RUN" (canto superior direito)
+   OU
+   Pressionar: Ctrl+Enter (Windows/Linux) ou Cmd+Enter (Mac)
+
+2. Esperar 2-5 segundos pela execução
+
+
+✅ RESULTADO ESPERADO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

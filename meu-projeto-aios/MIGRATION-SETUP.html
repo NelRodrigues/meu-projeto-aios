@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="pt-AO">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClickUp Migration Setup - Phase 5</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .status-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .step-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            margin-right: 15px;
+            font-weight: 600;
+        }
+
+        .instructions {
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 6px;
+            line-height: 1.8;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 12px;
+            color: #555;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 15px;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .button.secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .button.secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        .info-box {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        .timeline {
+            display: flex;
+            gap: 30px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .timeline-item {
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+        }
+
+        .timeline-item.completed {
+            opacity: 0.6;
+        }
+
+        .timeline-item.active {
+            opacity: 1;
+        }
+
+        .timeline-dot {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+        }
+
+        .timeline-item.completed .timeline-dot {
+            background: #28a745;
+        }
+
+        .timeline-item.active .timeline-dot {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            animation: pulse 2s infinite;
+        }
+
+        .timeline-item.pending .timeline-dot {
+            background: #ccc;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .timeline-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .copy-button {
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+            transition: background 0.2s;
+        }
+
+        .copy-button:hover {
+            background: #e0e0e0;
+        }
+
+        .copy-button.copied {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .footer {
+            background: #f5f5f5;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #e0e0e0;
+            color: #666;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🚀 ClickUp Integration - Phase 5</h1>
+            <p>Database Schema Setup</p>
+            <div class="status-badge">⚡ Execute the Migration</div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Timeline -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="step-number">📊</span>
+                    Progress
+                </h2>
+                <div class="timeline">
+                    <div class="timeline-item completed">
+                        <div class="timeline-dot">1️⃣</div>
+                        <div class="timeline-label">Adapter<br><small>✅ Complete</small></div>
+                    </div>
+                    <div class="timeline-item completed">
+                        <div class="timeline-dot">2️⃣</div>
+                        <div class="timeline-label">Factory<br><small>✅ Complete</small></div>
+                    </div>
+                    <div class="timeline-item completed">
+                        <div class="timeline-dot">3️⃣</div>
+                        <div class="timeline-label">Config<br><small>✅ Complete</small></div>
+                    </div>
+                    <div class="timeline-item completed">
+                        <div class="timeline-dot">4️⃣</div>
+                        <div class="timeline-label">Server<br><small>✅ Complete</small></div>
+                    </div>
+                    <div class="timeline-item active">
+                        <div class="timeline-dot">5️⃣</div>
+                        <div class="timeline-label">Database<br><small>⚡ NOW</small></div>
+                    </div>
+                    <div class="timeline-item pending">
+                        <div class="timeline-dot">6️⃣</div>
+                        <div class="timeline-label">Dashboard<br><small>⏳ Next</small></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="step-number">1️⃣</span>
+                    Open Supabase Dashboard
+                </h2>
+                <div class="instructions">
+                    <ol>
+                        <li>Open: <strong>https://app.supabase.com</strong></li>
+                        <li>Select project: <strong>nvkcsojyjwzpiqwvmzwi</strong></li>
+                        <li>Wait for dashboard to load</li>
+                    </ol>
+                    <a href="https://app.supabase.com/project/nvkcsojyjwzpiqwvmzwi/sql/new" class="button" target="_blank">
+                        🔗 Open Supabase SQL Editor
+                    </a>
+                </div>
+            </div>
+
+            <!-- SQL Copy -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="step-number">2️⃣</span>
+                    Copy SQL Migration
+                </h2>
+                <div class="instructions">
+                    <p>Click the button below to copy the migration SQL to clipboard:</p>
+                    <button class="button" onclick="copySQLToClipboard()">
+                        📋 Copy SQL to Clipboard
+                    </button>
+                    <div id="copyStatus" style="margin-top: 10px; color: #28a745; font-weight: 600; display: none;">
+                        ✅ Copied! Ready to paste in Supabase
+                    </div>
+                </div>
+            </div>
+
+            <!-- Paste Instructions -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="step-number">3️⃣</span>
+                    Paste & Execute in Supabase
+                </h2>
+                <div class="instructions">
+                    <ol>
+                        <li>Click on <strong>"+ New Query"</strong> button</li>
+                        <li>Paste the SQL (Ctrl+V or Cmd+V)</li>
+                        <li>Click the blue <strong>"RUN"</strong> button (top right)</li>
+                        <li>Wait 2-5 seconds for execution</li>
+                    </ol>
+                    <div class="success-box">
+                        ✅ <strong>Expected Result:</strong><br>
+                        Query executed successfully. Tables created and indices configured.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Verify -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="step-number">4️⃣</span>
+                    Verify Migration Success
+                </h2>
+                <div class="instructions">
+                    <p>After migration completes, test locally:</p>
+                    <div class="code-block">
+# Start server<br>
+node simple-server.js<br>
+<br>
+# In another terminal, test endpoint<br>
+curl http://localhost:3000/api/tasks | jq '.tasks | length'<br>
+<br>
+# Expected: 0 (tables are empty until sync runs)
+                    </div>
+                    <button class="button secondary" onclick="copyTestCommand()">
+                        📋 Copy Test Command
+                    </button>
+                </div>
+            </div>
+
+            <!-- What's Next -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="step-number">✨</span>
+                    What's Next?
+                </h2>
+                <div class="instructions">
+                    <p><strong>Phase 5 Complete!</strong> After successful migration:</p>
+                    <ol>
+                        <li><strong>Configure ClickUp Credentials</strong>
+                            <div class="code-block" style="margin-top: 10px;">
+CLICKUP_API_TOKEN=pk_your_token<br>
+CLICKUP_LIST_ID=your_list_id
+                            </div>
+                        </li>
+                        <li><strong>Test Sync</strong>
+                            <div class="code-block" style="margin-top: 10px;">
+curl -X POST http://localhost:3000/api/sync/clickup
+                            </div>
+                        </li>
+                        <li><strong>Monitor Logs</strong> in terminal for sync results</li>
+                    </ol>
+                    <div class="warning-box">
+                        ⚠️ <strong>Important:</strong> Sync will be automatic every 3 hours. First sync may take 30-60 seconds depending on number of tasks.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Need Help? -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="step-number">❓</span>
+                    Troubleshooting
+                </h2>
+                <div class="instructions">
+                    <p><strong>SQL Execution Failed?</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Check if you're in correct project</li>
+                        <li>Ensure Supabase service is running (green status)</li>
+                        <li>Try executing SQL in smaller chunks</li>
+                        <li>Check browser console for errors (F12)</li>
+                    </ul>
+                    <p style="margin-top: 15px;"><strong>Tables not found after execution?</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Refresh the page</li>
+                        <li>Check Table Editor on the left sidebar</li>
+                        <li>Verify execution completed (no error messages)</li>
+                    </ul>
+                    <div class="info-box" style="margin-top: 15px;">
+                        📚 See <strong>CLICKUP-SETUP.md</strong> for complete troubleshooting guide
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>ClickUp Integration Phase 5 Setup Guide | Created 2026-02-16</p>
+            <p style="margin-top: 5px;">Status: ✅ Ready for Execution</p>
+        </div>
+    </div>
+
+    <!-- SQL Content (Hidden) -->
+    <textarea id="sqlContent" style="display: none;">-- Migration: Add ClickUp Tasks Tables
+-- Created: 2026-02-16
+-- Purpose: Add tasks and task_assignments tables for ClickUp integration
+
+-- ============================================
+-- Tabela: tasks
+-- ============================================
+CREATE TABLE IF NOT EXISTS tasks (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  external_id TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  description TEXT,
+  client_id UUID REFERENCES clients(id),
+  status TEXT NOT NULL DEFAULT 'open',
+  priority INTEGER DEFAULT 3,
+  due_date TIMESTAMPTZ,
+  start_date TIMESTAMPTZ,
+  time_estimate INTEGER,
+  time_tracked INTEGER,
+  tags TEXT[],
+  metadata JSONB DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Índices para tasks
+CREATE INDEX IF NOT EXISTS idx_tasks_external_id ON tasks(external_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
+CREATE INDEX IF NOT EXISTS idx_tasks_client_id ON tasks(client_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_due_date ON tasks(due_date);
+CREATE INDEX IF NOT EXISTS idx_tasks_priority ON tasks(priority);
+
+-- ============================================
+-- Tabela: task_assignments
+-- ============================================
+CREATE TABLE IF NOT EXISTS task_assignments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  task_id TEXT NOT NULL REFERENCES tasks(external_id) ON DELETE CASCADE,
+  assignee_name TEXT NOT NULL,
+  assignee_email TEXT,
+  assignee_id TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(task_id, assignee_id)
+);
+
+-- Índices para task_assignments
+CREATE INDEX IF NOT EXISTS idx_task_assignments_task_id ON task_assignments(task_id);
+CREATE INDEX IF NOT EXISTS idx_task_assignments_assignee_name ON task_assignments(assignee_name);
+CREATE INDEX IF NOT EXISTS idx_task_assignments_assignee_email ON task_assignments(assignee_email);
+
+-- ============================================
+-- Function: get_task_stats()
+-- ============================================
+CREATE OR REPLACE FUNCTION get_task_stats()
+RETURNS TABLE(
+  total BIGINT,
+  open BIGINT,
+  in_progress BIGINT,
+  review BIGINT,
+  completed BIGINT,
+  closed BIGINT,
+  overdue BIGINT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    COUNT(*) as total,
+    COUNT(*) FILTER (WHERE status = 'open') as open,
+    COUNT(*) FILTER (WHERE status = 'in_progress') as in_progress,
+    COUNT(*) FILTER (WHERE status = 'review') as review,
+    COUNT(*) FILTER (WHERE status = 'completed') as completed,
+    COUNT(*) FILTER (WHERE status = 'closed') as closed,
+    COUNT(*) FILTER (WHERE due_date < NOW() AND status NOT IN ('completed', 'closed')) as overdue
+  FROM tasks;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ============================================
+-- RLS Policies for tasks
+-- ============================================
+ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow read access to all authenticated users" ON tasks
+  FOR SELECT
+  USING (auth.role() = 'authenticated');
+
+-- ============================================
+-- RLS Policies for task_assignments
+-- ============================================
+ALTER TABLE task_assignments ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow read access to all authenticated users" ON task_assignments
+  FOR SELECT
+  USING (auth.role() = 'authenticated');
+
+-- ============================================
+-- Comentários para documentação
+-- ============================================
+COMMENT ON TABLE tasks IS 'Tarefas sincronizadas do ClickUp. Atualizado a cada 3 horas via adaptador.';
+COMMENT ON TABLE task_assignments IS 'Atribuição de tarefas a colaboradores (assignees do ClickUp).';
+COMMENT ON FUNCTION get_task_stats() IS 'Retorna estatísticas agregadas de tarefas (total, por status, atrasadas).';</textarea>
+
+    <script>
+        function copySQLToClipboard() {
+            const sqlContent = document.getElementById('sqlContent').value;
+            navigator.clipboard.writeText(sqlContent).then(() => {
+                const status = document.getElementById('copyStatus');
+                status.style.display = 'block';
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 3000);
+            });
+        }
+
+        function copyTestCommand() {
+            const command = 'curl http://localhost:3000/api/tasks | jq ".tasks | length"';
+            navigator.clipboard.writeText(command);
+            alert('✅ Test command copied to clipboard!');
+        }
+    </script>
+</body>
+</html>
