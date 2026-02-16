@@ -1,51 +1,76 @@
-const { Server } = require('aios');
+/**
+ * Servidor Node.js que serves frontend estático + APIs
+ * Este ficheiro é o entrypoint para o Vercel
+ */
 
-// Criar uma instância do servidor AIOS
-const server = new Server({
-  host: 'localhost',
-  port: 8118
+import express from 'express';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import { supabase } from './api/lib/supabase.js';
+import { sendJSON, sendSuccess, sendError } from './api/lib/handlers.js';
+import healthHandler from './api/health.js';
+import metricsLatestHandler from './api/metrics/latest.js';
+import insightsIndexHandler from './api/insights/index.js';
+import insightsGenerateHandler from './api/insights/generate.js';
+import chatHandler from './api/chat.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// CORS headers
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
 });
 
-console.log('✅ Servidor AIOS criado com sucesso!');
-console.log('Configuração:', server.options);
-console.log('');
+// API Routes
+app.get('/health', healthHandler);
+app.get('/api/health', healthHandler);
+app.get('/api/metrics/latest', metricsLatestHandler);
+app.get('/api/insights', insightsIndexHandler);
+app.post('/api/insights/generate', insightsGenerateHandler);
+app.post('/api/chat', chatHandler);
 
-// Exemplo 1: Testar ping
-console.log('📡 Testando ping....');
-const pingResult = server.ping();
-console.log('Resultado do ping:', pingResult);
-console.log('');
+// Serve frontend estático
+const frontendPath = join(__dirname, 'frontend', 'dist');
+app.use(express.static(frontendPath));
 
-// Exemplo 2: Executar um comando
-console.log('⚙️  Executando comando....');
-const cmdResult = server.command('info');
-console.log('Resultado do comando:', cmdResult);
-console.log('');
+// SPA fallback - redirecionar todas as rotas não-API para index.html
+app.get('*', (req, res) => {
+  res.sendFile(join(frontendPath, 'index.html'));
+});
 
-// Exemplo 3: Verificar data sources
-console.log('📊 Data sources disponíveis:', Object.keys(server.dataSources));
-console.log('');
+// Error handling
+app.use((err, req, res, next) => {
+  console.error('Server error:', err);
+  res.status(500).json({ error: 'Internal server error' });
+});
 
-// Exemplo 4: Operações assíncronas
-async function exemploAssincrono() {
-  console.log('⏳ Executando operações assíncronas...');
+// Start server
+const server = app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`   Frontend: http://localhost:${PORT}`);
+  console.log(`   API: http://localhost:${PORT}/api`);
+});
 
-  try {
-    // Ping assíncrono
-    const pingAsync = await server.pingAsync();
-    console.log('Ping assíncrono:', pingAsync);
-
-    // Comando assíncrono
-    const cmdAsync = await server.commandAsync('status');
-    console.log('Comando assíncrono:', cmdAsync);
-
-  } catch (error) {
-    console.error('Erro:', error.message);
-  }
-
-  console.log('\n✨ Exemplos concluídos!');
-}
-
-// Executar exemplos assíncronos
-exemploAssincrono();
-
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
+});
