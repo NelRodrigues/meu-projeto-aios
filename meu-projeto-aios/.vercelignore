@@ -1,0 +1,17 @@
+# Node modules are installed fresh on Vercel
+# node_modules/
+
+# Don't ignore important directories
+!api/
+!frontend/
+!server.js
+!package.json
+!package-lock.json
+
+# Ignore development files
+.git/
+.gitignore
+.env.local
+.env.*.local
+.DS_Store
+*.log
