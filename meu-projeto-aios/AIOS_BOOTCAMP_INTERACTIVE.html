@@ -1,0 +1,1867 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎭 AIOS Bootcamp - Interactive Learning Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1f2937;
+            --light: #f3f4f6;
+            --text: #374151;
+            --border: #e5e7eb;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 280px;
+            background: white;
+            padding: 30px 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 30px;
+            border-bottom: 2px solid var(--light);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+
+        .sidebar-header p {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            color: var(--text);
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: var(--light);
+            border-left-color: var(--primary);
+        }
+
+        .nav-item.active {
+            background: var(--light);
+            border-left-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* MAIN CONTENT */
+        .main {
+            margin-left: 280px;
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            max-height: 100vh;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .section-title {
+            font-size: 32px;
+            color: white;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-subtitle {
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 0;
+            background: white;
+            border-radius: 8px 8px 0 0;
+            overflow: hidden;
+            margin-bottom: 0;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            background: var(--light);
+            border: none;
+            font-weight: 600;
+            color: var(--text);
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab:hover {
+            background: white;
+        }
+
+        .tab.active {
+            background: white;
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* CARDS */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+
+        .card h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .card p {
+            color: var(--text);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        /* COLLAPSE */
+        .collapse-header {
+            background: var(--light);
+            padding: 15px 20px;
+            cursor: pointer;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: var(--text);
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .collapse-header:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .collapse-icon {
+            transition: transform 0.3s ease;
+            font-size: 18px;
+        }
+
+        .collapse-header.active .collapse-icon {
+            transform: rotate(180deg);
+        }
+
+        .collapse-content {
+            display: none;
+            padding: 20px;
+            background: white;
+            border-radius: 0 0 8px 8px;
+            border: 1px solid var(--border);
+            border-top: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        .collapse-content.active {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* CODE BLOCK */
+        .code-block {
+            background: #1f2937;
+            color: #e5e7eb;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            position: relative;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .code-block code {
+            color: #f3f4f6;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        /* BADGES */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 10px;
+        }
+
+        .badge-primary {
+            background: #dbeafe;
+            color: #0c4a6e;
+        }
+
+        .badge-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        /* PROGRESS */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--light);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.3s ease;
+        }
+
+        /* CHECKBOX */
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            cursor: pointer;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
+        }
+
+        .checkbox-item input[type="checkbox"]:checked + label {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            flex: 1;
+        }
+
+        /* AGENT CARD */
+        .agent-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border-top: 4px solid var(--primary);
+        }
+
+        .agent-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+        .agent-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .agent-card h4 {
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .agent-card p {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .agent-card .badge {
+            margin-top: 10px;
+        }
+
+        /* GRID */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        /* TIMELINE */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline-item {
+            padding-bottom: 25px;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -25px;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 12px;
+            width: 2px;
+            height: calc(100% + 13px);
+            background: var(--border);
+        }
+
+        .timeline-item:last-child::after {
+            display: none;
+        }
+
+        .timeline-item h4 {
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .timeline-item p {
+            font-size: 13px;
+            color: #999;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-bottom: 2px solid var(--border);
+            }
+
+            .main {
+                margin-left: 0;
+                max-height: none;
+                padding: 20px;
+            }
+
+            .section-title {
+                font-size: 24px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* DAY PROGRESS */
+        .day-card {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .day-card h3 {
+            margin-bottom: 10px;
+        }
+
+        .day-card p {
+            color: rgba(255,255,255,0.9);
+            font-size: 13px;
+        }
+
+        /* BUTTON */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        /* HIGHLIGHT */
+        .highlight {
+            background: #fef3c7;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        /* ALERT */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #0c4a6e;
+            border-left: 4px solid #0284c7;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+            border-left: 4px solid #16a34a;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .alert-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: var(--primary);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h1>👑 AIOS</h1>
+                <p>7-Day Bootcamp</p>
+            </div>
+
+            <div class="nav-item active" onclick="switchSection('intro', event)">
+                🎭 Introdução
+            </div>
+
+            <div style="padding: 0 20px; margin: 20px 0; color: #999; font-size: 11px; font-weight: 600;">
+                FUNDAÇÕES
+            </div>
+
+            <div class="nav-item" onclick="switchSection('agents', event)">
+                🤖 Os 9 Agents
+            </div>
+            <div class="nav-item" onclick="switchSection('concepts', event)">
+                💡 Conceitos-Chave
+            </div>
+            <div class="nav-item" onclick="switchSection('setup', event)">
+                ⚙️ Setup Inicial
+            </div>
+
+            <div style="padding: 0 20px; margin: 20px 0; color: #999; font-size: 11px; font-weight: 600;">
+                APRENDIZADO
+            </div>
+
+            <div class="nav-item" onclick="switchSection('workflow', event)">
+                🔄 O Workflow
+            </div>
+            <div class="nav-item" onclick="switchSection('commands', event)">
+                ⌨️ Comandos
+            </div>
+            <div class="nav-item" onclick="switchSection('examples', event)">
+                💻 Exemplos Práticos
+            </div>
+
+            <div style="padding: 0 20px; margin: 20px 0; color: #999; font-size: 11px; font-weight: 600;">
+                7-DAY PLAN
+            </div>
+
+            <div class="nav-item" onclick="switchSection('schedule', event)">
+                📅 Cronograma
+            </div>
+            <div class="nav-item" onclick="switchSection('progress', event)">
+                ✅ Seu Progresso
+            </div>
+            <div class="nav-item" onclick="switchSection('resources', event)">
+                📚 Recursos
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main">
+            <!-- INTRO SECTION -->
+            <section id="intro" class="section active">
+                <div class="section-title">🎭 Bem-vindo ao AIOS Bootcamp!</div>
+                <div class="section-subtitle">Torne-se um Expert em Orquestração de Agents em 7 dias</div>
+
+                <div class="alert alert-info">
+                    <div class="alert-icon">ℹ️</div>
+                    <div>
+                        <strong>Você é um aprendiz visual!</strong> Esta interface interativa foi criada especialmente para você com exemplos visuais, código executável e um design que facilita a aprendizagem.
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>📖 O que é AIOS?</h3>
+                    <p><strong>AIOS = AI-Orchestrated System</strong> - Uma framework que permite você controlar múltiplos agents especializados (como uma orquestra sinfônica!) para construir projetos incríveis.</p>
+                    <p><strong>Você = Maestro</strong> 🎼<br/>
+                    <strong>Agents = Músicos especializados</strong> 🎻🎺🎹<br/>
+                    <strong>Projeto = Sinfonia extraordinária</strong> 🎵</p>
+                </div>
+
+                <div class="grid">
+                    <div class="agent-card">
+                        <div class="agent-icon">💻</div>
+                        <h4>Desenvolvimento</h4>
+                        <p>7 dias intensivos de aprendizado prático</p>
+                        <div class="badge badge-primary">Interativo</div>
+                    </div>
+                    <div class="agent-card">
+                        <div class="agent-icon">🎯</div>
+                        <h4>Objetivo Claro</h4>
+                        <p>Sair como expert com portfólio impressionante</p>
+                        <div class="badge badge-success">Garantido</div>
+                    </div>
+                    <div class="agent-card">
+                        <div class="agent-icon">🚀</div>
+                        <h4>Resultado Real</h4>
+                        <p>Projetos deployados e vivos na web</p>
+                        <div class="badge badge-warning">Oscar-worthy</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🎯 Seu Roadmap dos 7 Dias</h3>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <h4>DIA 1-2: Fundações</h4>
+                            <p>Entender AIOS, agents, squad. Criar seu primeiro agent personalizado.</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4>DIA 3-4: Orquestração</h4>
+                            <p>Implementar primeira story. Fazer deploy! 🚀</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4>DIA 5-6: Scaling</h4>
+                            <p>Criar Expansion Pack reutilizável. 3+ stories implementadas.</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4>DIA 7: Masterpiece</h4>
+                            <p>Projeto Oscar-worthy do zero ao deployment. 🎬</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="switchSection('agents', event)">
+                    👉 Começar com Os 9 Agents
+                </button>
+            </section>
+
+            <!-- AGENTS SECTION -->
+            <section id="agents" class="section">
+                <div class="section-title">🤖 Os 9 Agents (Sua Equipe)</div>
+                <div class="section-subtitle">Cada um é um especialista em sua área</div>
+
+                <div class="grid">
+                    <div class="agent-card" style="border-top-color: #f59e0b;">
+                        <div class="agent-icon">👑</div>
+                        <h4>@aios-master</h4>
+                        <p><strong>Orion</strong> - Master Orchestrator</p>
+                        <p style="margin-top: 10px; font-size: 12px;">Coordena tudo, cria componentes, executa workflows</p>
+                        <div class="badge badge-warning">Framework</div>
+                    </div>
+
+                    <div class="agent-card" style="border-top-color: #3b82f6;">
+                        <div class="agent-icon">🏛️</div>
+                        <h4>@architect</h4>
+                        <p><strong>Aria</strong> - Visionary</p>
+                        <p style="margin-top: 10px; font-size: 12px;">Desenha arquitetura, escolhe tech stack</p>
+                        <div class="badge badge-primary">Design</div>
+                    </div>
+
+                    <div class="agent-card" style="border-top-color: #10b981;">
+                        <div class="agent-icon">💻</div>
+                        <h4>@dev</h4>
+                        <p><strong>Dex</strong> - Builder</p>
+                        <p style="margin-top: 10px; font-size: 12px;">Implementa código, escreve testes, resolve bugs</p>
+                        <div class="badge badge-success">Code</div>
+                    </div>
+
+                    <div class="agent-card" style="border-top-color: #ec4899;">
+                        <div class="agent-icon">📋</div>
+                        <h4>@pm</h4>
+                        <p><strong>Morgan</strong> - Strategist</p>
+                        <p style="margin-top: 10px; font-size: 12px;">Cria PRD, planeja produto, estratégia</p>
+                        <div class="badge badge-primary">Product</div>
+                    </div>
+
+                    <div class="agent-card" style="border-top-color: #8b5cf6;">
+                        <div class="agent-icon">✅</div>
+                        <h4>@qa</h4>
+                        <p><strong>Quinn</strong> - Validator</p>
+                        <p style="margin-top: 10px; font-size: 12px;">Testa, revisa código, valida qualidade</p>
+                        <div class="badge badge-warning">Testing</div>
+                    </div>
+
+                    <div class="agent-card" style="border-top-color: #f59e0b;">
+                        <div class="agent-icon">🎨</div>
+                        <h4>@ux-design-expert</h4>
+                        <p><strong>Uma</strong> - Empathizer</p>
+                        <p style="margin-top: 10px; font-size: 12px;">Pesquisa UX, design systems, componentes</p>
+                        <div class="badge badge-secondary">Design</div>
+                    </div>
+
+                    <div class="agent-card" style="border-top-color: #14b8a6;">
+                        <div class="agent-icon">🔍</div>
+                        <h4>@analyst</h4>
+                        <p><strong>Atlas</strong> - Decoder</p>
+                        <p style="margin-top: 10px; font-size: 12px;">Pesquisa mercado, brainstorm, insights</p>
+                        <div class="badge badge-primary">Research</div>
+                    </div>
+
+                    <div class="agent-card" style="border-top-color: #06b6d4;">
+                        <div class="agent-icon">🌊</div>
+                        <h4>@data-engineer</h4>
+                        <p><strong>Darcy</strong> - Data Architect</p>
+                        <p style="margin-top: 10px; font-size: 12px;">Design de BD, otimização, pipelines</p>
+                        <div class="badge badge-primary">Database</div>
+                    </div>
+
+                    <div class="agent-card" style="border-top-color: #ef4444;">
+                        <div class="agent-icon">🚀</div>
+                        <h4>@github-devops</h4>
+                        <p><strong>Gage</strong> - DevOps Master</p>
+                        <p style="margin-top: 10px; font-size: 12px;">Git operations, CI/CD, deployment</p>
+                        <div class="badge badge-success">DevOps</div>
+                    </div>
+                </div>
+
+                <div class="alert alert-success">
+                    <div class="alert-icon">✅</div>
+                    <div>
+                        <strong>Você não está sozinho!</strong> Esses 9 especialistas estão aqui para ajudá-lo. Você é o maestro que os coordena!
+                    </div>
+                </div>
+
+                <button class="btn" onclick="switchSection('concepts', event)">
+                    👉 Entender Conceitos-Chave
+                </button>
+            </section>
+
+            <!-- CONCEPTS SECTION -->
+            <section id="concepts" class="section">
+                <div class="section-title">💡 Conceitos-Chave Explicados</div>
+                <div class="section-subtitle">Os 3 pilares que você precisa entender</div>
+
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab(this, 'concept-agents')">🤖 Agents</button>
+                    <button class="tab" onclick="switchTab(this, 'concept-squad')">👥 Squad</button>
+                    <button class="tab" onclick="switchTab(this, 'concept-pack')">📦 Expansion Pack</button>
+                </div>
+
+                <div id="concept-agents" class="tab-content active">
+                    <h3>O que é um Agent?</h3>
+                    <p>Um agent é uma <strong>persona especializada</strong> com expertise em uma ou duas áreas.</p>
+
+                    <div class="card">
+                        <h3>Exemplo: @dev (Dex - Developer)</h3>
+                        <p><strong>Persona:</strong> Expert Senior Software Engineer</p>
+                        <p><strong>Especialidade:</strong> Implementar código, testes, debugging</p>
+                        <p><strong>Comando para ativar:</strong> <span class="highlight">@dev</span></p>
+                        <p><strong>O que @dev faz:</strong></p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>Lê uma story (requisitos de trabalho)</li>
+                            <li>Implementa o código</li>
+                            <li>Escreve testes</li>
+                            <li>Roda CodeRabbit (verificador automático)</li>
+                            <li>Marca tarefa como completa [✓]</li>
+                        </ul>
+                    </div>
+
+                    <div class="collapse-header" onclick="toggleCollapse(this)">
+                        <span class="collapse-icon">▼</span>
+                        Visualização: Como @dev trabalha
+                    </div>
+                    <div class="collapse-content">
+                        <pre><code>
+YOU (Maestro):
+    @dev              ← Ativa o @dev
+    *develop story-1.1 ← Pede para implementar
+
+DEX (Developer) faz:
+    1. Lê a story completa
+    2. Entende o que precisa fazer
+    3. Implementa código
+    4. Escreve testes (npm test)
+    5. CodeRabbit verifica a qualidade
+    6. Se passou: marca [✓] DONE
+    7. Se falhou: corrige e tenta de novo
+
+YOU:
+    Vê que terminou ✅
+    Ativa @qa (próximo agent)
+                        </code></pre>
+                    </div>
+                </div>
+
+                <div id="concept-squad" class="tab-content">
+                    <h3>O que é um Squad?</h3>
+                    <p>Um squad é um <strong>grupo de agents trabalhando juntos</strong> em um projeto específico.</p>
+
+                    <div class="card">
+                        <h3>Exemplo: Squad para "Add User Auth"</h3>
+                        <p><strong>Objetivo:</strong> Adicionar autenticação de usuários ao projeto</p>
+                        <p><strong>Agents envolvidos:</strong></p>
+                        <div style="background: var(--light); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                            <p>1️⃣ <strong>@pm</strong> (Morgan) → Cria PRD com requisitos</p>
+                            <p>2️⃣ <strong>@architect</strong> (Aria) → Desenha arquitetura de auth</p>
+                            <p>3️⃣ <strong>@dev</strong> (Dex) → Implementa código</p>
+                            <p>4️⃣ <strong>@qa</strong> (Quinn) → Testa tudo</p>
+                            <p>5️⃣ <strong>@github-devops</strong> (Gage) → Deploy</p>
+                        </div>
+                        <p><strong>Resultado:</strong> Feature de autenticação completa e deployada! 🎉</p>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <div class="alert-icon">💡</div>
+                        <div>
+                            <strong>Key Insight:</strong> Você não faz nada! Você só coordena o squad. Cada agent faz seu trabalho especializado.
+                        </div>
+                    </div>
+                </div>
+
+                <div id="concept-pack" class="tab-content">
+                    <h3>O que é Expansion Pack?</h3>
+                    <p>Um expansion pack é uma <strong>biblioteca reutilizável</strong> de agents, tasks e templates.</p>
+
+                    <div class="card">
+                        <h3>Exemplo: Pack de Autenticação</h3>
+                        <p><strong>Problema:</strong> Você cria sistema de auth 3 vezes em 3 projetos</p>
+                        <p><strong>Solução:</strong> Criar um Expansion Pack de auth ONCE, reusar sempre</p>
+
+                        <div class="collapse-header" onclick="toggleCollapse(this)">
+                            <span class="collapse-icon">▼</span>
+                            Estrutura do Auth Pack
+                        </div>
+                        <div class="collapse-content">
+                            <div class="code-block">
+                                <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<code>expansion-pack-auth/
+├── agents/
+│   ├── auth-specialist.yaml
+│   └── security-auditor.yaml
+├── tasks/
+│   ├── setup-jwt.md
+│   ├── implement-oauth.md
+│   └── setup-2fa.md
+├── templates/
+│   ├── auth-api-spec.yaml
+│   └── security-checklist.md
+└── README.md (Como usar)
+</code>
+                            </div>
+                        </div>
+
+                        <p style="margin-top: 20px;"><strong>Como usar:</strong></p>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<code>Projeto 1:
+@aios-master *create-pack auth-module
+(cria o pack)
+
+Projeto 2:
+@aios-master *load-pack auth-module
+(carrega o pack)
+✅ Tudo pronto em 30 minutos!
+</code>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SETUP SECTION -->
+            <section id="setup" class="section">
+                <div class="section-title">⚙️ Setup Inicial (Seu Ambiente)</div>
+                <div class="section-subtitle">Prepare sua máquina para começar</div>
+
+                <div class="card">
+                    <h3>✅ Pré-requisitos</h3>
+                    <div class="collapse-header" onclick="toggleCollapse(this)">
+                        <span class="collapse-icon">▼</span>
+                        Node.js + npm
+                    </div>
+                    <div class="collapse-content">
+                        <p>Precisa da versão 18+</p>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<code>node --version
+npm --version
+
+# Se não tem, instale de: nodejs.org
+</code>
+                        </div>
+                    </div>
+
+                    <div class="collapse-header" onclick="toggleCollapse(this)">
+                        <span class="collapse-icon">▼</span>
+                        Git + GitHub CLI
+                    </div>
+                    <div class="collapse-content">
+                        <p>Para versionamento e deploy</p>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<code>git --version
+gh --version
+
+# Configure seu git:
+git config user.name "Nelson Rodrigues"
+git config user.email "seu@email.com"
+</code>
+                        </div>
+                    </div>
+
+                    <div class="collapse-header" onclick="toggleCollapse(this)">
+                        <span class="collapse-icon">▼</span>
+                        Claude Code
+                    </div>
+                    <div class="collapse-content">
+                        <p>Você já está aqui! 🎉</p>
+                        <div class="alert alert-success">
+                            <div class="alert-icon">✅</div>
+                            <div>
+                                Seu projeto está em: <br/>
+                                <span class="highlight">/Users/admin/meu-projeto-aios/</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🚀 Seu Primeiro Comando</h3>
+                    <p>Vamos ativar o Master e ver tudo funcionando:</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<code>@aios-master
+*help
+
+# Resultado: Lista de todos os comandos do Master!
+</code>
+                    </div>
+                    <p style="margin-top: 15px;">Se funcionar, você está pronto para começar! ✅</p>
+                </div>
+
+                <button class="btn" onclick="switchSection('workflow', event)">
+                    👉 Entender o Workflow
+                </button>
+            </section>
+
+            <!-- WORKFLOW SECTION -->
+            <section id="workflow" class="section">
+                <div class="section-title">🔄 O Workflow Completo</div>
+                <div class="section-subtitle">Como um projeto passa de ideia a deployment</div>
+
+                <div class="card">
+                    <h3>📊 O Ciclo em 7 Passos</h3>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <h4>1️⃣ Planejamento (@pm)</h4>
+                            <p>@pm cria PRD com requisitos do projeto</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4>2️⃣ Arquitetura (@architect)</h4>
+                            <p>@architect desenha como o sistema vai funcionar</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4>3️⃣ Design (@ux-design-expert)</h4>
+                            <p>@ux-design-expert faz pesquisa e design spec</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4>4️⃣ Implementação (@dev)</h4>
+                            <p>@dev escreve o código + testes</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4>5️⃣ QA (@qa)</h4>
+                            <p>@qa revisa qualidade do código</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4>6️⃣ Deploy (@github-devops)</h4>
+                            <p>@github-devops faz push e deploy para produção</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4>7️⃣ Live! 🎉</h4>
+                            <p>Seu projeto está live na internet!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>📖 Exemplo Real: Adicionar Login</h3>
+                    <p>Vamos ver como isso funciona na prática:</p>
+
+                    <div class="collapse-header" onclick="toggleCollapse(this)">
+                        <span class="collapse-icon">▼</span>
+                        DIA 1: Planejamento & Design
+                    </div>
+                    <div class="collapse-content">
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<code>MANHÃ:
+@pm
+*create-prd
+(Morgan cria PRD com requisitos de login)
+
+TARDE:
+@architect
+*create-full-stack-architecture
+(Aria desenha arquitetura)
+
+@ux-design-expert
+*research
+*create-front-end-spec
+(Uma faz design spec)
+</code>
+                        </div>
+                    </div>
+
+                    <div class="collapse-header" onclick="toggleCollapse(this)">
+                        <span class="collapse-icon">▼</span>
+                        DIA 2: Implementação
+                    </div>
+                    <div class="collapse-content">
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<code>MANHÃ:
+@dev
+*develop story-1.1
+(Dex implementa login form)
+
+TARDE:
+@qa
+*create-suite story-1.1
+(Quinn testa tudo)
+</code>
+                        </div>
+                    </div>
+
+                    <div class="collapse-header" onclick="toggleCollapse(this)">
+                        <span class="collapse-icon">▼</span>
+                        DIA 3: Deploy & Live
+                    </div>
+                    <div class="collapse-content">
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<code>@github-devops
+*create-pr
+(Gage cria PR)
+
+GitHub Actions roda:
+- npm test ✅
+- npm run lint ✅
+- npm run build ✅
+
+@github-devops
+*merge-pr
+(Gage faz merge)
+
+Vercel auto-deploy!
+
+🎉 LOGIN ESTÁ LIVE!
+</code>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="switchSection('commands', event)">
+                    👉 Ver os Comandos Principais
+                </button>
+            </section>
+
+            <!-- COMMANDS SECTION -->
+            <section id="commands" class="section">
+                <div class="section-title">⌨️ Comandos Principais (Copy-Paste!)</div>
+                <div class="section-subtitle">Todos os comandos que você precisa, em um lugar</div>
+
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab(this, 'cmd-master')">Master</button>
+                    <button class="tab" onclick="switchTab(this, 'cmd-dev')">Dev</button>
+                    <button class="tab" onclick="switchTab(this, 'cmd-pm')">PM</button>
+                    <button class="tab" onclick="switchTab(this, 'cmd-qa')">QA</button>
+                    <button class="tab" onclick="switchTab(this, 'cmd-devops')">DevOps</button>
+                </div>
+
+                <div id="cmd-master" class="tab-content active">
+                    <h3>@aios-master (Orion)</h3>
+                    <p>Master Orchestrator - Coordena tudo!</p>
+
+                    <div class="collapse-header" onclick="toggleCollapse(this)">
+                        <span class="collapse-icon">▼</span>
+                        Comandos de Ajuda
+                    </div>
+                    <div class="collapse-content">
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<code>@aios-master
+*help              # Ver todos os comandos
+*kb                # Aprender método AIOS
+*status            # Ver status do projeto
+*guide             # Guia completo
+</code>
+                        </div>
+                    </div>
+
+                    <div class="collapse-header" onclick="toggleCollapse(this)">
+                        <span class="collapse-icon">▼</span>
+                        Criar Componentes
+                    </div>
+                    <div class="collapse-content">
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<code>@aios-master
+*create agent {name}        # Novo agent
+*create task {name}         # Nova task
+*create workflow {name}     # Novo workflow
+*create doc {template}      # Novo documento
+</code>
+                        </div>
+                    </div>
+
+                    <div class="collapse-header" onclick="toggleCollapse(this)">
+                        <span class="collapse-icon">▼</span>
+                        Análise & Documentação
+                    </div>
+                    <div class="collapse-content">
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<code>@aios-master
+*analyze-framework          # Estudar patterns
+*list-components            # Ver tudo criado
+*validate-component {name}  # Security check
+*document-project           # Auto-gerar docs
+</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="cmd-dev" class="tab-content">
+                    <h3>@dev (Dex)</h3>
+                    <p>Full Stack Developer - Implementa código!</p>
+
+                    <div class="collapse-header" onclick="toggleCollapse(this)">
+                        <span class="collapse-icon">▼</span>
+                        Desenvolvimento
+                    </div>
+                    <div class="collapse-content">
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<code>@dev
+*develop story-X.Y.Z        # Implementar story
+*run-tests                  # Rodar testes
+*create-service {tipo}      # Novo service
+</code>
+                        </div>
+                    </div>
+
+                    <div class="collapse-header" onclick="toggleCollapse(this)">
+                        <span class="collapse-icon">▼</span>
+                        Qualidade
+                    </div>
+                    <div class="collapse-content">
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<code>@dev
+*apply-qa-fixes             # Aplicar feedback de QA
+*backlog-debt {title}       # Registrar tech debt
+*waves                      # Ver oportunidades paralelas
+</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="cmd-pm" class="tab-content">
+                    <h3>@pm (Morgan)</h3>
+                    <p>Product Manager - Planejamento!</p>
+
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<code>@pm
+*create-prd                 # Criar PRD
+*create-epic {name}         # Criar épico
+*create-story               # Criar story
+*research {topic}           # Pesquisa mercado
+</code>
+                    </div>
+                </div>
+
+                <div id="cmd-qa" class="tab-content">
+                    <h3>@qa (Quinn)</h3>
+                    <p>Quality Assurance - Testes!</p>
+
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<code>@qa
+*create-suite story-X       # Criar test suite
+*apply-qa-fixes             # Aplicar feedback
+*execute-checklist          # Rodar checklist
+</code>
+                    </div>
+                </div>
+
+                <div id="cmd-devops" class="tab-content">
+                    <h3>@github-devops (Gage)</h3>
+                    <p>DevOps Master - Deployment!</p>
+
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<code>@github-devops
+*create-pr                  # Criar pull request
+*merge-pr                   # Fazer merge
+*status                     # Status do deployment
+</code>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="switchSection('examples', event)">
+                    👉 Ver Exemplos Práticos
+                </button>
+            </section>
+
+            <!-- EXAMPLES SECTION -->
+            <section id="examples" class="section">
+                <div class="section-title">💻 Exemplos Práticos (Hands-On)</div>
+                <div class="section-subtitle">Código real que você pode executar agora</div>
+
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab(this, 'ex-setup')">Setup</button>
+                    <button class="tab" onclick="switchTab(this, 'ex-auth')">Auth Example</button>
+                    <button class="tab" onclick="switchTab(this, 'ex-component')">Component</button>
+                    <button class="tab" onclick="switchTab(this, 'ex-service')">Service</button>
+                </div>
+
+                <div id="ex-setup" class="tab-content active">
+                    <h3>Primeiro Setup (Próximos 5 minutos!)</h3>
+
+                    <div class="card">
+                        <h3>Step 1: Ativar Master</h3>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<code>@aios-master</code>
+                        </div>
+                        <p style="margin-top: 10px; color: #999;">Você verá: "👑 Orion (Master Orchestrator) ready. Let's orchestrate!"</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>Step 2: Ver Ajuda</h3>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<code>*help</code>
+                        </div>
+                        <p style="margin-top: 10px; color: #999;">Mostra lista de todos os comandos do Master</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>Step 3: Ver Status</h3>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<code>*status</code>
+                        </div>
+                        <p style="margin-top: 10px; color: #999;">Mostra como está seu projeto agora</p>
+                    </div>
+
+                    <div class="alert alert-success">
+                        <div class="alert-icon">✅</div>
+                        <div>
+                            Sucesso! Você ativou seu primeiro agent! Agora qualquer coisa depois disso será mais fácil.
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ex-auth" class="tab-content">
+                    <h3>Exemplo Prático: Implementar Login</h3>
+
+                    <div class="card">
+                        <h3>Como Estruturar Autenticação</h3>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<code>// src/services/auth.ts
+export class AuthService {
+  async login(email: string, password: string) {
+    // 1. Busca user no DB
+    const user = await db.users.findOne({ email });
+
+    // 2. Verifica password
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) throw new Error('Invalid credentials');
+
+    // 3. Gera JWT token
+    const token = jwt.sign({ userId: user.id }, SECRET);
+
+    // 4. Retorna user + token
+    return { user, token };
+  }
+}
+</code>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Frontend: Login Form</h3>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<code>// src/pages/login.tsx
+import { AuthService } from '@/services/auth';
+
+export default function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const result = await AuthService.login(email, password);
+    // Salva token
+    localStorage.setItem('token', result.token);
+    // Redireciona
+    window.location.href = '/dashboard';
+  };
+
+  return (
+    &lt;form onSubmit={handleLogin}&gt;
+      &lt;input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Email"
+      /&gt;
+      &lt;input
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="Password"
+      /&gt;
+      &lt;button type="submit"&gt;Login&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ex-component" class="tab-content">
+                    <h3>Exemplo: Component com React</h3>
+
+                    <div class="card">
+                        <h3>Button Component (Atom)</h3>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<code>// src/components/atoms/Button.tsx
+import React from 'react';
+
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick?: () => void;
+  variant?: 'primary' | 'secondary';
+  disabled?: boolean;
+}
+
+export const Button: React.FC<ButtonProps> = ({
+  children,
+  onClick,
+  variant = 'primary',
+  disabled = false,
+}) => {
+  const baseStyles = 'px-4 py-2 rounded font-semibold transition-all';
+  const variants = {
+    primary: 'bg-blue-600 text-white hover:bg-blue-700',
+    secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300',
+  };
+
+  return (
+    &lt;button
+      className={`${baseStyles} ${variants[variant]}`}
+      onClick={onClick}
+      disabled={disabled}
+    &gt;
+      {children}
+    &lt;/button&gt;
+  );
+};
+</code>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Usar o Button</h3>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<code>// Em qualquer página:
+import { Button } from '@/components/atoms/Button';
+
+export default function MyPage() {
+  return (
+    &lt;div&gt;
+      &lt;Button onClick={() => alert('Clicked!')}&gt;
+        Click me
+      &lt;/Button&gt;
+
+      &lt;Button variant="secondary"&gt;
+        Secondary Button
+      &lt;/Button&gt;
+    &lt;/div&gt;
+  );
+}
+</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ex-service" class="tab-content">
+                    <h3>Exemplo: Service Pattern</h3>
+
+                    <div class="card">
+                        <h3>User Service</h3>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<code>// src/services/user.ts
+export class UserService {
+  async getUser(id: string) {
+    const response = await fetch(`/api/users/${id}`);
+    return response.json();
+  }
+
+  async updateUser(id: string, data: Partial<User>) {
+    const response = await fetch(`/api/users/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  }
+
+  async deleteUser(id: string) {
+    await fetch(`/api/users/${id}`, {
+      method: 'DELETE',
+    });
+  }
+}
+</code>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SCHEDULE SECTION -->
+            <section id="schedule" class="section">
+                <div class="section-title">📅 Seu Cronograma dos 7 Dias</div>
+                <div class="section-subtitle">Dia-a-dia estruturado com tarefas práticas</div>
+
+                <div class="day-card">
+                    <h3>📖 DIA 1-2: FUNDAÇÕES (4 horas)</h3>
+                    <p><strong>Objetivo:</strong> Entender AIOS, criar seu Agent, familiarizar com environment</p>
+                </div>
+
+                <div class="collapse-header" onclick="toggleCollapse(this)">
+                    <span class="collapse-icon">▼</span>
+                    Tarefas do Dia 1-2 (Clique para expandir)
+                </div>
+                <div class="collapse-content">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="d1t1">
+                        <label for="d1t1">Ler PLAYBOOK Módulo 1 (Conceitos) - 45 min</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="d1t2">
+                        <label for="d1t2">Ativar @aios-master e rodar *kb - 15 min</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="d1t3">
+                        <label for="d1t3">Explorar .aios-core/ (diretório) - 30 min</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="d1t4">
+                        <label for="d1t4">Criar seu Agent personalizado - 45 min</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="d1t5">
+                        <label for="d1t5">Criar primeira Task para seu Agent - 30 min</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="d1t6">
+                        <label for="d1t6">Ativar seu Agent e testar - 15 min</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="d1t7">
+                        <label for="d1t7">Estudar um Agent existente em profundidade - 60 min</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="d1t8">
+                        <label for="d1t8">Criar docs/learning-notes/dia-1.md com suas anotações - 20 min</label>
+                    </div>
+                </div>
+
+                <div class="day-card" style="background: linear-gradient(135deg, #10b981, #059669);">
+                    <h3>🔄 DIA 3-4: ORQUESTRAÇÃO (4 horas)</h3>
+                    <p><strong>Objetivo:</strong> Implementar primeira Story, rodar testes, fazer primeiro deploy</p>
+                </div>
+
+                <div class="collapse-header" onclick="toggleCollapse(this)">
+                    <span class="collapse-icon">▼</span>
+                    Tarefas do Dia 3-4 (Clique para expandir)
+                </div>
+                <div class="collapse-content">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="d3t1">
+                        <label for="d3t1">Ler PLAYBOOK Módulo 2 (Orquestração) - 60 min</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="d3t2">
+                        <label for="d3t2">Escolher uma Story simples do projeto - 15 min</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="d3t3">
+                        <label for="d3t3">@dev *develop story-X.Y.Z (implementar) - 120 min</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="d3t4">
+                        <label for="d3t4">@dev *run-tests (executar testes) - 20 min</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="d3t5">
+                        <label for="d3t5">@qa *create-suite (criar testes) - 30 min</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="d3t6">
+                        <label for="d3t6">@github-devops *create-pr (criar PR) - 15 min</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="d3t7">
+                        <label for="d3t7">Verificar Deploy na Vercel - 10 min</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="d3t8">
+                        <label for="d3t8">Criar docs/learning-notes/dia-3-4.md - 10 min</label>
+                    </div>
+                </div>
+
+                <div class="day-card" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                    <h3>📦 DIA 5-6: SCALING (4 horas)</h3>
+                    <p><strong>Objetivo:</strong> Criar Expansion Pack, implementar 2-3 stories com padrões</p>
+                </div>
+
+                <div class="collapse-header" onclick="toggleCollapse(this)">
+                    <span class="collapse-icon">▼</span>
+                    Tarefas do Dia 5-6 (Clique para expandir)
+                </div>
+                <div class="collapse-content">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="d5t1">
+                        <label for="d5t1">Ler PLAYBOOK Módulo 3 (Patterns) - 60 min</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="d5t2">
+                        <label for="d5t2">Identificar padrão reutilizável - 20 min</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="d5t3">
+                        <label for="d5t3">@aios-master *create-pack (criar pack) - 45 min</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="d5t4">
+                        <label for="d5t4">@dev *develop story-2 (com padrões) - 90 min</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="d5t5">
+                        <label for="d5t5">@dev *develop story-3 (com padrões) - 60 min</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="d5t6">
+                        <label for="d5t6">Setup GitHub Actions e Vercel - 30 min</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="d5t7">
+                        <label for="d5t7">Documentar seu Expansion Pack - 20 min</label>
+                    </div>
+                </div>
+
+                <div class="day-card" style="background: linear-gradient(135deg, #ec4899, #be185d);">
+                    <h3>🎬 DIA 7: MASTERPIECE (8 horas)</h3>
+                    <p><strong>Objetivo:</strong> Projeto full-stack do zero ao deployment</p>
+                </div>
+
+                <div class="collapse-header" onclick="toggleCollapse(this)">
+                    <span class="collapse-icon">▼</span>
+                    Cronograma Hora-a-Hora do Dia 7 (Clique para expandir)
+                </div>
+                <div class="collapse-content">
+                    <div style="background: var(--light); padding: 15px; border-radius: 8px;">
+                        <p><strong>8:00-9:00</strong> → Planejamento (@pm *create-prd)</p>
+                        <p><strong>9:00-10:00</strong> → Arquitetura (@architect design)</p>
+                        <p><strong>10:00-11:00</strong> → UX & Design (@ux-design-expert)</p>
+                        <p><strong>11:00-15:00</strong> → Implementação (@dev stories)</p>
+                        <p><strong>15:00-16:00</strong> → QA & Testing (@qa review)</p>
+                        <p><strong>16:00-17:00</strong> → Deploy (@github-devops push)</p>
+                        <p><strong>17:00-18:00</strong> → Docs & Celebração 🎉</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PROGRESS SECTION -->
+            <section id="progress" class="section">
+                <div class="section-title">✅ Seu Progresso (Rastreio Real)</div>
+                <div class="section-subtitle">Acompanhe sua evolução ao longo dos 7 dias</div>
+
+                <div class="card">
+                    <h3>📊 Progresso Geral</h3>
+                    <p><strong>Dia 1:</strong></p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+
+                    <p style="margin-top: 20px;"><strong>Dia 2:</strong></p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+
+                    <p style="margin-top: 20px;"><strong>Dia 3:</strong></p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+
+                    <p style="margin-top: 20px;"><strong>Dia 4:</strong></p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+
+                    <p style="margin-top: 20px;"><strong>Dia 5:</strong></p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+
+                    <p style="margin-top: 20px;"><strong>Dia 6:</strong></p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+
+                    <p style="margin-top: 20px;"><strong>Dia 7:</strong></p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🎯 Checklist de Conhecimento</h3>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="know1">
+                        <label for="know1">Entendo o que é um Agent</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="know2">
+                        <label for="know2">Entendo diferença entre Squad e Agent</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="know3">
+                        <label for="know3">Sei o que é Expansion Pack</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="know4">
+                        <label for="know4">Consegui ativar @aios-master</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="know5">
+                        <label for="know5">Criei meu Agent personalizado</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="know6">
+                        <label for="know6">Implementei minha primeira Story</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="know7">
+                        <label for="know7">Fiz meu primeiro deploy</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="know8">
+                        <label for="know8">Criei um Expansion Pack</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="know9">
+                        <label for="know9">Entendo como agents colaboram</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="know10">
+                        <label for="know10">Sou um Expert! 🎓</label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RESOURCES SECTION -->
+            <section id="resources" class="section">
+                <div class="section-title">📚 Recursos Adicionais</div>
+                <div class="section-subtitle">Documentação, vídeos e referências</div>
+
+                <div class="card">
+                    <h3>📖 Documentação Oficial</h3>
+                    <p><span class="highlight">PLAYBOOK_AIOS_MASTERCLASS.md</span> - Seu guia completo (em seu projeto)</p>
+                    <p style="margin-top: 10px;"><span class="highlight">QUICK_REFERENCE.md</span> - Cheat sheet com todos os comandos</p>
+                    <p style="margin-top: 10px;"><span class="highlight">VISUAL_ARCHITECTURE_GUIDE.md</span> - Diagramas e visão gráfica</p>
+                    <p style="margin-top: 10px;"><span class="highlight">PROGRESS_DASHBOARD_7DAYS.md</span> - Rastreamento dia-a-dia</p>
+                </div>
+
+                <div class="card">
+                    <h3>🎯 Dicas de Aprendizado</h3>
+                    <div style="background: var(--light); padding: 15px; border-radius: 8px;">
+                        <p style="margin-bottom: 10px;"><strong>✅ Leia o conceito</strong> → Entenda a ideia</p>
+                        <p style="margin-bottom: 10px;"><strong>✅ Veja o exemplo</strong> → Compreenda aplicação prática</p>
+                        <p style="margin-bottom: 10px;"><strong>✅ Rode o código</strong> → Solidifique aprendizado</p>
+                        <p style="margin-bottom: 10px;"><strong>✅ Faça anotações</strong> → Crie docs/learning-notes/</p>
+                        <p><strong>✅ Cometa erros</strong> → Erros são professores!</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🆘 Se Ficar Preso</h3>
+                    <p><strong>Passo 1:</strong> Respire. Você consegue! 💪</p>
+                    <p><strong>Passo 2:</strong> Leia a mensagem de erro completamente</p>
+                    <p><strong>Passo 3:</strong> Busque no QUICK_REFERENCE.md</p>
+                    <p><strong>Passo 4:</strong> Leia a seção relevante do PLAYBOOK</p>
+                    <p><strong>Passo 5:</strong> Use @agent *guide para ajuda</p>
+                    <p><strong>Passo 6:</strong> Tente de novo</p>
+                </div>
+
+                <div class="alert alert-success">
+                    <div class="alert-icon">🎉</div>
+                    <div>
+                        <strong>Parabéns!</strong> Você tem TUDO o que precisa para aprender. Agora é só começar e manter o ritmo. Você vai ser expert em 7 dias!
+                    </div>
+                </div>
+
+                <button class="btn" onclick="switchSection('intro', event)" style="margin-top: 20px;">
+                    👈 Voltar ao Início
+                </button>
+                <button class="btn btn-secondary" onclick="switchSection('schedule', event)">
+                    📅 Ver Cronograma
+                </button>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        function switchSection(sectionId, event) {
+            if (event) event.preventDefault();
+
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+
+            // Scroll to top
+            document.querySelector('.main').scrollTop = 0;
+        }
+
+        function switchTab(button, contentId) {
+            // Hide all tabs in this group
+            button.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            button.parentElement.parentElement.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            // Show selected tab
+            button.classList.add('active');
+            document.getElementById(contentId).classList.add('active');
+        }
+
+        function toggleCollapse(header) {
+            header.classList.toggle('active');
+            header.nextElementSibling.classList.toggle('active');
+        }
+
+        function copyCode(button) {
+            const code = button.nextElementSibling.textContent;
+            navigator.clipboard.writeText(code);
+            button.textContent = '✅ Copiado!';
+            setTimeout(() => {
+                button.textContent = 'Copiar';
+            }, 2000);
+        }
+
+        // Set first nav item as active
+        document.querySelector('.nav-item').classList.add('active');
+    </script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+{
+  "ecosystem": {
+    "content_pillars": [
+      {
+        "pillar": "Scaling Fundamentals",
+        "core_content": "7-Step Scaling System Guide",
+        "supporting_content": [
+          "Bottleneck Identification Audit",
+          "Systems Documentation Template",
+          "Decision Rules Framework"
+        ]
+      },
+      {
+        "pillar": "Leverage Mechanics",
+        "core_content": "4 Leverage Types Explained",
+        "supporting_content": [
+          "Content Leverage Case Study",
+          "Technology Automation Guide",
+          "Community Building Blueprint"
+        ]
+      },
+      {
+        "pillar": "Implementation",
+        "core_content": "From Busy to Free: 30-Day Challenge",
+        "supporting_content": [
+          "Week 1: Audit & Diagnosis",
+          "Week 2: Documentation & Rules",
+          "Week 3: System Building",
+          "Week 4: Measurement & Delegation"
+        ]
+      }
+    ],
+    "content_flow": "Linear progression from awareness → understanding → implementation → mastery",
+    "audience_journey": [
+      "Stage 1: Agitation (YouTube, Twitter) - Aware they're stuck",
+      "Stage 2: Education (Blog, Newsletter) - Learning the system",
+      "Stage 3: Implementation (Email, PDF) - Taking action",
+      "Stage 4: Community (Workshop, Group) - Support & accountability"
+    ]
+  },
+  "production_schedule": {
+    "week_1": {
+      "batch": "Batch 1: Foundation Content",
+      "start": "2026-02-13",
+      "pieces": [
+        {
+          "title": "Why Scale Beats Growth",
+          "format": "LinkedIn Post",
+          "status": "Draft"
+        },
+        {
+          "title": "Your Bottleneck Quiz",
+          "format": "Interactive",
+          "status": "Design"
+        },
+        {
+          "title": "7-Step System Overview",
+          "format": "Email",
+          "status": "Write"
+        }
+      ]
+    },
+    "week_2": {
+      "batch": "Batch 2: Demand Generation",
+      "start": "2026-02-20",
+      "pieces": [
+        {
+          "title": "Scale vs Growth Video",
+          "format": "YouTube",
+          "status": "Script"
+        },
+        {
+          "title": "Bottleneck Audit PDF",
+          "format": "PDF Download",
+          "status": "Design"
+        },
+        {
+          "title": "Thread: 7 Scaling Myths",
+          "format": "Twitter",
+          "status": "Write"
+        }
+      ]
+    },
+    "week_3": {
+      "batch": "Batch 3: Deep Dive Content",
+      "start": "2026-02-27",
+      "pieces": [
+        {
+          "title": "7-Step System Article",
+          "format": "Blog (3000w)",
+          "status": "Write"
+        },
+        {
+          "title": "Leverage Breakdown Video",
+          "format": "YouTube Short",
+          "status": "Film"
+        },
+        {
+          "title": "Newsletter Deep Dive",
+          "format": "Email Series",
+          "status": "Plan"
+        }
+      ]
+    },
+    "week_4": {
+      "batch": "Batch 4: Amplification",
+      "start": "2026-03-06",
+      "pieces": [
+        {
+          "title": "Podcast: Scaling Secrets",
+          "format": "Audio",
+          "status": "Record"
+        },
+        {
+          "title": "Infographic: 80/20 Rule",
+          "format": "Visual",
+          "status": "Design"
+        },
+        {
+          "title": "Challenge Announcement",
+          "format": "Multi-platform",
+          "status": "Plan"
+        }
+      ]
+    }
+  },
+  "distribution": [
+    {
+      "platform": "Twitter",
+      "frequency": "Daily threads + retweets",
+      "pieces": "4/month"
+    },
+    {
+      "platform": "LinkedIn",
+      "frequency": "3x per week",
+      "pieces": "12/month"
+    },
+    {
+      "platform": "YouTube",
+      "frequency": "1 long-form + 2 shorts/week",
+      "pieces": "16/month"
+    },
+    {
+      "platform": "Email",
+      "frequency": "2x per week",
+      "pieces": "8/month"
+    },
+    {
+      "platform": "Blog",
+      "frequency": "2x per month",
+      "pieces": "2/month"
+    },
+    {
+      "platform": "Instagram",
+      "frequency": "3x per week",
+      "pieces": "12/month"
+    }
+  ]
+}

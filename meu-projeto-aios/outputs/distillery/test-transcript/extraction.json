@@ -1,0 +1,55 @@
+{
+  "PRIMARY_FRAMEWORK": {
+    "name": "7-Step Scaling System",
+    "steps": [
+      "Diagnosis",
+      "Documentation",
+      "Rules",
+      "Delegation",
+      "Leverage",
+      "Measurement",
+      "Repetition"
+    ],
+    "type": "Process Framework",
+    "domain": "Operational Scaling",
+    "source": "[21:30-22:00]",
+    "actionability": "Very High",
+    "completeness": "95%"
+  },
+  "SECONDARY_FRAMEWORKS": [
+    {
+      "name": "80/20 Rule (Pareto Principle)",
+      "type": "Decision Framework",
+      "application": "Focus on the 20% of activities generating 80% of results",
+      "source": "[17:30-18:00]"
+    },
+    {
+      "name": "Leverage Multiplier Model",
+      "type": "Growth Framework",
+      "levers": [
+        "Content",
+        "Community",
+        "Technology",
+        "People"
+      ],
+      "source": "[13:30-14:45]"
+    },
+    {
+      "name": "Bottleneck Analysis",
+      "type": "Diagnosis Framework",
+      "steps": [
+        "Identify",
+        "Measure",
+        "Create System",
+        "Delegate"
+      ],
+      "source": "[05:30-06:30]"
+    },
+    {
+      "name": "Rules-Based Systemization",
+      "type": "Operational Framework",
+      "pattern": "Document → Extract Rules → Code Rules → Train/Automate",
+      "source": "[07:30-08:15]"
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "four_a_framework": {
+    "primary_framework": "7-Step Scaling System",
+    "angles": {
+      "AGITATE": [
+        "You're busy but not getting ahead",
+        "Your bottleneck is invisible",
+        "You're trying to be personal at scale",
+        "Growth and scale are not the same",
+        "Systems feel impersonal but they work",
+        "Delegation seems scary but it's freedom"
+      ],
+      "AMPLIFY": [
+        "The 80/20 rule is underutilized",
+        "Gary V's 64-piece method proves it",
+        "Your competitors are systemizing (you're not)",
+        "Measurement changes everything",
+        "Frameworks multiply your output",
+        "Leverage compounds exponentially"
+      ],
+      "ARTICULATE": [
+        "Here's the exact 7-step system",
+        "This is how to identify your bottleneck",
+        "Convert your gut decisions into rules",
+        "Here's how to build leverage",
+        "These are your 4 leverage types",
+        "This is what to measure daily"
+      ],
+      "ACTIVATE": [
+        "Document your process this week",
+        "Find your bottleneck (audit your time)",
+        "Create ONE system (start small)",
+        "Delegate ONE task this month",
+        "Implement measurement immediately",
+        "Join the free workshop (link)"
+      ]
+    }
+  },
+  "content_ideas": [
+    {
+      "angle": "AGITATE: Busy vs Free",
+      "format": "Thread",
+      "platform": "Twitter"
+    },
+    {
+      "angle": "AGITATE: Scale or die",
+      "format": "Video",
+      "platform": "YouTube"
+    },
+    {
+      "angle": "AGITATE: Hidden bottleneck",
+      "format": "Email",
+      "platform": "List"
+    },
+    {
+      "angle": "AGITATE: Personal doesn't scale",
+      "format": "Reel",
+      "platform": "Instagram"
+    },
+    {
+      "angle": "AMPLIFY: 80/20 secret",
+      "format": "Post",
+      "platform": "LinkedIn"
+    },
+    {
+      "angle": "AMPLIFY: Gary V method",
+      "format": "Breakdown",
+      "platform": "Newsletter"
+    },
+    {
+      "angle": "AMPLIFY: Competitors are ahead",
+      "format": "Podcast",
+      "platform": "Audio"
+    },
+    {
+      "angle": "AMPLIFY: Measurement wins",
+      "format": "Infographic",
+      "platform": "Pinterest"
+    },
+    {
+      "angle": "ARTICULATE: 7-step system",
+      "format": "Article",
+      "platform": "Blog"
+    },
+    {
+      "angle": "ARTICULATE: Diagnosis framework",
+      "format": "Checklist",
+      "platform": "PDF"
+    },
+    {
+      "angle": "ARTICULATE: IF/THEN rules",
+      "format": "Template",
+      "platform": "Notion"
+    },
+    {
+      "angle": "ARTICULATE: Leverage types",
+      "format": "Visualization",
+      "platform": "Canva"
+    },
+    {
+      "angle": "ACTIVATE: Document now",
+      "format": "Challenge",
+      "platform": "Community"
+    },
+    {
+      "angle": "ACTIVATE: Bottleneck audit",
+      "format": "Worksheet",
+      "platform": "Gumroad"
+    },
+    {
+      "angle": "ACTIVATE: Build system today",
+      "format": "Workshop",
+      "platform": "Zoom"
+    },
+    {
+      "angle": "ACTIVATE: Delegation framework",
+      "format": "Guide",
+      "platform": "Download"
+    }
+  ],
+  "total_ideas": 16
+}

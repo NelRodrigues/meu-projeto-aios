@@ -1,0 +1,130 @@
+{
+  "knowledge_base": {
+    "PROJECTS": [
+      {
+        "title": "Build Scalable Operations",
+        "context": "Criar sistemas que funcionam sem envolvimento pessoal contínuo",
+        "frameworks": [
+          "7-Step Scaling System",
+          "Rules-Based Systemization",
+          "Bottleneck Analysis"
+        ],
+        "actionable_items": [
+          "Identify current bottleneck (time/capital/knowledge)",
+          "Document exact process (word-for-word)",
+          "Extract decision rules (IF/THEN)",
+          "Create measurement system",
+          "Plan delegation strategy"
+        ]
+      }
+    ],
+    "AREAS": [
+      {
+        "area": "Operational Excellence",
+        "principles": [
+          "Measurement drives improvement",
+          "Systems replace personal effort",
+          "Focus on 20% that drives 80%"
+        ],
+        "linked_frameworks": [
+          "80/20 Rule",
+          "7-Step Scaling System"
+        ]
+      },
+      {
+        "area": "Leverage & Multiplication",
+        "principles": [
+          "Content amplifies reach without proportional effort",
+          "Technology automates decisions",
+          "Community scales knowledge sharing"
+        ],
+        "levers": [
+          "Content",
+          "Technology",
+          "Community",
+          "People"
+        ]
+      }
+    ],
+    "RESOURCES": [
+      {
+        "type": "Framework",
+        "title": "7-Step Scaling System",
+        "summary": "Diagnostic → Documentation → Rules → Delegation → Leverage → Measurement → Repetition",
+        "application": "Any operation that needs to scale",
+        "completeness": "95%"
+      },
+      {
+        "type": "Decision Matrix",
+        "title": "Bottleneck Identification Guide",
+        "factors": [
+          "Time",
+          "Capital",
+          "Expertise",
+          "Infrastructure"
+        ],
+        "how_to_identify": "Audit each process step, find where things slow down"
+      }
+    ]
+  },
+  "atomic_pieces": {
+    "PILLAR_CONTENT": {
+      "title": "The 7-Step Scaling System: How to Escape the Busy Trap",
+      "format": "Long-form Article (3000+ words)",
+      "structure": [
+        "Intro: The Busy vs Successful Paradox",
+        "Step 1: Diagnose Your Bottleneck",
+        "Step 2: Document Your Process",
+        "Step 3: Convert Decisions to Rules",
+        "Step 4: Build Systems",
+        "Step 5: Apply Leverage",
+        "Step 6: Measure Everything",
+        "Step 7: Repeat Continuously",
+        "Conclusion: From Busy to Free"
+      ],
+      "target_audience": "Entrepreneurs, managers, creators"
+    },
+    "ATOMIC_PIECES": [
+      {
+        "title": "Grow ≠ Scale: Why Your Business Hit a Wall",
+        "format": "Tweet",
+        "target": "Awareness"
+      },
+      {
+        "title": "Your Bottleneck Isn't What You Think",
+        "format": "LinkedIn Post",
+        "target": "Engagement"
+      },
+      {
+        "title": "The 80/20 Rule Everyone Gets Wrong",
+        "format": "Short Video",
+        "target": "Viral"
+      },
+      {
+        "title": "Document This One Thing (It Changes Everything)",
+        "format": "Instagram Reel",
+        "target": "Educational"
+      },
+      {
+        "title": "If X Then Y: How to Automate Your Decisions",
+        "format": "YouTube Short",
+        "target": "Viral"
+      },
+      {
+        "title": "Why Personal Can't Scale (And That's OK)",
+        "format": "Podcast Snippet",
+        "target": "Thought Leadership"
+      },
+      {
+        "title": "The System That Freed Me From 80-Hour Weeks",
+        "format": "Blog Post",
+        "target": "SEO"
+      },
+      {
+        "title": "3 Leverage Points That 10X Your Output",
+        "format": "Email",
+        "target": "List Building"
+      }
+    ]
+  }
+}

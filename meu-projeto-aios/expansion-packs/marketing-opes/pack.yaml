@@ -1,0 +1,55 @@
+name: marketing-opes
+version: 2.0.0
+description: "Complete AI-powered marketing department for solo entrepreneurs ($10k-50k/month budget) - 7-person marketing team hierarchy"
+author: "Solo Entrepreneur"
+license: MIT
+slashPrefix: marketingOps
+
+aios:
+  minVersion: "2.1.0"
+  type: expansion-pack
+
+components:
+  agents:
+    # Main Agents (7-person marketing team)
+    - cmo.md
+    - ideacao-ig.md
+    - ideacao-li.md
+    - producao.md
+    - designer.md
+    - distribuicao.md
+    - metricas.md
+
+  tasks:
+    - marketing-manager-plan-campaign.md
+    - marketing-manager-create-content.md
+    - marketing-manager-schedule-posting.md
+    - marketing-manager-analyze-performance.md
+
+  templates:
+    - campaign-brief-template.md
+    - content-calendar-template.md
+    - performance-report-template.md
+
+  workflows:
+    - complete-campaign-workflow.md
+
+config:
+  extends: extend
+  coding-standards: ../../docs/framework/CODING-STANDARDS.md
+  tech-stack: ../../docs/framework/TECH-STACK.md
+  source-tree: ../../docs/framework/SOURCE-TREE.md
+
+dependencies:
+  node: []
+  python: []
+  squads: []
+
+tags:
+  - marketing
+  - ai-automation
+  - solo-entrepreneur
+  - digital-marketing
+  - marketing-ops
+  - one-person-business
+  - content-pipeline

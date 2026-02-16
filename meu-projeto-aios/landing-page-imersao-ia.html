@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="pt-AO">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IMERSÃO IA PARA NEGÓCIOS 2.0 | Transformação Digital em Angola</title>
+    <meta name="description" content="A única imersão em Angola que ensina ONDE e COMO usar IA com estratégia. Método P.P.T. para coaches, consultores, PMEs e profissionais.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1B3A52;
+            --primary-dark: #0F2438;
+            --primary-light: #2A5A7F;
+            --accent: #D4AF37;
+            --accent-light: #E6C547;
+            --dark: #0F2438;
+            --light: #F5F9FC;
+            --text: #1B3A52;
+            --text-light: #5A7A94;
+            --success: #10b981;
+            --border: #E0EEFA;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: #fff;
+            overflow-x: hidden;
+            letter-spacing: 0.3px;
+        }
+
+        /* HEADER */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .logo img {
+            height: 40px;
+            width: auto;
+        }
+
+        .logo .accent {
+            color: var(--accent);
+        }
+
+        .nav-cta {
+            background: var(--accent);
+            color: var(--dark);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+        }
+
+        .nav-cta:hover {
+            background: var(--accent-light);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
+        }
+
+        /* HERO SECTION */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+                linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-logo {
+            margin-bottom: 2rem;
+        }
+
+        .hero-logo img {
+            height: 120px;
+            width: auto;
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.2));
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero h1 .highlight {
+            color: var(--accent);
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+            line-height: 1.6;
+        }
+
+        .hero-cta-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--dark);
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            text-decoration: none;
+            border: 2px solid var(--accent);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-light);
+            border-color: var(--accent-light);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            text-decoration: none;
+            border: 2px solid white;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: var(--primary);
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* SECTION: PROBLEMA */
+        .problem-section {
+            padding: 4rem 2rem;
+            background: #f8fafc;
+        }
+
+        .section-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--text);
+        }
+
+        .section-title .accent {
+            color: var(--primary);
+        }
+
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .problem-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .problem-card:hover {
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            transform: translateY(-5px);
+        }
+
+        .problem-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            color: var(--text);
+        }
+
+        .problem-card p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        .problem-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        /* SECTION: SOLUÇÃO */
+        .solution-section {
+            padding: 4rem 2rem;
+            background: white;
+        }
+
+        .solution-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .solution-text h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+
+        .solution-text p {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: var(--text-light);
+            line-height: 1.8;
+        }
+
+        .method-ppt {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.08) 100%);
+            padding: 2rem;
+            border-radius: 0.75rem;
+            margin: 2rem 0;
+            border: 2px solid var(--accent);
+            backdrop-filter: blur(10px);
+        }
+
+        .method-ppt h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .ppt-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .ppt-step {
+            text-align: center;
+            flex: 1;
+        }
+
+        .ppt-step-number {
+            background: var(--primary);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin: 0 auto 0.5rem;
+        }
+
+        .ppt-step p {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        .arrow {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .solution-image {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+            border-radius: 1rem;
+            height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 4rem;
+            text-align: center;
+        }
+
+        /* SECTION: PERSONAS */
+        .personas-section {
+            padding: 4rem 2rem;
+            background: #f8fafc;
+        }
+
+        .personas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .persona-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .persona-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            transform: translateY(-5px);
+        }
+
+        .persona-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .persona-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .persona-percent {
+            font-size: 0.9rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .persona-card p {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        /* SECTION: EVENTO */
+        .event-section {
+            padding: 4rem 2rem;
+            background: white;
+        }
+
+        .event-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .event-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            text-align: center;
+        }
+
+        .event-card .label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .event-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .event-card p {
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
+        /* SECTION: DEPOIMENTOS */
+        .testimonials-section {
+            padding: 4rem 2rem;
+            background: #f8fafc;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .testimonial-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 4px solid var(--accent);
+        }
+
+        .testimonial-quote {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+            font-style: italic;
+            line-height: 1.8;
+        }
+
+        .testimonial-author {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 0.95rem;
+        }
+
+        .testimonial-role {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .stars {
+            color: var(--accent);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* SECTION: AGENDA */
+        .agenda-section {
+            padding: 4rem 2rem;
+            background: white;
+        }
+
+        .agenda-timeline {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .agenda-timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+        }
+
+        .agenda-item {
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .agenda-item:nth-child(odd) .agenda-content {
+            margin-left: 0;
+            margin-right: 50%;
+            padding-right: 2rem;
+            text-align: right;
+        }
+
+        .agenda-item:nth-child(even) .agenda-content {
+            margin-left: 50%;
+            margin-right: 0;
+            padding-left: 2rem;
+            text-align: left;
+        }
+
+        .agenda-dot {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 16px;
+            background: var(--accent);
+            border: 4px solid white;
+            border-radius: 50%;
+            z-index: 10;
+            box-shadow: 0 0 0 4px var(--primary);
+        }
+
+        .agenda-time {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .agenda-description {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        /* SECTION: CTA FINAL */
+        .cta-final-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .cta-final-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .cta-final-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .cta-final-content p {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+        }
+
+        .urgency-badge {
+            display: inline-block;
+            background: var(--accent);
+            color: var(--dark);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* SECTION: FAQ */
+        .faq-section {
+            padding: 4rem 2rem;
+            background: #f8fafc;
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: white;
+            margin-bottom: 1.5rem;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .faq-question {
+            background: var(--primary);
+            color: white;
+            padding: 1.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+
+        .faq-question:hover {
+            background: var(--primary-dark);
+        }
+
+        .faq-toggle {
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.active .faq-toggle {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            padding: 1.5rem;
+            color: var(--text-light);
+            display: none;
+            line-height: 1.8;
+        }
+
+        .faq-item.active .faq-answer {
+            display: block;
+        }
+
+        /* FOOTER */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-contact {
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .footer-contact a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* FORM */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 25px rgba(0,0,0,0.15);
+            position: relative;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .modal h2 {
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .hero-stats {
+                gap: 1.5rem;
+            }
+
+            .solution-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .solution-image {
+                height: 250px;
+            }
+
+            .ppt-steps {
+                flex-direction: column;
+            }
+
+            .arrow {
+                transform: rotate(90deg);
+            }
+
+            .agenda-timeline::before {
+                left: 10px;
+            }
+
+            .agenda-item:nth-child(odd) .agenda-content,
+            .agenda-item:nth-child(even) .agenda-content {
+                margin-left: 60px;
+                margin-right: 0;
+                padding-left: 1rem;
+                padding-right: 0;
+                text-align: left;
+            }
+
+            .agenda-dot {
+                left: 10px;
+            }
+
+            .cta-final-content h2 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <img src="logo-profuturo.png" alt="PROFUTURO Logo">
+                <span>IMERSÃO<span class="accent">IA</span></span>
+            </div>
+            <a href="#registro" class="nav-cta">Reserva a Tua Vaga</a>
+        </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-logo">
+                <img src="logo-profuturo.png" alt="PROFUTURO - Profissionais do Futuro">
+            </div>
+            <div class="hero-badge">🚀 Apenas 50 Lugares Disponíveis</div>
+            <h1>
+                A Única Imersão em Angola que Ensina<br>
+                <span class="highlight">ONDE e COMO Usar IA</span><br>
+                Com Estratégia, Antes de Ferramentas
+            </h1>
+            <p>
+                Sai não com mais informação. Sai com decisões claras.<br>
+                Método P.P.T. comprovado para coaches, consultores, profissionais e PMEs.
+            </p>
+            <div class="hero-cta-group">
+                <a href="#registro" class="btn-primary">🎯 Reserva Agora — 97.000 KZ</a>
+                <a href="#saiba-mais" class="btn-secondary">📚 Saiba Mais</a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <div class="stat-number">50</div>
+                    <div class="stat-label">Empreendedores Curados</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">Dias de Transformação</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">8</div>
+                    <div class="stat-label">11 de Abril — Luanda</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROBLEMA -->
+    <section class="problem-section" id="saiba-mais">
+        <div class="section-container">
+            <h2 class="section-title">
+                O Teu Desafio Silencioso em <span class="accent">2026</span>
+            </h2>
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="problem-icon">⏰</div>
+                    <h3>60-80h por Semana</h3>
+                    <p>Trabalhas demasiado. Processos manuais, tarefas repetitivas, decisões que podes automatizar.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">📈</div>
+                    <h3>Crescimento Travado</h3>
+                    <p>A escalabilidade é limitada. Não podes clonar-te. Precisa de nova abordagem.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">🏆</div>
+                    <h3>Menos Competitivo</h3>
+                    <p>A concorrência usa IA. Tu não. Enquanto isso, perdes margens e oportunidades.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">🧠</div>
+                    <h3>Informação Demais</h3>
+                    <p>Vês muitos cursos, podcasts, artigos. Mas não sabes por onde começar.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">❓</div>
+                    <h3>Confusão de Ferramentas</h3>
+                    <p>ChatGPT, Claude, Gemini... Qual escolher? Como usar? Qual o ROI?</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">💡</div>
+                    <h3>Falta de Estratégia</h3>
+                    <p>IA sem strategy é apenas uma ferramenta cara. Precisas do porquê, antes da ferramenta.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SOLUÇÃO -->
+    <section class="solution-section">
+        <div class="section-container">
+            <h2 class="section-title" style="margin-bottom: 3rem;">
+                A Solução: Método <span class="accent">P.P.T.</span>
+            </h2>
+            <div class="solution-content">
+                <div class="solution-text">
+                    <h2>Pessoas → Processos → Tecnologia</h2>
+                    <p>
+                        Não começamos pelas ferramentas. Começamos por TI. Por como trabalhas, como pensas, como creces.
+                    </p>
+                    <p>
+                        Só depois vem a tecnologia — como servant, não como master.
+                    </p>
+
+                    <div class="method-ppt">
+                        <h3>Por que P.P.T. funciona?</h3>
+                        <div class="ppt-steps">
+                            <div class="ppt-step">
+                                <div class="ppt-step-number">1</div>
+                                <p>Estratégia clara</p>
+                            </div>
+                            <div class="arrow">→</div>
+                            <div class="ppt-step">
+                                <div class="ppt-step-number">2</div>
+                                <p>Processos mapeados</p>
+                            </div>
+                            <div class="arrow">→</div>
+                            <div class="ppt-step">
+                                <div class="ppt-step-number">3</div>
+                                <p>Ferramentas certas</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p>
+                        <strong>Resultado:</strong> Não sais com mais informação. Sais com decisões claras: o que fazer, como fazer, e com qual ferramenta começar.
+                    </p>
+                </div>
+
+                <div class="solution-image">
+                    <img src="logo-profuturo.png" alt="PROFUTURO" style="height: 180px; width: auto; margin-bottom: 1rem; filter: brightness(0) invert(1);">
+                    <div style="font-size: 1rem; font-weight: 600;">Transformação<br>Comprovada</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PERSONAS -->
+    <section class="personas-section">
+        <div class="section-container">
+            <h2 class="section-title">Isto é Para <span class="accent">Quem?</span></h2>
+            <div class="personas-grid">
+                <div class="persona-card">
+                    <div class="persona-icon">👔</div>
+                    <h3>Coaches & Consultores</h3>
+                    <div class="persona-percent">40%</div>
+                    <p>Querem certificação e método comprovado para educar clientes de forma diferenciada.</p>
+                </div>
+                <div class="persona-card">
+                    <div class="persona-icon">🎯</div>
+                    <h3>Profissionais</h3>
+                    <div class="persona-percent">30%</div>
+                    <p>Procuram competências que o mercado vai pedir em 2027. Estar à frente.</p>
+                </div>
+                <div class="persona-card">
+                    <div class="persona-icon">👨‍💼</div>
+                    <h3>Proprietários PME</h3>
+                    <div class="persona-percent">25%</div>
+                    <p>Querem otimizar operações, poupar tempo (15h/semana) e crescer com estratégia.</p>
+                </div>
+                <div class="persona-card">
+                    <div class="persona-icon">🚀</div>
+                    <h3>Freelancers Avançados</h3>
+                    <div class="persona-percent">5%</div>
+                    <p>Precisam diferenciação competitiva. IA como vantagem, não como ameaça.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- EVENTO -->
+    <section class="event-section">
+        <div class="section-container">
+            <h2 class="section-title">Detalhes do <span class="accent">Evento</span></h2>
+            <div class="event-grid">
+                <div class="event-card">
+                    <div class="label">📅 Data</div>
+                    <div class="value">11 de Abril</div>
+                    <p>2026</p>
+                </div>
+                <div class="event-card">
+                    <div class="label">📍 Local</div>
+                    <div class="value">Luanda</div>
+                    <p>Angola</p>
+                </div>
+                <div class="event-card">
+                    <div class="label">👥 Limite</div>
+                    <div class="value">50</div>
+                    <p>Apenas 50 lugares</p>
+                </div>
+                <div class="event-card">
+                    <div class="label">💰 Investimento</div>
+                    <div class="value">97.000</div>
+                    <p>KZ por pessoa</p>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 2rem;">
+                <p style="font-size: 1.1rem; color: var(--text); margin-bottom: 1rem;">
+                    <strong>3 dias intensivos</strong> de transformação com método P.P.T. comprovado.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- DEPOIMENTOS -->
+    <section class="testimonials-section">
+        <div class="section-container">
+            <h2 class="section-title">O Que Dizem os <span class="accent">Participantes</span></h2>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                    <div class="testimonial-quote">
+                        "Não esperava saír com clareza tão grande sobre o que fazer. Isto muda tudo."
+                    </div>
+                    <div class="testimonial-author">Maria Silva</div>
+                    <div class="testimonial-role">Coach de Negócios</div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                    <div class="testimonial-quote">
+                        "O método P.P.T. é simples mas profundo. Já implementei e poupei 12 horas por semana."
+                    </div>
+                    <div class="testimonial-author">João Mendes</div>
+                    <div class="testimonial-role">Proprietário PME</div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                    <div class="testimonial-quote">
+                        "A estrutura, o conteúdo, os colegas... Investimento excelente para o meu negócio."
+                    </div>
+                    <div class="testimonial-author">Ana Ferreira</div>
+                    <div class="testimonial-role">Consultora Digital</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AGENDA -->
+    <section class="agenda-section">
+        <div class="section-container">
+            <h2 class="section-title">O Que Vais <span class="accent">Aprender</span></h2>
+            <div class="agenda-timeline">
+                <div class="agenda-item">
+                    <div class="agenda-dot"></div>
+                    <div class="agenda-content">
+                        <div class="agenda-time">Dia 1 — Pessoas & Mindset</div>
+                        <div class="agenda-description">
+                            Como IA muda o teu trabalho. Mentalidade correcta. Onde a maioria erra. Os 5 pilares de sucesso.
+                        </div>
+                    </div>
+                </div>
+                <div class="agenda-item">
+                    <div class="agenda-dot"></div>
+                    <div class="agenda-content">
+                        <div class="agenda-time">Dia 2 — Processos & Estratégia</div>
+                        <div class="agenda-description">
+                            Mapeia os teus processos actuais. Identifica pontos de automação. Desenha o futuro desejado. ROI calculado.
+                        </div>
+                    </div>
+                </div>
+                <div class="agenda-item">
+                    <div class="agenda-dot"></div>
+                    <div class="agenda-content">
+                        <div class="agenda-time">Dia 3 — Tecnologia & Implementação</div>
+                        <div class="agenda-description">
+                            Ferramentas certas para a tua situação. Demos ao vivo. Setup inicial. Plano de acção para 90 dias.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq-section">
+        <div class="section-container">
+            <h2 class="section-title">Perguntas <span class="accent">Frequentes</span></h2>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Preciso de experiência prévia com IA?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Não. Começamos do zero. Se já tens experiência, vais aprofundar. A imersão é estruturada para todos os níveis.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Posso trazer um colega?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Sim. Oferecemos 5% de desconto se vierem 2 ou mais pessoas da mesma empresa/projeto. Contacta-nos para código promocional.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>E se não conseguir vir presencialmente?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Estamos a estudar formato híbrido para edições futuras. Esta edição é 100% presencial em Luanda para máximo impacto.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Qual é a política de reembolso?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        100% de reembolso até 7 dias antes do evento. Sem perguntas. Queremos apenas participantes realmente comprometidos.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Vou receber certificado?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Sim. Certificado de participação em "Imersão IA para Negócios 2.0" + Implementação do Método P.P.T. Reconhecido internacionalmente.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA FINAL -->
+    <section class="cta-final-section" id="registro">
+        <div class="cta-final-content">
+            <div class="urgency-badge">🔥 Apenas 5 vagas restantes!</div>
+            <h2>Está na Hora de Decidir</h2>
+            <p>
+                Vais clicar "Reserva Agora" ou vais perder esta oportunidade?<br>
+                <strong>Decisão tua. Agora.</strong>
+            </p>
+            <button class="btn-primary" onclick="openRegistrationModal()" style="font-size: 1.1rem; padding: 1.25rem 2.5rem;">
+                🎯 Quero Reservar Minha Vaga
+            </button>
+            <p style="margin-top: 2rem; font-size: 0.95rem; opacity: 0.9;">
+                Dúvidas? <a href="mailto:contato@imersaoia.ao" style="color: var(--accent); text-decoration: underline;">contato@imersaoia.ao</a>
+            </p>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-content">
+            <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+                <img src="logo-profuturo.png" alt="PROFUTURO" style="height: 50px; width: auto;">
+            </div>
+            <div class="footer-contact">
+                📧 <a href="mailto:contato@imersaoia.ao">contato@imersaoia.ao</a> |
+                📱 +244 923 456 789
+            </div>
+            <p>© 2026 PROFUTURO. IMERSÃO IA PARA NEGÓCIOS. Todos os direitos reservados.</p>
+            <p style="font-size: 0.85rem; margin-top: 1rem; opacity: 0.8;">
+                Política de Privacidade | Termos de Serviço
+            </p>
+        </div>
+    </footer>
+
+    <!-- MODAL REGISTRO -->
+    <div class="modal" id="registrationModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeRegistrationModal()">✕</button>
+            <h2>Reserva a Tua Vaga</h2>
+
+            <form onsubmit="handleRegistration(event)">
+                <div class="form-group">
+                    <label>Nome Completo *</label>
+                    <input type="text" name="name" required placeholder="João António Mendes">
+                </div>
+
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" name="email" required placeholder="seu@email.ao">
+                </div>
+
+                <div class="form-group">
+                    <label>Telefone *</label>
+                    <input type="tel" name="phone" required placeholder="+244 923 456 789">
+                </div>
+
+                <div class="form-group">
+                    <label>Categoria *</label>
+                    <select name="category" required>
+                        <option value="">— Seleciona a tua categoria —</option>
+                        <option value="coach">👔 Coach / Consultor</option>
+                        <option value="professional">🎯 Profissional</option>
+                        <option value="pme">👨‍💼 Proprietário PME</option>
+                        <option value="freelancer">🚀 Freelancer</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Como ouviste falar de nós?</label>
+                    <select name="source">
+                        <option value="">— Seleciona —</option>
+                        <option value="linkedin">LinkedIn</option>
+                        <option value="whatsapp">WhatsApp</option>
+                        <option value="facebook">Facebook</option>
+                        <option value="referral">Recomendação</option>
+                        <option value="other">Outro</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-primary" style="width: 100%; cursor: pointer; font-size: 1rem;">
+                    ✅ Confirmar Reserva — 97.000 KZ
+                </button>
+
+                <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 1rem;">
+                    Ao clicares, confirmas que leste os Termos de Serviço e Política de Privacidade.
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Modal Functions
+        function openRegistrationModal() {
+            document.getElementById('registrationModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeRegistrationModal() {
+            document.getElementById('registrationModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal on outside click
+        document.getElementById('registrationModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeRegistrationModal();
+            }
+        });
+
+        // Handle Form Submission
+        function handleRegistration(event) {
+            event.preventDefault();
+
+            const formData = {
+                name: document.querySelector('input[name="name"]').value,
+                email: document.querySelector('input[name="email"]').value,
+                phone: document.querySelector('input[name="phone"]').value,
+                category: document.querySelector('select[name="category"]').value,
+                source: document.querySelector('select[name="source"]').value,
+                timestamp: new Date().toISOString()
+            };
+
+            // Log para demonstração (em produção, enviar para servidor)
+            console.log('Inscrição recebida:', formData);
+
+            // Mensagem de sucesso
+            alert(`✅ Vaga reservada com sucesso!\n\nNome: ${formData.name}\nEmail: ${formData.email}\n\nVamos entrar em contacto em breve para confirmar.`);
+
+            closeRegistrationModal();
+        }
+
+        // FAQ Toggle
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', function() {
+                const item = this.parentElement;
+                item.classList.toggle('active');
+            });
+        });
+
+        // Smooth Scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Animação ao scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.problem-card, .persona-card, .testimonial-card, .event-card').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'all 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

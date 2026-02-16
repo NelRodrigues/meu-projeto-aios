@@ -1,0 +1,177 @@
+{
+  "youtube_briefs": {
+    "briefing_framework": "CCN Rule: Core (existing audience) | Casual (potential audience) | New (complete strangers)",
+    "briefs": [
+      {
+        "video_id": 1,
+        "title": "Scale vs Growth: Why Most Entrepreneurs Get It Wrong",
+        "ccn_target": "Core + Casual",
+        "estimated_ctr": "7.2/10",
+        "hook": "Most entrepreneurs confuse growth with scale. Here's why it matters.",
+        "format": "Educational + Story",
+        "duration": "12-15 minutes",
+        "retention_strategy": [
+          "Hook first 5 seconds: Paradox (busy but poor)",
+          "Pattern interrupt at 3:00 - Emotion switch",
+          "Break at 6:00 - Key insight reveal",
+          "Call-to-action at 9:00 - Drive engagement"
+        ],
+        "thumbnail_elements": [
+          "Contrasting faces",
+          "Red arrows",
+          "Text overlay: 'GROWTH ≠ SCALE'"
+        ],
+        "description_focus": "Define growth vs scale + timestamp index",
+        "tags": [
+          "scaling",
+          "entrepreneurship",
+          "business systems",
+          "growth strategy"
+        ]
+      },
+      {
+        "video_id": 2,
+        "title": "The Bottleneck That's Killing Your Growth (And How to Find Yours)",
+        "ccn_target": "Casual + New",
+        "estimated_ctr": "8.1/10",
+        "hook": "Every operation has a bottleneck. Yours is costing you thousands.",
+        "format": "How-to + Analysis",
+        "duration": "8-10 minutes",
+        "retention_strategy": [
+          "Open with relatable struggle",
+          "Case study example at 2:00",
+          "Tool/framework reveal at 4:00",
+          "Personal application at 6:00"
+        ],
+        "thumbnail_elements": [
+          "Stopwatch/hourglass",
+          "Frustrated face",
+          "Question mark"
+        ],
+        "description_focus": "Audit steps + free checklist link",
+        "tags": [
+          "bottleneck",
+          "productivity",
+          "business audit",
+          "optimization"
+        ]
+      },
+      {
+        "video_id": 3,
+        "title": "I Documented My Process and Hired Someone to Do It (Here's What Happened)",
+        "ccn_target": "Core + New",
+        "estimated_ctr": "8.8/10 ⭐",
+        "hook": "Documenting my process was scary. Hiring someone was liberating.",
+        "format": "Story + Tutorial",
+        "duration": "15-18 minutes",
+        "retention_strategy": [
+          "Personal story opening (2:00)",
+          "Fear/hesitation admission (4:00)",
+          "Step-by-step process (6:00-12:00)",
+          "Surprising result (13:00)",
+          "How you can do it (15:00)"
+        ],
+        "thumbnail_elements": [
+          "Before/after split",
+          "Pointing emoji",
+          "Surprised expression"
+        ],
+        "description_focus": "Full process breakdown + templates",
+        "tags": [
+          "delegation",
+          "hiring",
+          "systems",
+          "automation"
+        ]
+      },
+      {
+        "video_id": 4,
+        "title": "The 7-Step System That Freed Me From 80-Hour Weeks",
+        "ccn_target": "New",
+        "estimated_ctr": "7.9/10",
+        "hook": "This system is so counterintuitive, most people reject it immediately.",
+        "format": "Framework + Walkthrough",
+        "duration": "20-25 minutes",
+        "retention_strategy": [
+          "Problem statement (2:00)",
+          "Framework introduction (4:00)",
+          "Step 1-3 deep dive (6:00-12:00)",
+          "Step 4-7 deep dive (13:00-19:00)",
+          "Implementation roadmap (20:00)"
+        ],
+        "thumbnail_elements": [
+          "Tired vs fresh face",
+          "Number '7'",
+          "Clock graphic"
+        ],
+        "description_focus": "Full system explained + checklist + free guide",
+        "tags": [
+          "systems",
+          "productivity",
+          "scaling",
+          "automation",
+          "delegation"
+        ]
+      }
+    ]
+  },
+  "optimization": {
+    "titles": [
+      "Use curiosity gap (partial information)",
+      "Include benefit-driven hook",
+      "Test 6-8 variations in Analytics"
+    ],
+    "thumbnails": [
+      "High contrast colors (red/yellow on dark)",
+      "Face with strong emotion (surprise/shock)",
+      "Bold text (max 3 words)",
+      "Consistency (same elements across series)"
+    ],
+    "hooks_first_5_secs": [
+      "Start with the problem (emotional hook)",
+      "Skip intro - jump to content",
+      "Use pattern interrupt (visual/audio shift)",
+      "Promise the outcome immediately"
+    ],
+    "retention": [
+      "Chapter breaks (keep avg watch time >70%)",
+      "B-roll / graphics every 30 seconds",
+      "Voice variation / energy changes",
+      "Pattern interrupt every 3-4 minutes"
+    ]
+  },
+  "report": {
+    "pipeline_id": "CD-2026-0213-TEST",
+    "duration": "6 phases completed",
+    "extraction": {
+      "frameworks_identified": 5,
+      "heuristics": 7,
+      "mental_models": 4
+    },
+    "content_production": {
+      "atomic_pieces": 8,
+      "content_ideas": 16,
+      "youtube_briefs": 4,
+      "total_distribution": 54
+    },
+    "quality_gates": {
+      "QG_001": "PASS",
+      "QG_002": "PASS",
+      "QG_003": "PASS",
+      "QG_004": "PASS",
+      "QG_005": "PASS"
+    },
+    "production_timeline": "4 weeks",
+    "content_formats": [
+      "Articles",
+      "Videos",
+      "Email",
+      "Twitter",
+      "LinkedIn",
+      "PDF",
+      "Podcast",
+      "Infographics"
+    ],
+    "platforms_covered": 6
+  }
+}
