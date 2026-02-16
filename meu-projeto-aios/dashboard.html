@@ -768,6 +768,110 @@
         width: 100%;
       }
     }
+
+    /* ═══════════════════════════════════════════════════════════ */
+    /* PHASE 8: Optimizações de Real-time Updates                 */
+    /* ═══════════════════════════════════════════════════════════ */
+
+    /* Animações de Transição */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes highlight {
+      0%, 100% { background-color: transparent; }
+      50% { background-color: #fff3cd; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* Classes de Animação para Tarefas */
+    .task-row-new {
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    .task-row-updated {
+      animation: highlight 1s ease-in-out;
+    }
+
+    /* Badge de Sincronização */
+    .syncing-badge {
+      animation: pulse 1s infinite;
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 0.85em;
+      font-weight: 500;
+      background: #fff3cd;
+      color: #856404;
+      margin-left: 10px;
+    }
+
+    /* Status de Conexão */
+    .connection-status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.85em;
+      font-weight: 500;
+      margin-right: 10px;
+    }
+
+    .connection-status.connected {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .connection-status.disconnected {
+      background: #ffebee;
+      color: #c62828;
+    }
+
+    .connection-status.syncing {
+      background: #fff3cd;
+      color: #856404;
+      animation: pulse 1s infinite;
+    }
+
+    .connection-status.error {
+      background: #ffcdd2;
+      color: #b71c1c;
+    }
+
+    /* Connection Badge */
+    .connection-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 0.85em;
+      font-weight: 500;
+      margin-right: 10px;
+    }
+
+    .connection-badge.connected {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .connection-badge.disconnected {
+      background: #ffebee;
+      color: #c62828;
+    }
+
+    .connection-badge.syncing {
+      background: #fff3cd;
+      color: #856404;
+      animation: pulse 1s infinite;
+    }
+
+    .connection-badge.error {
+      background: #ffcdd2;
+      color: #b71c1c;
+    }
   </style>
 </head>
 <body>
@@ -1007,6 +1111,7 @@
     <div class="page-title" id="tasks">
       <div class="section-header">
         <h1>📋 Tarefas (ClickUp)</h1>
+        <span id="tasksConnectionBadge" class="connection-badge connected" style="display: none;">🟢 Conectado</span>
         <button class="btn" onclick="syncTasks()">
           <span id="syncIcon">🔄</span> Sincronizar Agora
         </button>
@@ -1320,6 +1425,15 @@
     let insightsStream = null;
     let tasksStream = null;
 
+    // ═══════════════════════════════════════════════════════════
+    // PHASE 8: Debouncing de Actualizações
+    // ═══════════════════════════════════════════════════════════
+    let tasksUpdatePending = false;
+    let tasksDebounceTimer = null;
+    const DEBOUNCE_DELAY = 300; // ms
+    let lastUpdateTime = 0;
+    let updateCount = 0;
+
     // Load Data from API
     async function loadClientsData() {
       try {
@@ -1436,6 +1550,169 @@
       };
     }
 
+    /* ═══════════════════════════════════════════════════════════ */
+    /* PHASE 8: Funções de Debouncing e Animações                  */
+    /* ═══════════════════════════════════════════════════════════ */
+
+    /**
+     * Debounce de actualizações de tarefas
+     */
+    function debouncedLoadTasks() {
+      console.log('⏱️ Debouncing actualização de tarefas (300ms)...');
+
+      // Mostrar badge de sincronizando
+      showSyncingBadge();
+      updateConnectionStatus('tasks', 'syncing');
+
+      // Limpar timer anterior
+      if (tasksDebounceTimer) {
+        clearTimeout(tasksDebounceTimer);
+      }
+
+      // Agendar carregamento com debounce
+      tasksDebounceTimer = setTimeout(() => {
+        console.log('✅ Executando loadTasksWithTransition...');
+        loadTasksWithTransition();
+        hideSyncingBadge();
+        updateConnectionStatus('tasks', 'connected');
+      }, DEBOUNCE_DELAY);
+
+      tasksUpdatePending = true;
+    }
+
+    /**
+     * Carregar tarefas com efeito de transição
+     */
+    async function loadTasksWithTransition() {
+      try {
+        showLoadingIndicator(true);
+
+        const response = await fetch('/api/tasks');
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Guardar IDs das tarefas anteriores
+        const previousIds = new Set(allTasks.map(t => t.id));
+
+        allTasks = data.tasks || [];
+        taskAssignees = data.assignees || [];
+
+        // Detectar tarefas novas e actualizadas
+        const newIds = new Set(allTasks.map(t => t.id));
+        const addedIds = [...newIds].filter(id => !previousIds.has(id));
+        const updatedIds = [...previousIds].filter(id => newIds.has(id));
+
+        populateAssigneeFilter();
+        applyTaskFilters();
+        updateTaskKPIs();
+
+        // Aplicar animações
+        if (addedIds.length > 0) {
+          console.log('✨ Marcando', addedIds.length, 'tarefas como novas');
+          markTasksAsNew(addedIds);
+        }
+        if (updatedIds.length > 0) {
+          console.log('💫 Marcando', updatedIds.length, 'tarefas como actualizadas');
+          markTasksAsUpdated(updatedIds);
+        }
+
+        showLoadingIndicator(false);
+        lastUpdateTime = Date.now();
+        updateCount++;
+        tasksUpdatePending = false;
+
+        console.log('📊 Tarefas actualizadas:', { total: allTasks.length, novas: addedIds.length, modificadas: updatedIds.length });
+      } catch (error) {
+        console.error('❌ Erro ao carregar tarefas com transição:', error);
+        updateConnectionStatus('tasks', 'error');
+        showLoadingIndicator(false);
+        tasksUpdatePending = false;
+      }
+    }
+
+    /**
+     * Mostrar badge de "Sincronizando..."
+     */
+    function showSyncingBadge() {
+      const badge = document.getElementById('tasksConnectionBadge');
+      if (badge) {
+        badge.textContent = '🔄 Sincronizando...';
+        badge.className = 'connection-badge syncing';
+        badge.style.display = 'inline-block';
+        console.log('🔄 Sincronizando badge mostrado');
+      }
+    }
+
+    /**
+     * Esconder badge de sincronizando
+     */
+    function hideSyncingBadge() {
+      const badge = document.getElementById('tasksConnectionBadge');
+      if (badge) {
+        badge.style.display = 'none';
+        console.log('✓ Sincronizando badge ocultado');
+      }
+    }
+
+    /**
+     * Actualizar status visual de conexão
+     */
+    function updateConnectionStatus(type, status) {
+      const badge = document.getElementById(`${type}ConnectionBadge`);
+      if (!badge) return;
+
+      const statuses = {
+        connected: { text: '🟢 Conectado', className: 'connected' },
+        disconnected: { text: '🔴 Desconectado', className: 'disconnected' },
+        syncing: { text: '🔄 Sincronizando...', className: 'syncing' },
+        error: { text: '⚠️ Erro', className: 'error' }
+      };
+
+      const config = statuses[status] || statuses.disconnected;
+      badge.textContent = config.text;
+      badge.className = `connection-badge ${config.className}`;
+      console.log(`📍 Status ${type}: ${config.text}`);
+    }
+
+    /**
+     * Marcar tarefas como novas (com animação)
+     */
+    function markTasksAsNew(ids) {
+      ids.forEach(id => {
+        const row = document.querySelector(`[data-task-id="${id}"]`);
+        if (row) {
+          row.classList.add('task-row-new');
+          setTimeout(() => row.classList.remove('task-row-new'), 300);
+        }
+      });
+    }
+
+    /**
+     * Marcar tarefas como actualizadas (com highlight)
+     */
+    function markTasksAsUpdated(ids) {
+      ids.forEach(id => {
+        const row = document.querySelector(`[data-task-id="${id}"]`);
+        if (row) {
+          row.classList.add('task-row-updated');
+          setTimeout(() => row.classList.remove('task-row-updated'), 1000);
+        }
+      });
+    }
+
+    /**
+     * Mostrar/Esconder Loading Indicator
+     */
+    function showLoadingIndicator(show) {
+      const indicator = document.getElementById('tasksLoadingIndicator');
+      if (indicator) {
+        indicator.style.display = show ? 'flex' : 'none';
+      }
+    }
+
     /**
      * Subscrever ao stream de tarefas (SSE)
      */
@@ -1456,18 +1733,19 @@
           updateTaskKPIs();
         } else if (data.type === 'tasks') {
           console.log('📡 Mudança de tarefas detectada:', data.event);
-          // Recarregar tarefas via API
-          loadTasks();
+          // Usar debouncing em vez de recarregar imediatamente
+          debouncedLoadTasks();
         }
       };
 
       tasksStream.onerror = (error) => {
         console.warn('⚠️  Erro no stream de tarefas. Usando polling como fallback...');
+        updateConnectionStatus('tasks', 'disconnected');
         tasksStream.close();
         tasksStream = null;
 
-        // Fallback: Polling a cada 10 segundos
-        setInterval(loadTasks, 10000);
+        // Fallback: Polling a cada 10 segundos com debouncing
+        setInterval(debouncedLoadTasks, 10000);
       };
 
       tasksStream.onopen = () => {
@@ -1862,7 +2140,7 @@
         const tags = task.tags?.slice(0, 3) || [];
 
         return `
-          <tr class="${isOverdue ? 'overdue-row' : ''}">
+          <tr class="${isOverdue ? 'overdue-row' : ''}" data-task-id="${task.id}">
             <td>
               <strong>${escapeHtml(task.name)}</strong>
               ${task.description ? `<br><small class="task-description">${escapeHtml(task.description.substring(0, 80))}${task.description.length > 80 ? '...' : ''}</small>` : ''}
