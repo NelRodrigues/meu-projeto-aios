@@ -564,13 +564,13 @@ server.listen(PORT, async () => {
     } else {
       // Inicializar Insights Generator
       insightsGenerator = new AIInsightsGenerator({
-        model: 'claude-3-5-sonnet-20241022'
+        model: 'claude-instant-1.3'
       });
       console.log('✅ AI Insights Generator inicializado');
 
       // Inicializar Chat Service
       chatService = new AIChatService({
-        model: 'claude-3-5-sonnet-20241022'
+        model: 'claude-instant-1.3'
       });
       console.log('✅ AI Chat Service inicializado');
 

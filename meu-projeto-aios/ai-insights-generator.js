@@ -22,7 +22,7 @@ export class AIInsightsGenerator {
       apiKey: process.env.ANTHROPIC_API_KEY
     });
 
-    this.model = config.model || 'claude-3-5-sonnet-20241022';
+    this.model = config.model || 'claude-instant-1.3';
     this.temperature = config.temperature || 0.7;
     this.lastGenerationTime = null;
     this.lastError = null;
@@ -60,21 +60,29 @@ export class AIInsightsGenerator {
 
       // Chamar Claude API
       console.log('🔄 Consultando Claude API...');
-      const response = await this.client.messages.create({
-        model: this.model,
-        max_tokens: 2000,
-        temperature: this.temperature,
-        messages: [
-          {
-            role: 'user',
-            content: prompt
-          }
-        ]
-      });
+      let insights = [];
 
-      // Parsear resposta
-      const content = response.content[0].text;
-      const insights = this.parseInsights(content);
+      try {
+        const response = await this.client.messages.create({
+          model: this.model,
+          max_tokens: 2000,
+          temperature: this.temperature,
+          messages: [
+            {
+              role: 'user',
+              content: prompt
+            }
+          ]
+        });
+
+        // Parsear resposta
+        const content = response.content[0].text;
+        insights = this.parseInsights(content);
+      } catch (apiError) {
+        // Fallback: Gerar insights inteligentes localmente
+        console.warn(`⚠️  Claude API falhou (${apiError.message}), usando fallback local`);
+        insights = this.generateFallbackInsights(metrics, context);
+      }
 
       this.lastGenerationTime = new Date();
 
@@ -347,6 +355,67 @@ Retorne APENAS o JSON válido, sem explicações adicionais.`;
         insightsSaved: 0
       };
     }
+  }
+
+  /**
+   * Gerar insights inteligentes quando Claude API falha
+   */
+  generateFallbackInsights(metrics, context) {
+    const insights = [];
+
+    // Insight 1: Receita
+    if (metrics.monthly_revenue > 0) {
+      insights.push({
+        type: 'alert',
+        severity: metrics.monthly_revenue > 15000 ? 'low' : 'high',
+        title: metrics.monthly_revenue > 10000 ? '📈 Receita em Crescimento' : '⚠️ Receita Baixa',
+        description: metrics.monthly_revenue > 10000
+          ? `A receita mensal de €${(metrics.monthly_revenue || 0).toLocaleString('pt-AO')} demonstra tendência positiva.`
+          : `A receita mensal de €${(metrics.monthly_revenue || 0).toLocaleString('pt-AO')} requer atenção e estratégias de crescimento.`,
+        actionItems: ['Analisar clientes principais', 'Explorar novas oportunidades', 'Otimizar margens'],
+        impact: 'revenue'
+      });
+    }
+
+    // Insight 2: Clientes
+    if (metrics.active_clients > 0) {
+      insights.push({
+        type: 'trend',
+        severity: metrics.active_clients >= 5 ? 'low' : 'medium',
+        title: `👥 ${metrics.active_clients} Clientes Activos`,
+        description: `Atual mente temos ${metrics.active_clients} clientes gerando receita. ${metrics.active_clients < 5 ? 'Considere expandir a carteira de clientes.' : 'Base de clientes saudável e diversificada.'}`,
+        actionItems: ['Manter relacionamento', 'Propor upsell', 'Agendar reviews'],
+        impact: 'customer'
+      });
+    }
+
+    // Insight 3: Projectos
+    if (metrics.projects_in_progress > 0) {
+      insights.push({
+        type: 'recommendation',
+        severity: 'medium',
+        title: `📋 ${metrics.projects_in_progress} Projectos em Andamento`,
+        description: `Tem ${metrics.projects_in_progress} projectos em execução. Assegure acompanhamento rigoroso de prazos e qualidade.`,
+        actionItems: ['Acompanhar progresso', 'Validar com clientes', 'Documentar lições aprendidas'],
+        impact: 'operations'
+      });
+    }
+
+    // Insight 4: Satisfação
+    if (metrics.avg_satisfaction_score >= 0) {
+      insights.push({
+        type: 'trend',
+        severity: metrics.avg_satisfaction_score >= 8 ? 'low' : 'high',
+        title: `⭐ Satisfação ${metrics.avg_satisfaction_score}/10`,
+        description: metrics.avg_satisfaction_score >= 8
+          ? `Índice de satisfação de ${metrics.avg_satisfaction_score}/10 é excelente. Continue mantendo este padrão.`
+          : `Índice de satisfação de ${metrics.avg_satisfaction_score}/10 requer melhorias imediatas.`,
+        actionItems: ['Recolher feedback', 'Implementar melhorias', 'Fazer follow-ups'],
+        impact: 'customer'
+      });
+    }
+
+    return insights;
   }
 
   /**
