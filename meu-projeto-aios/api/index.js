@@ -1,6 +1,6 @@
 /**
- * Servidor Node.js que serves frontend estático + APIs
- * Este ficheiro é o entrypoint para o Vercel
+ * Serverless function para Vercel
+ * Executa como função HTTP que o Vercel consegue executar
  */
 
 import express from 'express';
@@ -13,12 +13,12 @@ import metricsLatestHandler from './metrics/latest.js';
 import insightsIndexHandler from './insights/index.js';
 import insightsGenerateHandler from './insights/generate.js';
 import chatHandler from './chat.js';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
@@ -46,12 +46,16 @@ app.post('/api/chat', chatHandler);
 
 // Serve frontend estático
 const frontendPath = join(__dirname, '..', 'frontend', 'dist');
-app.use(express.static(frontendPath));
+if (fs.existsSync(frontendPath)) {
+  app.use(express.static(frontendPath));
 
-// SPA fallback - redirecionar todas as rotas não-API para index.html
-app.get('*', (req, res) => {
-  res.sendFile(join(frontendPath, 'index.html'));
-});
+  // SPA fallback - redirecionar todas as rotas não-API para index.html
+  app.get('*', (req, res) => {
+    res.sendFile(join(frontendPath, 'index.html'));
+  });
+} else {
+  console.warn(`Frontend path not found: ${frontendPath}`);
+}
 
 // Error handling
 app.use((err, req, res, next) => {
@@ -59,18 +63,23 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-// Start server
-const server = app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-  console.log(`   Frontend: http://localhost:${PORT}`);
-  console.log(`   API: http://localhost:${PORT}/api`);
-});
+// Exportar como serverless function para Vercel
+export default app;
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
-  server.close(() => {
-    console.log('Server closed');
-    process.exit(0);
+// Para desenvolvimento local
+if (process.env.NODE_ENV !== 'production' && !process.argv[1]?.includes('vercel')) {
+  const PORT = process.env.PORT || 3000;
+  const server = app.listen(PORT, () => {
+    console.log(`✅ Server running on port ${PORT}`);
+    console.log(`   Frontend: http://localhost:${PORT}`);
+    console.log(`   API: http://localhost:${PORT}/api`);
   });
-});
+
+  process.on('SIGTERM', () => {
+    console.log('SIGTERM received, shutting down gracefully');
+    server.close(() => {
+      console.log('Server closed');
+      process.exit(0);
+    });
+  });
+}
