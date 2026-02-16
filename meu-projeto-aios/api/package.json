@@ -1,0 +1,13 @@
+{
+  "name": "meu-projeto-aios-api",
+  "version": "1.0.0",
+  "description": "Control Tower Executivo API",
+  "type": "module",
+  "main": "index.js",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.38.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
