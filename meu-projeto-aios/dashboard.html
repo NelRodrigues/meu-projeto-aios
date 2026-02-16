@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control Tower - Marca Digital</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f7fa;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      color: white;
+      padding: 30px 20px;
+      overflow-y: auto;
+      position: fixed;
+      height: 100vh;
+      left: 0;
+      top: 0;
+    }
+
+    .logo {
+      font-size: 1.5em;
+      font-weight: bold;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .menu {
+      list-style: none;
+    }
+
+    .menu li {
+      margin-bottom: 10px;
+    }
+
+    .menu a {
+      color: white;
+      text-decoration: none;
+      padding: 12px 15px;
+      border-radius: 6px;
+      display: block;
+      transition: background 0.3s;
+      cursor: pointer;
+    }
+
+    .menu a:hover,
+    .menu a.active {
+      background: rgba(255,255,255,0.2);
+    }
+
+    /* Main Content */
+    .main {
+      margin-left: 280px;
+      flex: 1;
+      padding: 40px;
+      overflow-y: auto;
+    }
+
+    .header {
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      font-size: 2em;
+      color: #1e3c72;
+      margin-bottom: 10px;
+    }
+
+    .page-title {
+      display: none;
+    }
+
+    .page-title.active {
+      display: block;
+    }
+
+    /* KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+
+    .kpi-card {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .kpi-label {
+      color: #666;
+      font-size: 0.85em;
+      font-weight: 600;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .kpi-value {
+      font-size: 2.2em;
+      font-weight: bold;
+      color: #1e3c72;
+      margin-bottom: 8px;
+    }
+
+    .kpi-change {
+      font-size: 0.9em;
+      color: #27ae60;
+    }
+
+    /* AI Insights Sidebar */
+    .ai-insights-sidebar {
+      position: fixed;
+      right: -400px;
+      top: 0;
+      width: 400px;
+      height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      overflow-y: auto;
+      transition: right 0.3s ease;
+      z-index: 999;
+      box-shadow: -5px 0 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .ai-insights-sidebar.open {
+      right: 0;
+    }
+
+    .ai-insights-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .ai-insights-header h3 {
+      margin: 0;
+      font-size: 1.3em;
+    }
+
+    .insights-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .insight-card {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .insight-card:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateX(-5px);
+    }
+
+    .insight-card strong {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .insight-card p {
+      margin: 0;
+      font-size: 0.9em;
+      opacity: 0.9;
+    }
+
+    /* Insights Toggle Button */
+    .insights-toggle {
+      position: fixed;
+      right: 30px;
+      bottom: 120px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      font-size: 1.5em;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      transition: all 0.3s;
+      z-index: 998;
+    }
+
+    .insights-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+
+    /* Chatbot */
+    .chatbot-container {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 350px;
+      height: 500px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 5px 40px rgba(0, 0, 0, 0.16);
+      display: flex;
+      flex-direction: column;
+      z-index: 997;
+      transition: all 0.3s ease;
+    }
+
+    .chatbot-container.collapsed {
+      height: 60px;
+    }
+
+    .chatbot-header {
+      background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+      color: white;
+      padding: 15px;
+      border-radius: 12px 12px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .chatbot-header h4 {
+      margin: 0;
+      font-size: 1.1em;
+    }
+
+    .chatbot-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px;
+      background: #f9f9f9;
+      border-radius: 0;
+    }
+
+    .chatbot-messages.hidden {
+      display: none;
+    }
+
+    .chat-message {
+      display: flex;
+      margin-bottom: 12px;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .chat-message.user {
+      justify-content: flex-end;
+    }
+
+    .chat-message.bot {
+      justify-content: flex-start;
+    }
+
+    .chat-bubble {
+      max-width: 70%;
+      padding: 10px 15px;
+      border-radius: 12px;
+      word-wrap: break-word;
+      font-size: 0.9em;
+    }
+
+    .chat-message.user .chat-bubble {
+      background: #2a5298;
+      color: white;
+      border-radius: 12px 0 12px 12px;
+    }
+
+    .chat-message.bot .chat-bubble {
+      background: #e8e8e8;
+      color: #333;
+      border-radius: 0 12px 12px 12px;
+    }
+
+    .chatbot-input {
+      display: flex;
+      gap: 10px;
+      padding: 15px;
+      border-top: 1px solid #e0e0e0;
+      background: white;
+      border-radius: 0 0 12px 12px;
+    }
+
+    .chatbot-input input {
+      flex: 1;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 0.9em;
+    }
+
+    .chatbot-input input:focus {
+      outline: none;
+      border-color: #2a5298;
+    }
+
+    .chatbot-input button {
+      background: #2a5298;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+
+    .chatbot-input button:hover {
+      background: #1e3c72;
+    }
+
+    /* Charts */
+    .charts {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+
+    .chart-card {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .chart-title {
+      font-size: 1.1em;
+      font-weight: 600;
+      color: #1e3c72;
+      margin-bottom: 20px;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 300px;
+    }
+
+    /* Tables */
+    .table-container {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      margin-bottom: 25px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: #f8f9fa;
+    }
+
+    th {
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      color: #1e3c72;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    td {
+      padding: 15px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    tbody tr:hover {
+      background: #f8f9fa;
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #1e3c72;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 1em;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #2a5298;
+      box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+    }
+
+    .btn {
+      background: #2a5298;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+
+    .btn:hover {
+      background: #1e3c72;
+    }
+
+    .btn-secondary {
+      background: #666;
+    }
+
+    .btn-secondary:hover {
+      background: #555;
+    }
+
+    /* Messages */
+    .alert {
+      padding: 15px 20px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .alert.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      display: block;
+    }
+
+    /* Status badge */
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: 600;
+    }
+
+    .badge-success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .badge-warning {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .badge-danger {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 250px;
+        padding: 20px 15px;
+      }
+
+      .main {
+        margin-left: 250px;
+        padding: 20px;
+      }
+
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .charts {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="logo">🎯 Control Tower</div>
+    <ul class="menu">
+      <li><a class="menu-link active" data-page="dashboard">📊 Dashboard</a></li>
+      <li><a class="menu-link" data-page="clientes">👥 Clientes</a></li>
+      <li><a class="menu-link" data-page="projectos">📈 Projectos</a></li>
+      <li><a class="menu-link" data-page="admin">⚙️ Admin</a></li>
+      <li><a class="menu-link" data-page="relatorios">📋 Relatórios</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main">
+    <!-- Dashboard Page -->
+    <div class="page-title active" id="dashboard">
+      <div class="header">
+        <h1>📊 Dashboard Executivo</h1>
+        <p style="color: #666;">Visão geral em tempo real - Marca Digital Angola</p>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">👥 Clientes Activos</div>
+          <div class="kpi-value" id="clientCount">3</div>
+          <div class="kpi-change" style="color: #27ae60;">↑ +1 este mês</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">💰 Receita Mensal</div>
+          <div class="kpi-value">$<span id="monthRevenue">8,000</span></div>
+          <div class="kpi-change" style="color: #27ae60;">↑ +15% vs anterior</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">📈 Projectos Activos</div>
+          <div class="kpi-value" id="projectCount">1</div>
+          <div class="kpi-change">Acme Corporation - 65%</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">😊 Satisfação Média</div>
+          <div class="kpi-value">8/10</div>
+          <div class="kpi-change" style="color: #27ae60;">Excelente ✅</div>
+        </div>
+      </div>
+
+      <div class="charts">
+        <div class="chart-card">
+          <div class="chart-title">📈 Receita - Últimos 30 Dias</div>
+          <div class="chart-container">
+            <canvas id="revenueChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">🎯 Status dos Projectos</div>
+          <div class="chart-container">
+            <canvas id="projectChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Insights Sidebar -->
+    <div id="aiInsightsSidebar" class="ai-insights-sidebar">
+      <div class="ai-insights-header">
+        <h3>💡 IA Insights</h3>
+        <button onclick="closeInsightsSidebar()" style="background: none; border: none; color: white; font-size: 1.5em; cursor: pointer;">✕</button>
+      </div>
+      <div id="insightsList" class="insights-list"></div>
+    </div>
+
+    <!-- AI Insights Toggle Button -->
+    <button id="insightsBtn" class="insights-toggle" onclick="openInsightsSidebar()">💡</button>
+
+    <!-- Chatbot -->
+    <div id="chatbot" class="chatbot-container">
+      <div class="chatbot-header">
+        <h4>🤖 Gestor IA</h4>
+        <button onclick="toggleChatbot()" style="background: none; border: none; color: white; font-size: 1.2em; cursor: pointer;">−</button>
+      </div>
+      <div class="chatbot-messages" id="chatMessages"></div>
+      <div class="chatbot-input">
+        <input type="text" id="chatInput" placeholder="Faça uma pergunta..." onkeypress="handleChatKeypress(event)">
+        <button onclick="sendChatMessage()">Enviar</button>
+      </div>
+    </div>
+
+    <!-- Clientes Page -->
+    <div class="page-title" id="clientes">
+      <div class="header">
+        <h1>👥 Gestão de Clientes</h1>
+        <button class="btn" onclick="toggleClientForm()" style="margin-top: 10px;">+ Novo Cliente</button>
+      </div>
+
+      <div id="clientForm" style="display: none; background: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
+        <h3 style="margin-bottom: 20px; color: #1e3c72;">Adicionar Novo Cliente</h3>
+        <div class="form-group">
+          <label>Nome da Empresa</label>
+          <input type="text" id="clientName" placeholder="Ex: Tech Solutions">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="clientEmail" placeholder="contato@empresa.com">
+        </div>
+        <div class="form-group">
+          <label>Tier</label>
+          <select id="clientTier">
+            <option>Seleccione um tier</option>
+            <option>Bronze</option>
+            <option>Silver</option>
+            <option>Gold</option>
+            <option>Platinum</option>
+          </select>
+        </div>
+        <button class="btn" onclick="addClient()">Adicionar Cliente</button>
+        <button class="btn btn-secondary" onclick="toggleClientForm()">Cancelar</button>
+      </div>
+
+      <div id="alert" class="alert"></div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Empresa</th>
+              <th>Email</th>
+              <th>Tier</th>
+              <th>Status</th>
+              <th>Valor Mensal</th>
+              <th>Acções</th>
+            </tr>
+          </thead>
+          <tbody id="clientsTable">
+            <!-- Carregado via API -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Projectos Page -->
+    <div class="page-title" id="projectos">
+      <div class="header">
+        <h1>📈 Projectos em Andamento</h1>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Projecto</th>
+              <th>Cliente</th>
+              <th>Status</th>
+              <th>Progresso</th>
+              <th>Data Início</th>
+              <th>Data Fim Prevista</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Transformação Digital</strong></td>
+              <td>Acme Corporation</td>
+              <td><span class="badge badge-warning">Em Progresso</span></td>
+              <td>
+                <div style="background: #e0e0e0; height: 8px; border-radius: 4px; overflow: hidden;">
+                  <div style="background: #27ae60; height: 100%; width: 65%;"></div>
+                </div>
+                65%
+              </td>
+              <td>2026-01-15</td>
+              <td>2026-04-15</td>
+            </tr>
+            <tr>
+              <td><strong>Website Redesign</strong></td>
+              <td>Startup XYZ</td>
+              <td><span class="badge badge-success">Completo</span></td>
+              <td>
+                <div style="background: #e0e0e0; height: 8px; border-radius: 4px; overflow: hidden;">
+                  <div style="background: #27ae60; height: 100%; width: 100%;"></div>
+                </div>
+                100%
+              </td>
+              <td>2025-12-01</td>
+              <td>2026-01-30</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Admin Page -->
+    <div class="page-title" id="admin">
+      <div class="header">
+        <h1>⚙️ Painel de Administração</h1>
+      </div>
+
+      <div class="charts">
+        <div class="chart-card">
+          <div class="chart-title">🔄 Sincronização de Dados</div>
+          <div style="padding: 20px;">
+            <p style="margin-bottom: 15px;"><strong>Última sincronização:</strong> Hoje às 10:30</p>
+            <button class="btn" onclick="syncData()">🔄 Sincronizar Agora</button>
+            <p id="syncStatus" style="margin-top: 15px; color: #27ae60; display: none;">✅ Sincronização concluída!</p>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">🔐 Segurança</div>
+          <div style="padding: 20px;">
+            <p style="margin-bottom: 10px;">✅ HTTPS Activo</p>
+            <p style="margin-bottom: 10px;">✅ RLS Policies Configuradas</p>
+            <p style="margin-bottom: 10px;">✅ Backups Diários</p>
+            <p style="margin-bottom: 15px;">✅ 2FA Disponível</p>
+            <button class="btn" onclick="resetPassword()">🔑 Alterar Senha</button>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">📊 Estatísticas do Sistema</div>
+          <div style="padding: 20px;">
+            <p style="margin-bottom: 10px;"><strong>Clientes:</strong> 3</p>
+            <p style="margin-bottom: 10px;"><strong>Projectos:</strong> 2</p>
+            <p style="margin-bottom: 10px;"><strong>Receita Total:</strong> $8,000/mês</p>
+            <p style="margin-bottom: 15px;"><strong>Tempo de Uptime:</strong> 99.9%</p>
+            <button class="btn" onclick="exportReport()">📥 Exportar Relatório</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Relatórios Page -->
+    <div class="page-title" id="relatorios">
+      <div class="header">
+        <h1>📋 Relatórios e Análises</h1>
+      </div>
+
+      <div class="charts">
+        <div class="chart-card">
+          <div class="chart-title">💰 Receita por Cliente (Mensal)</div>
+          <div class="chart-container">
+            <canvas id="clientRevenueChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">📊 Crescimento Mensal</div>
+          <div class="chart-container">
+            <canvas id="growthChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Data
+    const clients = [
+      { name: 'Acme Corporation', email: 'contato@acme.ao', tier: 'Platinum', revenue: 5000 },
+      { name: 'Startup XYZ', email: 'hello@startup.io', tier: 'Gold', revenue: 2000 },
+      { name: 'Local Business', email: 'info@local.ao', tier: 'Silver', revenue: 1000 }
+    ];
+
+    // Page Navigation
+    document.querySelectorAll('.menu-link').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const page = this.dataset.page;
+
+        document.querySelectorAll('.page-title').forEach(p => p.classList.remove('active'));
+        document.getElementById(page).classList.add('active');
+
+        document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+
+        if (page === 'relatorios') {
+          setTimeout(initRelatorios, 100);
+        }
+      });
+    });
+
+    // Init Dashboard Charts
+    function initDashboard() {
+      initRevenueChart();
+      initProjectChart();
+    }
+
+    function initRevenueChart() {
+      const ctx = document.getElementById('revenueChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Dia 1', 'Dia 5', 'Dia 10', 'Dia 15', 'Dia 20', 'Dia 25', 'Dia 30'],
+          datasets: [{
+            label: 'Receita ($)',
+            data: [800, 1200, 1500, 2000, 2200, 2800, 8000],
+            borderColor: '#2a5298',
+            backgroundColor: 'rgba(42, 82, 152, 0.1)',
+            tension: 0.4,
+            fill: true,
+            pointRadius: 5,
+            pointBackgroundColor: '#2a5298'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: true } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    function initProjectChart() {
+      const ctx = document.getElementById('projectChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Em Progresso', 'Completo', 'Pausado'],
+          datasets: [{
+            data: [1, 1, 0],
+            backgroundColor: ['#f39c12', '#27ae60', '#e74c3c']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+    }
+
+    function initRelatorios() {
+      const ctx1 = document.getElementById('clientRevenueChart').getContext('2d');
+      new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: ['Acme Corporation', 'Startup XYZ', 'Local Business'],
+          datasets: [{
+            label: 'Receita Mensal ($)',
+            data: [5000, 2000, 1000],
+            backgroundColor: ['#2a5298', '#3498db', '#5dade2']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: true } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+
+      const ctx2 = document.getElementById('growthChart').getContext('2d');
+      new Chart(ctx2, {
+        type: 'line',
+        data: {
+          labels: ['Janeiro', 'Fevereiro', 'Março'],
+          datasets: [{
+            label: 'Crescimento (%)',
+            data: [0, 8, 15],
+            borderColor: '#27ae60',
+            backgroundColor: 'rgba(39, 174, 96, 0.1)',
+            tension: 0.4,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: true } }
+        }
+      });
+    }
+
+    // Client Management
+    function toggleClientForm() {
+      document.getElementById('clientForm').style.display =
+        document.getElementById('clientForm').style.display === 'none' ? 'block' : 'none';
+    }
+
+    function addClient() {
+      const name = document.getElementById('clientName').value;
+      const email = document.getElementById('clientEmail').value;
+      const tier = document.getElementById('clientTier').value;
+
+      if (!name || !email || tier === 'Seleccione um tier') {
+        alert('Preencha todos os campos!');
+        return;
+      }
+
+      const alert = document.getElementById('alert');
+      alert.textContent = '✅ Cliente adicionado com sucesso!';
+      alert.className = 'alert success';
+
+      setTimeout(() => {
+        alert.style.display = 'none';
+        toggleClientForm();
+        document.getElementById('clientName').value = '';
+        document.getElementById('clientEmail').value = '';
+        document.getElementById('clientTier').value = 'Seleccione um tier';
+      }, 2000);
+    }
+
+    // Admin Functions
+    function syncData() {
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = '⏳ Sincronizando...';
+
+      setTimeout(() => {
+        document.getElementById('syncStatus').style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = '🔄 Sincronizar Agora';
+      }, 2000);
+    }
+
+    function resetPassword() {
+      alert('Email de reposição de senha enviado!');
+    }
+
+    function exportReport() {
+      alert('Relatório exportado como PDF!');
+    }
+
+    // Real-time Stream Connections
+    let clientsStream = null;
+    let projectsStream = null;
+    let metricsStream = null;
+    let insightsStream = null;
+
+    // Load Data from API
+    async function loadClientsData() {
+      try {
+        const response = await fetch('/api/clients');
+        const result = await response.json();
+        renderClientsTable(result.data);
+      } catch (error) {
+        console.error('Erro ao carregar clientes:', error);
+      }
+    }
+
+    // Subscribe to Real-time Clients
+    function subscribeToClientsStream() {
+      console.log('🔌 Conectando a stream de clientes...');
+      clientsStream = new EventSource('/api/stream/clients');
+
+      clientsStream.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'initial') {
+            console.log('📡 Dados iniciais recebidos:', data.data.length, 'clientes');
+            renderClientsTable(data.data);
+          } else if (data.type === 'clients') {
+            console.log('🔄 Actualização em tempo real:', data.event);
+            loadClientsData(); // Recarregar dados
+          }
+        } catch (e) {
+          console.warn('Erro ao processar stream de clientes:', e);
+        }
+      };
+
+      clientsStream.onerror = (error) => {
+        console.warn('⚠️  Erro no stream de clientes. Usando polling...');
+        clientsStream.close();
+        // Fallback para polling a cada 5 segundos
+        setInterval(loadClientsData, 5000);
+      };
+    }
+
+    // Subscribe to Real-time Projects
+    function subscribeToProjectsStream() {
+      console.log('🔌 Conectando a stream de projectos...');
+      projectsStream = new EventSource('/api/stream/projects');
+
+      projectsStream.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'initial') {
+            console.log('📡 Projectos recebidos:', data.data.length);
+          } else if (data.type === 'projects') {
+            console.log('🔄 Actualização de projectos');
+            loadProjectsData();
+          }
+        } catch (e) {
+          console.warn('Erro ao processar stream de projectos:', e);
+        }
+      };
+
+      projectsStream.onerror = () => {
+        console.warn('⚠️  Erro no stream de projectos');
+        projectsStream.close();
+      };
+    }
+
+    // Subscribe to Real-time Metrics
+    function subscribeToMetricsStream() {
+      console.log('🔌 Conectando a stream de métricas...');
+      metricsStream = new EventSource('/api/stream/metrics');
+
+      metricsStream.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'initial') {
+            console.log('📡 Métricas recebidas:', data.data);
+            updateKPICards(data.data);
+          } else if (data.type === 'metrics') {
+            console.log('🔄 Actualização de métricas');
+            loadMetricsData();
+          }
+        } catch (e) {
+          console.warn('Erro ao processar stream de métricas:', e);
+        }
+      };
+
+      metricsStream.onerror = () => {
+        console.warn('⚠️  Erro no stream de métricas');
+        metricsStream.close();
+      };
+    }
+
+    // Subscribe to Real-time Insights
+    function subscribeToInsightsStream() {
+      console.log('🔌 Conectando a stream de insights...');
+      insightsStream = new EventSource('/api/stream/insights');
+
+      insightsStream.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'initial') {
+            console.log('📡 Insights recebidos:', data.data.length);
+            renderAIInsights(data.data);
+          } else if (data.type === 'insights') {
+            console.log('🔄 Actualização de insights');
+            loadAIInsights();
+          }
+        } catch (e) {
+          console.warn('Erro ao processar stream de insights:', e);
+        }
+      };
+
+      insightsStream.onerror = () => {
+        console.warn('⚠️  Erro no stream de insights');
+        insightsStream.close();
+      };
+    }
+
+    // Função para actualizar KPI cards em tempo real
+    function updateKPICards(metrics) {
+      if (metrics.active_clients) {
+        document.querySelectorAll('.kpi-value')[0].textContent = metrics.active_clients;
+      }
+      if (metrics.monthly_revenue) {
+        document.querySelectorAll('.kpi-value')[1].textContent = '$' + metrics.monthly_revenue.toLocaleString();
+      }
+      if (metrics.projects_in_progress) {
+        document.querySelectorAll('.kpi-value')[2].textContent = metrics.projects_in_progress;
+      }
+      if (metrics.avg_satisfaction_score) {
+        document.querySelectorAll('.kpi-value')[3].textContent = metrics.avg_satisfaction_score + '/10';
+      }
+    }
+
+    // Função para carregar métricas
+    async function loadMetricsData() {
+      try {
+        const response = await fetch('/api/metrics/latest');
+        const metrics = await response.json();
+        updateKPICards(metrics);
+      } catch (error) {
+        console.error('Erro ao carregar métricas:', error);
+      }
+    }
+
+    // Função para carregar projectos
+    async function loadProjectsData() {
+      try {
+        const response = await fetch('/api/projects');
+        const result = await response.json();
+        console.log('Projectos carregados:', result.data.length);
+      } catch (error) {
+        console.error('Erro ao carregar projectos:', error);
+      }
+    }
+
+    function renderClientsTable(clientsData) {
+      const tbody = document.getElementById('clientsTable');
+      tbody.innerHTML = clientsData.map(client => `
+        <tr>
+          <td><strong>${client.name}</strong></td>
+          <td>${client.email}</td>
+          <td>${client.tier} ${client.tier === 'Platinum' ? '👑' : ''}</td>
+          <td><span class="badge badge-success">Activo</span></td>
+          <td>$${client.revenue.toLocaleString()}</td>
+          <td><button class="btn" style="padding: 5px 10px; font-size: 0.9em;">Editar</button></td>
+        </tr>
+      `).join('');
+    }
+
+    // Load AI Insights
+    async function loadAIInsights() {
+      try {
+        const response = await fetch('/api/insights');
+        const result = await response.json();
+        renderAIInsights(result.data);
+      } catch (error) {
+        console.error('Erro ao carregar insights:', error);
+      }
+    }
+
+    function renderAIInsights(insightsData) {
+      const container = document.getElementById('insightsList');
+      container.innerHTML = insightsData.map(insight => `
+        <div class="insight-card" onclick="dismissInsight(this)">
+          <strong>${insight.icon} ${insight.title}</strong>
+          <p>${insight.description}</p>
+        </div>
+      `).join('');
+    }
+
+    // AI Insights Sidebar Functions
+    function openInsightsSidebar() {
+      document.getElementById('aiInsightsSidebar').classList.add('open');
+    }
+
+    function closeInsightsSidebar() {
+      document.getElementById('aiInsightsSidebar').classList.remove('open');
+    }
+
+    function dismissInsight(element) {
+      element.style.animation = 'slideOut 0.3s ease';
+      setTimeout(() => element.remove(), 300);
+    }
+
+    // Chatbot Functions
+    let chatHistory = [
+      { role: 'bot', message: 'Olá! 👋 Sou o Gestor IA. Como posso ajudar com os seus negócios?' }
+    ];
+
+    function renderChatMessages() {
+      const container = document.getElementById('chatMessages');
+      container.innerHTML = chatHistory.map(msg => `
+        <div class="chat-message ${msg.role}">
+          <div class="chat-bubble">${msg.message}</div>
+        </div>
+      `).join('');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function toggleChatbot() {
+      const chatbot = document.getElementById('chatbot');
+      const messages = document.getElementById('chatMessages');
+      chatbot.classList.toggle('collapsed');
+      messages.classList.toggle('hidden');
+    }
+
+    function handleChatKeypress(event) {
+      if (event.key === 'Enter') {
+        sendChatMessage();
+      }
+    }
+
+    async function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const message = input.value.trim();
+
+      if (!message) return;
+
+      // Add user message
+      chatHistory.push({ role: 'user', message });
+      renderChatMessages();
+      input.value = '';
+
+      // Simulate AI response
+      const responses = [
+        'Ótima pergunta! Segundo os últimos dados, a receita cresceu 15% este mês.',
+        'Recomendo iniciar um novo projecto com o cliente Acme Corporation para maximizar a receita.',
+        'A taxa de satisfação dos clientes mantém-se excelente em 8/10. Ótimo trabalho!',
+        'Os projectos estão no bom caminho. Marketing Campaign Q1 está 65% concluído.',
+        'Com 3 clientes activos e receita de $8,000/mês, a empresa está numa boa posição de crescimento.'
+      ];
+
+      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+
+      setTimeout(() => {
+        chatHistory.push({ role: 'bot', message: randomResponse });
+        renderChatMessages();
+      }, 1000);
+    }
+
+    // Init on Load
+    window.addEventListener('load', () => {
+      console.log('🚀 Inicializando Control Tower Dashboard...');
+      initDashboard();
+
+      // Tentar conectar a streams de real-time
+      // Se falharem, usar polling como fallback
+      try {
+        subscribeToClientsStream();
+        subscribeToProjectsStream();
+        subscribeToMetricsStream();
+        subscribeToInsightsStream();
+        console.log('✅ Real-time subscriptions activas!');
+      } catch (error) {
+        console.warn('⚠️  Real-time não disponível, usando polling:', error.message);
+        // Fallback para polling
+        loadClientsData();
+        loadMetricsData();
+        loadAIInsights();
+        setInterval(loadClientsData, 5000);
+        setInterval(loadMetricsData, 10000);
+        setInterval(loadAIInsights, 10000);
+      }
+
+      renderChatMessages();
+    });
+
+    // Cleanup ao desconectar
+    window.addEventListener('beforeunload', () => {
+      if (clientsStream) clientsStream.close();
+      if (projectsStream) projectsStream.close();
+      if (metricsStream) metricsStream.close();
+      if (insightsStream) insightsStream.close();
+    });
+  </script>
+</body>
+</html>

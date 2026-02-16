@@ -1,81 +1,37 @@
 import { create } from 'zustand';
-import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://seu-projeto.supabase.co';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sua-chave-anon';
-
-const supabase = createClient(supabaseUrl, supabaseKey);
-
+// Modo offline - sem Supabase
 export const useAuthStore = create((set) => ({
-  user: null,
-  isAuthenticated: false,
-  loading: true,
+  user: { id: 'demo', email: 'ceo@marcadigital.ao' },
+  isAuthenticated: true,
+  loading: false,
 
   // Inicializar autenticação
   initAuth: async () => {
-    try {
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        set({
-          user: data.session.user,
-          isAuthenticated: true,
-        });
-      }
-    } catch (error) {
-      console.error('Erro ao inicializar autenticação:', error);
-    } finally {
-      set({ loading: false });
-    }
+    // Modo offline - sem autenticação
+    set({ loading: false });
   },
 
   // Login
   login: async (email, password) => {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-
-      set({
-        user: data.user,
-        isAuthenticated: true,
-      });
-
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
+    set({
+      user: { id: 'demo', email },
+      isAuthenticated: true,
+    });
+    return { success: true };
   },
 
   // Logout
   logout: async () => {
-    try {
-      await supabase.auth.signOut();
-      set({
-        user: null,
-        isAuthenticated: false,
-      });
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
+    set({
+      user: null,
+      isAuthenticated: false,
+    });
+    return { success: true };
   },
 
   // Registar
   signup: async (email, password) => {
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-
-      return { success: true, data };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
+    return { success: true, data: { user: { email } } };
   },
 }));
