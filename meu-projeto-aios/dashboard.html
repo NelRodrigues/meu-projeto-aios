@@ -501,6 +501,191 @@
       color: #721c24;
     }
 
+    /* Filtros Container */
+    .filters-container {
+      display: flex;
+      gap: 20px;
+      align-items: flex-end;
+      margin: 25px 0;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .filter-group label {
+      font-size: 0.9em;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .filter-select {
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.95em;
+      min-width: 180px;
+      cursor: pointer;
+      transition: border-color 0.3s;
+    }
+
+    .filter-select:hover {
+      border-color: #2a5298;
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: #2a5298;
+      box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #666;
+    }
+
+    .empty-state .empty-icon {
+      font-size: 4em;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    .empty-state h3 {
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .empty-state p {
+      margin-bottom: 25px;
+      color: #666;
+    }
+
+    /* Badge de Status com cores específicas */
+    .badge-open {
+      background: #e3f2fd;
+      color: #1565c0;
+    }
+
+    .badge-in_progress {
+      background: #fff3e0;
+      color: #e65100;
+    }
+
+    .badge-review {
+      background: #f3e5f5;
+      color: #6a1b9a;
+    }
+
+    .badge-completed {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .badge-closed {
+      background: #f5f5f5;
+      color: #616161;
+    }
+
+    /* Prioridade com ícones */
+    .priority {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.9em;
+      font-weight: 600;
+    }
+
+    .priority-1::before { content: '🔴'; }
+    .priority-2::before { content: '🟠'; }
+    .priority-3::before { content: '🟡'; }
+    .priority-4::before { content: '⚪'; }
+
+    /* Tags */
+    .task-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .task-tag {
+      background: #f0f0f0;
+      color: #555;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.8em;
+      font-weight: 500;
+    }
+
+    /* Task Description */
+    .task-description {
+      color: #999;
+      display: block;
+      margin-top: 5px;
+    }
+
+    /* Overdue Row */
+    .overdue-row {
+      background: #fff5f5;
+    }
+
+    .overdue-row td {
+      color: #c53030;
+    }
+
+    .text-danger {
+      color: #c53030;
+    }
+
+    /* Loading Indicator */
+    .loading-indicator {
+      text-align: center;
+      padding: 40px;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #2a5298;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* KPI Card Alert (para tarefas atrasadas) */
+    .kpi-card.alert {
+      border-left: 4px solid #e74c3c;
+    }
+
+    .kpi-card.alert .kpi-icon {
+      color: #e74c3c;
+    }
+
+    /* Section Header */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .section-header h1 {
+      margin: 0;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .sidebar {
@@ -520,6 +705,25 @@
       .charts {
         grid-template-columns: 1fr;
       }
+
+      .filters-container {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .filter-select {
+        width: 100%;
+      }
+
+      .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+
+      .section-header .btn {
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -531,6 +735,7 @@
       <li><a class="menu-link active" data-page="dashboard">📊 Dashboard</a></li>
       <li><a class="menu-link" data-page="clientes">👥 Clientes</a></li>
       <li><a class="menu-link" data-page="projectos">📈 Projectos</a></li>
+      <li><a class="menu-link" data-page="tasks">📋 Tarefas</a></li>
       <li><a class="menu-link" data-page="admin">⚙️ Admin</a></li>
       <li><a class="menu-link" data-page="relatorios">📋 Relatórios</a></li>
     </ul>
@@ -752,6 +957,112 @@
             <button class="btn" onclick="exportReport()">📥 Exportar Relatório</button>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Tarefas Page -->
+    <div class="page-title" id="tasks">
+      <div class="section-header">
+        <h1>📋 Tarefas (ClickUp)</h1>
+        <button class="btn" onclick="syncTasks()">
+          <span id="syncIcon">🔄</span> Sincronizar Agora
+        </button>
+      </div>
+
+      <!-- KPI Cards Grid -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon">📊</div>
+          <div class="kpi-content">
+            <div class="kpi-label">Total de Tarefas</div>
+            <div class="kpi-value" id="totalTasks">0</div>
+            <div class="kpi-change" id="totalTasksChange">-</div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon">⏳</div>
+          <div class="kpi-content">
+            <div class="kpi-label">Tarefas Abertas</div>
+            <div class="kpi-value" id="openTasks">0</div>
+            <div class="kpi-change positive" id="openTasksChange">-</div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon">✅</div>
+          <div class="kpi-content">
+            <div class="kpi-label">Concluídas (Este Mês)</div>
+            <div class="kpi-value" id="completedTasks">0</div>
+            <div class="kpi-change positive" id="completedChange">-</div>
+          </div>
+        </div>
+
+        <div class="kpi-card alert">
+          <div class="kpi-icon">⚠️</div>
+          <div class="kpi-content">
+            <div class="kpi-label">Atrasadas</div>
+            <div class="kpi-value" id="overdueTasks">0</div>
+            <div class="kpi-change negative" id="overdueChange">-</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <div class="filters-container">
+        <div class="filter-group">
+          <label for="statusFilter">Status:</label>
+          <select id="statusFilter" class="filter-select">
+            <option value="">Todos</option>
+            <option value="open">Abertas</option>
+            <option value="in_progress">Em Progresso</option>
+            <option value="review">Em Revisão</option>
+            <option value="completed">Concluídas</option>
+            <option value="closed">Fechadas</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="assigneeFilter">Colaborador:</label>
+          <select id="assigneeFilter" class="filter-select">
+            <option value="">Todos</option>
+            <!-- Preenchido dinamicamente -->
+          </select>
+        </div>
+
+        <button class="btn btn-secondary" onclick="clearFilters()">
+          🔄 Limpar Filtros
+        </button>
+      </div>
+
+      <!-- Tabela de Tarefas -->
+      <div class="table-container">
+        <div id="tasksEmptyState" class="empty-state" style="display: none;">
+          <div class="empty-icon">📋</div>
+          <h3>Nenhuma Tarefa Encontrada</h3>
+          <p>As tarefas sincronizadas do ClickUp aparecerão aqui.</p>
+          <button class="btn" onclick="syncTasks()">🔄 Sincronizar Agora</button>
+        </div>
+
+        <table id="tasksTableContainer" style="display: none;">
+          <thead>
+            <tr>
+              <th>Tarefa</th>
+              <th>Status</th>
+              <th>Assignee</th>
+              <th>Prioridade</th>
+              <th>Data de Vencimento</th>
+              <th>Tags</th>
+            </tr>
+          </thead>
+          <tbody id="tasksTableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Loading Indicator -->
+      <div id="tasksLoadingIndicator" class="loading-indicator" style="display: none;">
+        <div class="spinner"></div>
+        <p>Carregando tarefas...</p>
       </div>
     </div>
 
@@ -1318,6 +1629,304 @@
       if (projectsStream) projectsStream.close();
       if (metricsStream) metricsStream.close();
       if (insightsStream) insightsStream.close();
+    });
+
+    // ============================================
+    // TASKS (ClickUp) - Gestão de Tarefas
+    // ============================================
+
+    let allTasks = [];
+    let filteredTasks = [];
+    let taskAssignees = [];
+
+    /**
+     * Carregar tarefas do backend
+     */
+    async function loadTasks() {
+      try {
+        showLoadingIndicator(true);
+
+        const response = await fetch('/api/tasks');
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        allTasks = data.tasks || [];
+        taskAssignees = data.assignees || [];
+
+        // Actualizar filtros
+        populateAssigneeFilter();
+
+        // Aplicar filtros actuais
+        applyTaskFilters();
+
+        // Actualizar KPIs
+        updateTaskKPIs();
+
+        showLoadingIndicator(false);
+      } catch (error) {
+        console.error('Erro ao carregar tarefas:', error);
+        showLoadingIndicator(false);
+        showEmptyState(true);
+      }
+    }
+
+    /**
+     * Preencher dropdown de assignees
+     */
+    function populateAssigneeFilter() {
+      const select = document.getElementById('assigneeFilter');
+
+      // Limpar opções antigas (manter "Todos")
+      while (select.options.length > 1) {
+        select.remove(1);
+      }
+
+      // Adicionar assignees únicos
+      taskAssignees.forEach(assignee => {
+        const option = document.createElement('option');
+        option.value = assignee;
+        option.textContent = assignee;
+        select.appendChild(option);
+      });
+    }
+
+    /**
+     * Aplicar filtros de status e assignee
+     */
+    function applyTaskFilters() {
+      const statusFilter = document.getElementById('statusFilter').value;
+      const assigneeFilter = document.getElementById('assigneeFilter').value;
+
+      filteredTasks = allTasks.filter(task => {
+        const matchStatus = !statusFilter || task.status === statusFilter;
+
+        const matchAssignee = !assigneeFilter ||
+          (task.assignments && task.assignments.some(a => a.assignee_name === assigneeFilter));
+
+        return matchStatus && matchAssignee;
+      });
+
+      renderTasksTable();
+    }
+
+    /**
+     * Limpar todos os filtros
+     */
+    function clearFilters() {
+      document.getElementById('statusFilter').value = '';
+      document.getElementById('assigneeFilter').value = '';
+      applyTaskFilters();
+    }
+
+    /**
+     * Renderizar tabela de tarefas
+     */
+    function renderTasksTable() {
+      const tbody = document.getElementById('tasksTableBody');
+      const table = document.getElementById('tasksTableContainer');
+      const emptyState = document.getElementById('tasksEmptyState');
+
+      if (filteredTasks.length === 0) {
+        table.style.display = 'none';
+        emptyState.style.display = 'block';
+        return;
+      }
+
+      table.style.display = 'table';
+      emptyState.style.display = 'none';
+
+      tbody.innerHTML = filteredTasks.map(task => {
+        const assignees = task.assignments?.map(a => a.assignee_name).join(', ') || 'Não atribuído';
+        const dueDate = task.due_date ? formatDate(task.due_date) : '-';
+        const isOverdue = task.due_date && new Date(task.due_date) < new Date() &&
+                          !['completed', 'closed'].includes(task.status);
+        const tags = task.tags?.slice(0, 3) || [];
+
+        return `
+          <tr class="${isOverdue ? 'overdue-row' : ''}">
+            <td>
+              <strong>${escapeHtml(task.name)}</strong>
+              ${task.description ? `<br><small class="task-description">${escapeHtml(task.description.substring(0, 80))}${task.description.length > 80 ? '...' : ''}</small>` : ''}
+            </td>
+            <td>
+              <span class="badge badge-${task.status}">${formatStatus(task.status)}</span>
+            </td>
+            <td>${escapeHtml(assignees)}</td>
+            <td>
+              <span class="priority priority-${task.priority || 3}">
+                P${task.priority || 3}
+              </span>
+            </td>
+            <td class="${isOverdue ? 'text-danger' : ''}">
+              ${dueDate}
+              ${isOverdue ? '<br><small>⚠️ Atrasada</small>' : ''}
+            </td>
+            <td>
+              <div class="task-tags">
+                ${tags.map(tag => `<span class="task-tag">${escapeHtml(tag)}</span>`).join('')}
+                ${task.tags?.length > 3 ? `<span class="task-tag">+${task.tags.length - 3}</span>` : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    /**
+     * Actualizar KPI cards
+     */
+    function updateTaskKPIs() {
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      // Total de tarefas
+      const totalCount = allTasks.length;
+      document.getElementById('totalTasks').textContent = totalCount;
+
+      // Tarefas abertas (open + in_progress)
+      const openCount = allTasks.filter(t =>
+        ['open', 'in_progress'].includes(t.status)
+      ).length;
+      document.getElementById('openTasks').textContent = openCount;
+
+      // Tarefas concluídas este mês
+      const completedThisMonth = allTasks.filter(t => {
+        if (!['completed', 'closed'].includes(t.status)) return false;
+        const updatedDate = new Date(t.updated_at);
+        return updatedDate >= startOfMonth;
+      }).length;
+      document.getElementById('completedTasks').textContent = completedThisMonth;
+
+      // Tarefas atrasadas
+      const overdueCount = allTasks.filter(t => {
+        if (!t.due_date) return false;
+        if (['completed', 'closed'].includes(t.status)) return false;
+        return new Date(t.due_date) < now;
+      }).length;
+      document.getElementById('overdueTasks').textContent = overdueCount;
+
+      // Actualizar classes de alerta
+      const overdueCard = document.getElementById('overdueTasks').closest('.kpi-card');
+      if (overdueCount > 0) {
+        overdueCard.classList.add('alert');
+      } else {
+        overdueCard.classList.remove('alert');
+      }
+    }
+
+    /**
+     * Sincronização manual do ClickUp
+     */
+    async function syncTasks() {
+      const syncIcon = document.getElementById('syncIcon');
+      syncIcon.textContent = '⏳';
+
+      try {
+        const response = await fetch('/api/sync/clickup', { method: 'POST' });
+        const result = await response.json();
+
+        if (result.success) {
+          syncIcon.textContent = '✅';
+          setTimeout(() => {
+            syncIcon.textContent = '🔄';
+            loadTasks(); // Recarregar tarefas
+          }, 2000);
+        } else {
+          syncIcon.textContent = '❌';
+          console.error('Sync falhou:', result.error);
+          setTimeout(() => syncIcon.textContent = '🔄', 3000);
+        }
+      } catch (error) {
+        syncIcon.textContent = '❌';
+        console.error('Erro ao sincronizar:', error);
+        setTimeout(() => syncIcon.textContent = '🔄', 3000);
+      }
+    }
+
+    /**
+     * Formatar status para exibição
+     */
+    function formatStatus(status) {
+      const statusLabels = {
+        'open': 'Aberta',
+        'in_progress': 'Em Progresso',
+        'review': 'Em Revisão',
+        'completed': 'Concluída',
+        'closed': 'Fechada'
+      };
+      return statusLabels[status] || status;
+    }
+
+    /**
+     * Formatar data
+     */
+    function formatDate(dateString) {
+      if (!dateString) return '-';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('pt-AO', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    }
+
+    /**
+     * Escape HTML para prevenir XSS
+     */
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    /**
+     * Mostrar/esconder loading indicator
+     */
+    function showLoadingIndicator(show) {
+      const indicator = document.getElementById('tasksLoadingIndicator');
+      indicator.style.display = show ? 'block' : 'none';
+    }
+
+    /**
+     * Mostrar/esconder empty state
+     */
+    function showEmptyState(show) {
+      const emptyState = document.getElementById('tasksEmptyState');
+      const table = document.getElementById('tasksTableContainer');
+
+      emptyState.style.display = show ? 'block' : 'none';
+      table.style.display = show ? 'none' : 'table';
+    }
+
+    // Event listeners para filtros
+    document.addEventListener('DOMContentLoaded', () => {
+      const statusFilter = document.getElementById('statusFilter');
+      const assigneeFilter = document.getElementById('assigneeFilter');
+
+      if (statusFilter) {
+        statusFilter.addEventListener('change', applyTaskFilters);
+      }
+
+      if (assigneeFilter) {
+        assigneeFilter.addEventListener('change', applyTaskFilters);
+      }
+
+      // Carregar tarefas quando navegar para a página
+      const pageLinks = document.querySelectorAll('.menu-link');
+      pageLinks.forEach(link => {
+        if (link.dataset.page === 'tasks') {
+          const originalClick = link.onclick;
+          link.addEventListener('click', function() {
+            setTimeout(() => {
+              loadTasks();
+            }, 100);
+          });
+        }
+      });
     });
   </script>
 </body>
