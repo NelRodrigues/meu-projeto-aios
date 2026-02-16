@@ -16,15 +16,13 @@
     "ANTHROPIC_API_KEY": "@anthropic-api-key",
     "CORS_ORIGIN": "@cors-origin"
   },
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
-    }
-  ],
   "routes": [
     {
-      "src": "/(?!api).*",
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
       "dest": "/index.html"
     }
   ]
