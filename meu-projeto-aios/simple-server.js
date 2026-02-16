@@ -520,7 +520,7 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // POST /api/chat - Chat com IA
+  // POST /api/chat - Chat com IA (com suporte a contexto de tarefas)
   if (req.url === '/api/chat' && req.method === 'POST') {
     let body = '';
     req.on('data', chunk => {
@@ -532,13 +532,29 @@ const server = http.createServer(async (req, res) => {
           throw new Error('Chat service not initialized');
         }
 
-        const { conversationId, message } = JSON.parse(body);
+        const { conversationId, message, taskContext } = JSON.parse(body);
         if (!conversationId || !message) {
           throw new Error('conversationId e message são obrigatórios');
         }
 
         const metrics = await getMetrics();
-        const response = await chatService.sendMessage(conversationId, message, metrics, supabase);
+
+        // Validar taskContext se fornecido
+        if (taskContext) {
+          console.log('📋 Contexto de tarefas recebido:', {
+            total: taskContext.total_open_tasks,
+            overdue: taskContext.overdue_count,
+            workload: Object.keys(taskContext.workload_by_assignee || {}).length + ' assignees'
+          });
+        }
+
+        const response = await chatService.sendMessage(
+          conversationId,
+          message,
+          metrics,
+          supabase,
+          taskContext
+        );
 
         // Salvar conversa
         await chatService.saveConversation(conversationId, supabase);
@@ -712,13 +728,13 @@ server.listen(PORT, async () => {
     } else {
       // Inicializar Insights Generator
       insightsGenerator = new AIInsightsGenerator({
-        model: 'claude-instant-1.3'
+        model: 'claude-sonnet-4-5-20250929'
       });
       console.log('✅ AI Insights Generator inicializado');
 
       // Inicializar Chat Service
       chatService = new AIChatService({
-        model: 'claude-instant-1.3'
+        model: 'claude-sonnet-4-5-20250929'
       });
       console.log('✅ AI Chat Service inicializado');
 

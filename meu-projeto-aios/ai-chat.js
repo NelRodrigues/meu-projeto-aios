@@ -21,7 +21,7 @@ export class AIChatService {
       apiKey: process.env.ANTHROPIC_API_KEY
     });
 
-    this.model = config.model || 'claude-instant-1.3';
+    this.model = config.model || 'claude-sonnet-4-5-20250929';
     this.temperature = config.temperature || 0.7;
     this.conversations = new Map(); // In-memory store for conversations
   }
@@ -48,6 +48,7 @@ export class AIChatService {
    * @param {string} userMessage - Mensagem do utilizador
    * @param {object} metrics - Métricas actuais para contexto
    * @param {object} db - Cliente Supabase para contexto
+   * @param {object} taskContext - Contexto de tarefas (Phase 9)
    * @returns {Promise<object>} Resposta do assistente
    *
    * @example
@@ -55,10 +56,11 @@ export class AIChatService {
    *   'conv-123',
    *   'Qual é a receita deste mês?',
    *   metrics,
-   *   supabase
+   *   supabase,
+   *   taskContext
    * );
    */
-  async sendMessage(conversationId, userMessage, metrics = {}, db = null) {
+  async sendMessage(conversationId, userMessage, metrics = {}, db = null, taskContext = null) {
     try {
       console.log(`💬 Processando mensagem (conv: ${conversationId.substring(0, 8)}...)`);
 
@@ -73,8 +75,10 @@ export class AIChatService {
       // Buscar contexto
       const contextData = await this.buildContextData(metrics, db);
 
-      // Construir prompt com sistema
-      const systemPrompt = this.buildSystemPrompt(contextData);
+      // Construir prompt com sistema (enriquecido com tarefas se disponível)
+      const systemPrompt = taskContext
+        ? this.buildEnrichedSystemPrompt(contextData, taskContext)
+        : this.buildSystemPrompt(contextData);
 
       // Chamar Claude API
       console.log('🔄 Consultando Claude...');
@@ -83,7 +87,7 @@ export class AIChatService {
       try {
         const response = await this.client.messages.create({
           model: this.model,
-          max_tokens: 1000,
+          max_tokens: 2000,
           temperature: this.temperature,
           system: systemPrompt,
           messages: conversation.messages.map(msg => ({
@@ -191,6 +195,83 @@ ${contextData.recentInsights.map(i => `- [${i.severity.toUpperCase()}] ${i.title
 4. Usar linguagem clara e profissional
 5. Considerar contexto de Angola e agências de IA
 6. Respeitar moedas locais (AOA/€)
+
+Responda de forma concisa (2-3 parágrafos) a menos que pedido contexto mais detalhado.`;
+  }
+
+  /**
+   * Construir prompt enriquecido com contexto de tarefas (Phase 9)
+   */
+  buildEnrichedSystemPrompt(contextData, taskContext) {
+    // Formatar workload por assignee
+    const workloadEntries = Object.entries(taskContext.workload_by_assignee || {})
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([name, count]) => `  - ${name}: ${count} tarefa${count !== 1 ? 's' : ''}`)
+      .join('\n');
+
+    // Formatar tarefas atrasadas
+    const overdueList = (taskContext.overdue_tasks || [])
+      .slice(0, 3)
+      .map(task => `  - [${task.status || 'open'}] ${task.name || 'Tarefa sem nome'} (vencimento: ${new Date(task.due_date).toLocaleDateString('pt-AO')})`)
+      .join('\n');
+
+    return `Você é o gestor de marketing de IA da Marca Digital, uma agência especializada em soluções de IA em Angola.
+
+Você é amigável, profissional e conhecedor do negócio. Ajuda o CEO/gestor com:
+- Análise de métricas e performance
+- Recomendações de negócio
+- Explicações de dados
+- Próximos passos estratégicos
+- **NOVO:** Gestão e análise de tarefas (Phase 9)
+
+## CONTEXTO ACTUAL
+
+**Data:** ${contextData.currentDate}
+
+**Métricas Actuais:**
+- Clientes Activos: ${contextData.metrics.active_clients || 0}
+- Receita Mensal: €${(contextData.metrics.monthly_revenue || 0).toLocaleString('pt-AO')}
+- Receita Anual: €${(contextData.metrics.annual_revenue || 0).toLocaleString('pt-AO')}
+- Projectos em Progresso: ${contextData.metrics.projects_in_progress || 0}
+- Satisfação Média: ${contextData.metrics.avg_satisfaction_score || 0}/10
+
+${contextData.recentInsights && contextData.recentInsights.length > 0 ? `**Insights Recentes:**
+${contextData.recentInsights.map(i => `- [${i.severity.toUpperCase()}] ${i.title}`).join('\n')}` : ''}
+
+## CONTEXTO DE TAREFAS (Phase 9)
+
+**Resumo de Tarefas Abertas:**
+- Total de Tarefas Abertas: ${taskContext.total_open_tasks || 0}
+- Tarefas Atrasadas: ${taskContext.overdue_count || 0}
+- Tarefas em Progresso: ${taskContext.tasks_by_status?.in_progress || 0}
+- Tarefas em Revisão: ${taskContext.tasks_by_status?.in_review || 0}
+- Tarefas Não Iniciadas: ${taskContext.tasks_by_status?.open || 0}
+
+${workloadEntries ? `**Workload por Assignee (Top 5):**
+${workloadEntries}` : ''}
+
+${overdueList ? `**Tarefas Atrasadas (Críticas):**
+${overdueList}` : 'Nenhuma tarefa atrasada - Excelente!'}
+
+## INSTRUÇÕES PARA TAREFAS
+
+Quando o utilizador pergunta sobre tarefas:
+1. Use os dados acima para fornecer informações precisas
+2. Identifique gargalos (assignees sobrecarregados)
+3. Recomende redistribuição de tarefas se necessário
+4. Sugira priorização baseada em prazos
+5. Alerte para tarefas críticas atrasadas
+
+## REGRAS
+
+1. Sempre ser honesto sobre dados e limitações
+2. Fornecer números reais quando disponíveis
+3. Fazer recomendações accionáveis
+4. Usar linguagem clara e profissional
+5. Considerar contexto de Angola e agências de IA
+6. Respeitar moedas locais (AOA/€)
+7. **NEW (Phase 9):** Reconhecer e responder a perguntas sobre tarefas e workload
 
 Responda de forma concisa (2-3 parágrafos) a menos que pedido contexto mais detalhado.`;
   }

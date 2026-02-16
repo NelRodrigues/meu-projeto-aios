@@ -773,6 +773,16 @@
     /* PHASE 8: Optimizações de Real-time Updates                 */
     /* ═══════════════════════════════════════════════════════════ */
 
+    /* ═══════════════════════════════════════════════════════════ */
+    /* PHASE 9: Chat AI Integration com Contexto de Tarefas       */
+    /* ═══════════════════════════════════════════════════════════ */
+
+    /* Animação de pulse para typing indicator */
+    @keyframes chatPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
     /* Animações de Transição */
     @keyframes fadeIn {
       from { opacity: 0; }
@@ -785,6 +795,11 @@
     }
 
     @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    @keyframes oldPulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.7; }
     }
@@ -1929,20 +1944,29 @@
 
       if (!message || chatIsLoading) return;
 
+      // Preparar contexto de tarefas para enviar ao chat
+      const taskContext = prepareTaskContext();
+
       // Add user message
       chatHistory.push({ role: 'user', message });
       renderChatMessages();
       input.value = '';
       chatIsLoading = true;
 
+      // Mostrar typing indicator
+      showTypingIndicator();
+
       try {
-        // Chamar API de chat
+        console.log('💬 Enviando mensagem com contexto de tarefas:', { message, taskContext });
+
+        // Chamar API de chat com contexto de tarefas
         const response = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             conversationId,
-            message
+            message,
+            taskContext  // ← ADICIONAR contexto de tarefas
           })
         });
 
@@ -1950,11 +1974,16 @@
 
         if (result.success) {
           chatHistory.push({ role: 'bot', message: result.message });
+          console.log('✅ Resposta recebida do chat AI');
+
+          // Mostrar sugestões rápidas baseadas em contexto
+          setTimeout(() => showQuickSuggestions(), 500);
         } else {
           chatHistory.push({
             role: 'bot',
             message: '❌ Desculpe, houve um erro ao processar a sua mensagem. Tente novamente.'
           });
+          console.error('Erro na resposta:', result.error);
         }
       } catch (error) {
         console.error('Erro ao enviar mensagem:', error);
@@ -1964,6 +1993,7 @@
         });
       } finally {
         chatIsLoading = false;
+        hideTypingIndicator();
         renderChatMessages();
       }
     }
@@ -2319,6 +2349,170 @@
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
+    }
+
+    /* ═══════════════════════════════════════════════════════════ */
+    /* PHASE 9: Chat AI Integration com Contexto de Tarefas       */
+    /* ═══════════════════════════════════════════════════════════ */
+
+    /**
+     * Preparar contexto de tarefas para enviar ao chat AI
+     */
+    function prepareTaskContext() {
+      // Filtrar tarefas abertas (não completadas/fechadas)
+      const openTasks = allTasks.filter(t =>
+        !['completed', 'closed'].includes(t.status)
+      );
+
+      // Calcular tarefas atrasadas
+      const now = new Date();
+      const overdueTasks = openTasks.filter(t =>
+        t.due_date && new Date(t.due_date) < now
+      );
+
+      // Calcular workload por assignee
+      const workloadByAssignee = {};
+      openTasks.forEach(task => {
+        const assignee = task.assignments?.[0]?.assignee_name || 'Não atribuído';
+        workloadByAssignee[assignee] = (workloadByAssignee[assignee] || 0) + 1;
+      });
+
+      // Calcular breakdown por status
+      const tasksByStatus = {
+        open: openTasks.filter(t => t.status === 'open').length,
+        in_progress: openTasks.filter(t => t.status === 'in_progress').length,
+        in_review: openTasks.filter(t => t.status === 'in_review' || t.status === 'review').length
+      };
+
+      // Preparar tarefas atrasadas com detalhes
+      const overdueDetails = overdueTasks.slice(0, 5).map(t => ({
+        name: t.name,
+        assignee: t.assignments?.[0]?.assignee_name || 'Não atribuído',
+        due_date: formatDate(t.due_date),
+        priority: t.priority || 3,
+        days_overdue: Math.floor((now - new Date(t.due_date)) / (1000 * 60 * 60 * 24))
+      }));
+
+      // Retornar contexto estruturado
+      const context = {
+        total_open_tasks: openTasks.length,
+        overdue_count: overdueTasks.length,
+        overdue_tasks: overdueDetails,
+        workload_by_assignee: workloadByAssignee,
+        tasks_by_status: tasksByStatus,
+        timestamp: new Date().toISOString()
+      };
+
+      console.log('📊 Contexto de tarefas preparado:', context);
+      return context;
+    }
+
+    /**
+     * Mostrar indicador de digitação (typing indicator)
+     */
+    function showTypingIndicator() {
+      const messagesDiv = document.querySelector('.chatbot-messages');
+      if (!messagesDiv) return;
+
+      // Criar elemento de typing indicator
+      const typingDiv = document.createElement('div');
+      typingDiv.id = 'typing-indicator';
+      typingDiv.className = 'chat-message bot';
+      typingDiv.innerHTML = `
+        <div class="chat-bubble" style="background: #e8e8e8; color: #333;">
+          <span style="display: inline-flex; gap: 4px; align-items: center;">
+            <span style="animation: pulse 0.6s infinite;">●</span>
+            <span style="animation: pulse 0.6s infinite 0.2s;">●</span>
+            <span style="animation: pulse 0.6s infinite 0.4s;">●</span>
+          </span>
+        </div>
+      `;
+      messagesDiv.appendChild(typingDiv);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      console.log('⏳ Typing indicator mostrado');
+    }
+
+    /**
+     * Esconder indicador de digitação
+     */
+    function hideTypingIndicator() {
+      const typingDiv = document.getElementById('typing-indicator');
+      if (typingDiv) {
+        typingDiv.remove();
+        console.log('✓ Typing indicator ocultado');
+      }
+    }
+
+    /**
+     * Mostrar sugestões rápidas baseadas em contexto de tarefas
+     */
+    function showQuickSuggestions() {
+      const context = prepareTaskContext();
+      const suggestions = [];
+
+      console.log('💡 Gerando quick suggestions baseadas em contexto...');
+
+      // Sugerir baseado em tarefas atrasadas
+      if (context.overdue_count > 0) {
+        suggestions.push('📌 Ver tarefas atrasadas');
+      }
+
+      // Sugerir baseado em workload desbalanceado
+      const maxWorkload = Math.max(...Object.values(context.workload_by_assignee || {}));
+      if (maxWorkload > 5) {
+        suggestions.push('⚖️ Balancear workload');
+      }
+
+      // Sugerir análise se muitas tarefas
+      if (context.total_open_tasks > 10) {
+        suggestions.push('📊 Análise de tarefas');
+      }
+
+      // Adicionar sugestão genérica
+      suggestions.push('❓ Qual é o status?');
+
+      // Renderizar botões de sugestões
+      const messagesDiv = document.querySelector('.chatbot-messages');
+      if (messagesDiv && suggestions.length > 0) {
+        const suggestionsContainer = document.createElement('div');
+        suggestionsContainer.className = 'chat-quick-suggestions';
+        suggestionsContainer.style.cssText = `
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          padding: 10px;
+          margin-top: 8px;
+          background: #f5f5f5;
+          border-radius: 8px;
+        `;
+
+        suggestions.forEach(suggestion => {
+          const btn = document.createElement('button');
+          btn.className = 'quick-suggestion-btn';
+          btn.textContent = suggestion;
+          btn.style.cssText = `
+            padding: 6px 12px;
+            background: #2a5298;
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.3s;
+          `;
+          btn.onmouseover = () => btn.style.background = '#1e3c72';
+          btn.onmouseout = () => btn.style.background = '#2a5298';
+          btn.onclick = () => {
+            document.getElementById('chatInput').value = suggestion;
+            sendChatMessage();
+          };
+          suggestionsContainer.appendChild(btn);
+        });
+
+        messagesDiv.appendChild(suggestionsContainer);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        console.log('💡 Quick suggestions mostradas:', suggestions);
+      }
     }
 
     /**
