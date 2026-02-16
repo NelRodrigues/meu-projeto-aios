@@ -887,6 +887,186 @@
       background: #ffcdd2;
       color: #b71c1c;
     }
+
+    /* ═══════════════════════════════════════════════════════════════ */
+    /* PHASE 9 - FASE 4: UX MELHORIAS - Styles Avançados              */
+    /* ═══════════════════════════════════════════════════════════════ */
+
+    /* Quick Suggestions Container - Melhorado */
+    .chat-quick-suggestions {
+      display: flex !important;
+      flex-wrap: wrap;
+      gap: 8px !important;
+      padding: 12px !important;
+      margin-top: 10px !important;
+      background: linear-gradient(135deg, #f5f7fa 0%, #f0f2f7 100%) !important;
+      border-radius: 10px !important;
+      border-left: 4px solid #2a5298;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    /* Quick Suggestion Button - Styles Melhorados */
+    .quick-suggestion-btn {
+      padding: 8px 14px !important;
+      background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%) !important;
+      color: white !important;
+      border: none !important;
+      border-radius: 18px !important;
+      font-size: 0.9em !important;
+      cursor: pointer !important;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      font-weight: 500 !important;
+      box-shadow: 0 2px 8px rgba(42, 82, 152, 0.2) !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      max-width: 100%;
+    }
+
+    .quick-suggestion-btn:hover {
+      background: linear-gradient(135deg, #1e3c72 0%, #1a2d5a 100%) !important;
+      transform: translateY(-2px) !important;
+      box-shadow: 0 4px 12px rgba(42, 82, 152, 0.3) !important;
+    }
+
+    .quick-suggestion-btn:active {
+      transform: translateY(0) !important;
+      box-shadow: 0 2px 8px rgba(42, 82, 152, 0.2) !important;
+    }
+
+    /* Typing Indicator - Animação Suave */
+    #typing-indicator {
+      animation: slideIn 0.3s ease-out !important;
+    }
+
+    #typing-indicator .chat-bubble {
+      background: linear-gradient(90deg, #e8e8e8 0%, #f0f0f0 50%, #e8e8e8 100%) !important;
+      background-size: 200% 100% !important;
+      animation: shimmer 1.5s infinite !important;
+      padding: 10px 18px !important;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      50% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    /* Error State */
+    .chat-error-message {
+      background: #ffebee;
+      border-left: 4px solid #c62828;
+      padding: 12px 15px;
+      border-radius: 8px;
+      margin: 12px 0;
+      color: #b71c1c;
+      font-size: 0.9em;
+    }
+
+    /* Loading State */
+    .chat-loading-message {
+      background: #e3f2fd;
+      border-left: 4px solid #2a5298;
+      padding: 12px 15px;
+      border-radius: 8px;
+      margin: 12px 0;
+      color: #1565c0;
+      font-size: 0.9em;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    /* ─────────────────────────────────────────────────────────────── */
+    /* RESPONSIVIDADE PARA MOBILE - Fase 4                             */
+    /* ─────────────────────────────────────────────────────────────── */
+
+    @media (max-width: 768px) {
+      .chatbot-container {
+        width: calc(100% - 20px);
+        height: 60vh;
+        max-height: 600px;
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+      }
+
+      .chat-bubble {
+        max-width: 85%;
+        font-size: 0.95em;
+      }
+
+      .quick-suggestion-btn {
+        padding: 6px 12px !important;
+        font-size: 0.85em !important;
+      }
+
+      .chat-quick-suggestions {
+        gap: 6px !important;
+        padding: 10px !important;
+      }
+
+      .chatbot-messages {
+        padding: 12px;
+      }
+
+      .chatbot-input {
+        padding: 12px;
+        gap: 8px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .chatbot-container {
+        width: calc(100% - 10px);
+        height: 70vh;
+        max-height: 400px;
+        bottom: 5px;
+        right: 5px;
+        left: 5px;
+      }
+
+      .chat-bubble {
+        max-width: 90%;
+        padding: 8px 12px;
+        font-size: 0.9em;
+      }
+
+      .quick-suggestion-btn {
+        padding: 5px 10px !important;
+        font-size: 0.8em !important;
+        flex: 1 1 calc(50% - 4px);
+      }
+
+      .chat-quick-suggestions {
+        flex-direction: row;
+        gap: 4px !important;
+        padding: 8px !important;
+      }
+
+      .chatbot-header h4 {
+        font-size: 1em;
+      }
+
+      .chatbot-messages {
+        padding: 10px;
+      }
+
+      .chatbot-input {
+        padding: 10px;
+        gap: 6px;
+        flex-direction: column;
+      }
+
+      #chatInput {
+        width: 100% !important;
+      }
+
+      .chat-send-btn {
+        width: 100% !important;
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────────────── */
+
   </style>
 </head>
 <body>
@@ -1987,10 +2167,19 @@
         }
       } catch (error) {
         console.error('Erro ao enviar mensagem:', error);
+
+        // Fallback inteligente com recomendação
+        const fallbackMessage = error.message.includes('Failed to fetch')
+          ? '⚠️ Falha na conexão. Verifique a sua ligação à internet.'
+          : error.message.includes('timeout')
+          ? '⏱️ Tempo de resposta esgotado. Tente novamente.'
+          : '❌ Erro ao processar a mensagem. Tente com uma pergunta diferente.';
+
         chatHistory.push({
           role: 'bot',
-          message: '⚠️ Falha na conexão com o servidor de IA. Verifique a sua conexão.'
+          message: fallbackMessage
         });
+        console.warn('Fallback ativado:', fallbackMessage);
       } finally {
         chatIsLoading = false;
         hideTypingIndicator();
@@ -2444,74 +2633,76 @@
     }
 
     /**
-     * Mostrar sugestões rápidas baseadas em contexto de tarefas
+     * Mostrar sugestões rápidas baseadas em contexto de tarefas (Phase 4 - Melhorado)
      */
     function showQuickSuggestions() {
-      const context = prepareTaskContext();
-      const suggestions = [];
+      try {
+        const context = prepareTaskContext();
+        const suggestions = [];
 
-      console.log('💡 Gerando quick suggestions baseadas em contexto...');
+        console.log('💡 Gerando quick suggestions baseadas em contexto...');
 
-      // Sugerir baseado em tarefas atrasadas
-      if (context.overdue_count > 0) {
-        suggestions.push('📌 Ver tarefas atrasadas');
-      }
+        // Sugerir baseado em tarefas atrasadas (CRÍTICO)
+        if (context.overdue_count > 0) {
+          suggestions.push('📌 Ver tarefas atrasadas');
+        }
 
-      // Sugerir baseado em workload desbalanceado
-      const maxWorkload = Math.max(...Object.values(context.workload_by_assignee || {}));
-      if (maxWorkload > 5) {
-        suggestions.push('⚖️ Balancear workload');
-      }
+        // Sugerir baseado em workload desbalanceado
+        const workloadValues = Object.values(context.workload_by_assignee || {});
+        if (workloadValues.length > 0) {
+          const maxWorkload = Math.max(...workloadValues);
+          if (maxWorkload > 5) {
+            suggestions.push('⚖️ Balancear workload');
+          }
+        }
 
-      // Sugerir análise se muitas tarefas
-      if (context.total_open_tasks > 10) {
-        suggestions.push('📊 Análise de tarefas');
-      }
+        // Sugerir análise se muitas tarefas
+        if (context.total_open_tasks > 10) {
+          suggestions.push('📊 Análise de tarefas');
+        }
 
-      // Adicionar sugestão genérica
-      suggestions.push('❓ Qual é o status?');
+        // Adicionar sugestão genérica
+        suggestions.push('❓ Qual é o status?');
 
-      // Renderizar botões de sugestões
-      const messagesDiv = document.querySelector('.chatbot-messages');
-      if (messagesDiv && suggestions.length > 0) {
-        const suggestionsContainer = document.createElement('div');
-        suggestionsContainer.className = 'chat-quick-suggestions';
-        suggestionsContainer.style.cssText = `
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-          padding: 10px;
-          margin-top: 8px;
-          background: #f5f5f5;
-          border-radius: 8px;
-        `;
+        // Renderizar botões de sugestões
+        const messagesDiv = document.querySelector('.chatbot-messages');
+        if (messagesDiv && suggestions.length > 0) {
+          const suggestionsContainer = document.createElement('div');
+          suggestionsContainer.className = 'chat-quick-suggestions';
 
-        suggestions.forEach(suggestion => {
-          const btn = document.createElement('button');
-          btn.className = 'quick-suggestion-btn';
-          btn.textContent = suggestion;
-          btn.style.cssText = `
-            padding: 6px 12px;
-            background: #2a5298;
-            color: white;
-            border: none;
-            border-radius: 16px;
-            font-size: 0.85em;
-            cursor: pointer;
-            transition: all 0.3s;
-          `;
-          btn.onmouseover = () => btn.style.background = '#1e3c72';
-          btn.onmouseout = () => btn.style.background = '#2a5298';
-          btn.onclick = () => {
-            document.getElementById('chatInput').value = suggestion;
-            sendChatMessage();
-          };
-          suggestionsContainer.appendChild(btn);
-        });
+          suggestions.forEach(suggestion => {
+            const btn = document.createElement('button');
+            btn.className = 'quick-suggestion-btn';
+            btn.textContent = suggestion;
+            btn.title = `Clicar para: ${suggestion}`;
 
-        messagesDiv.appendChild(suggestionsContainer);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        console.log('💡 Quick suggestions mostradas:', suggestions);
+            btn.onclick = async (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+
+              // Disable button durante processamento
+              btn.disabled = true;
+              btn.style.opacity = '0.6';
+
+              // Enviar sugestão como mensagem
+              document.getElementById('chatInput').value = suggestion;
+              await sendChatMessage();
+
+              // Re-enable button
+              btn.disabled = false;
+              btn.style.opacity = '1';
+            };
+
+            suggestionsContainer.appendChild(btn);
+          });
+
+          messagesDiv.appendChild(suggestionsContainer);
+          messagesDiv.scrollTop = messagesDiv.scrollHeight;
+          console.log('✅ Quick suggestions mostradas:', suggestions);
+        }
+      } catch (error) {
+        console.warn('⚠️ Erro ao gerar quick suggestions:', error.message);
+        // Fallback silencioso - não mostrar erro ao utilizador
       }
     }
 
