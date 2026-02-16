@@ -1318,6 +1318,7 @@
     let projectsStream = null;
     let metricsStream = null;
     let insightsStream = null;
+    let tasksStream = null;
 
     // Load Data from API
     async function loadClientsData() {
@@ -1432,6 +1433,45 @@
       insightsStream.onerror = () => {
         console.warn('⚠️  Erro no stream de insights');
         insightsStream.close();
+      };
+    }
+
+    /**
+     * Subscrever ao stream de tarefas (SSE)
+     */
+    function subscribeToTasksStream() {
+      console.log('🔌 Conectando a stream de tarefas...');
+
+      tasksStream = new EventSource('/api/stream/tasks');
+
+      tasksStream.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+
+        if (data.type === 'initial') {
+          console.log('📡 Dados iniciais de tarefas recebidos via SSE');
+          allTasks = data.data.tasks || [];
+          taskAssignees = data.data.assignees || [];
+          populateAssigneeFilter();
+          applyTaskFilters();
+          updateTaskKPIs();
+        } else if (data.type === 'tasks') {
+          console.log('📡 Mudança de tarefas detectada:', data.event);
+          // Recarregar tarefas via API
+          loadTasks();
+        }
+      };
+
+      tasksStream.onerror = (error) => {
+        console.warn('⚠️  Erro no stream de tarefas. Usando polling como fallback...');
+        tasksStream.close();
+        tasksStream = null;
+
+        // Fallback: Polling a cada 10 segundos
+        setInterval(loadTasks, 10000);
+      };
+
+      tasksStream.onopen = () => {
+        console.log('✅ Stream de tarefas conectado');
       };
     }
 
@@ -1662,6 +1702,7 @@
         subscribeToProjectsStream();
         subscribeToMetricsStream();
         subscribeToInsightsStream();
+        subscribeToTasksStream();
         console.log('✅ Real-time subscriptions activas!');
       } catch (error) {
         console.warn('⚠️  Real-time não disponível, usando polling:', error.message);
@@ -1669,9 +1710,11 @@
         loadClientsData();
         loadMetricsData();
         loadAIInsights();
+        loadTasks();
         setInterval(loadClientsData, 5000);
         setInterval(loadMetricsData, 10000);
         setInterval(loadAIInsights, 10000);
+        setInterval(loadTasks, 10000);
       }
 
       renderChatMessages();
@@ -1683,6 +1726,7 @@
       if (projectsStream) projectsStream.close();
       if (metricsStream) metricsStream.close();
       if (insightsStream) insightsStream.close();
+      if (tasksStream) tasksStream.close();
     });
 
     // ============================================

@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import cron from 'node-cron';
-import { getClients, getProjects, getMetrics, getAIInsights, addClient, subscribeToClients, subscribeToProjects, subscribeToMetrics, subscribeToInsights, supabase, supabaseAdmin } from './supabase-client.js';
+import { getClients, getProjects, getMetrics, getAIInsights, addClient, subscribeToClients, subscribeToProjects, subscribeToMetrics, subscribeToInsights, subscribeToTasks, supabase, supabaseAdmin } from './supabase-client.js';
 import DataSyncOrchestrator from './data-sync.js';
 import AdapterFactory from './adapter-factory.js';
 import AIInsightsGenerator from './ai-insights-generator.js';
@@ -26,6 +26,7 @@ const clients = new Set();
 const projectsClients = new Set();
 const metricsClients = new Set();
 const insightsClients = new Set();
+const tasksClients = new Set();
 
 // Função para notificar todos os clientes SSE
 function notifyClients(clientSet, data) {
@@ -71,6 +72,17 @@ function initializeRealTimeSubscriptions() {
     subscribeToInsights((payload) => {
       notifyClients(insightsClients, {
         type: 'insights',
+        event: payload.eventType,
+        timestamp: new Date().toISOString(),
+        data: payload.new || payload.old
+      });
+    });
+
+    // Subscribe a tarefas
+    subscribeToTasks((payload) => {
+      console.log('📡 Mudança de tarefas detectada:', payload.eventType);
+      notifyClients(tasksClients, {
+        type: 'tasks',
         event: payload.eventType,
         timestamp: new Date().toISOString(),
         data: payload.new || payload.old
@@ -360,6 +372,72 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // GET /api/stream/tasks - Real-time de tarefas
+  if (req.url === '/api/stream/tasks' && req.method === 'GET') {
+    console.log('🔌 Cliente conectou ao stream de tarefas');
+
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': '*'
+    });
+
+    const clientObj = { res };
+    tasksClients.add(clientObj);
+
+    // Enviar dados iniciais
+    (async () => {
+      try {
+        const { data: tasks, error } = await supabaseAdmin
+          .from('tasks')
+          .select(`
+            *,
+            assignments:task_assignments(assignee_name, assignee_email, assignee_id)
+          `)
+          .order('due_date', { ascending: true, nullsFirst: false });
+
+        if (!error && tasks) {
+          // Extrair assignees únicos
+          const assigneesSet = new Set();
+          tasks.forEach(task => {
+            if (task.assignments) {
+              task.assignments.forEach(a => {
+                if (a.assignee_name) {
+                  assigneesSet.add(a.assignee_name);
+                }
+              });
+            }
+          });
+
+          res.write(`data: ${JSON.stringify({
+            type: 'initial',
+            data: {
+              tasks: tasks,
+              assignees: Array.from(assigneesSet)
+            }
+          })}\n\n`);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar tarefas iniciais:', error);
+      }
+    })();
+
+    // Keep-alive a cada 30 segundos
+    const keepAlive = setInterval(() => {
+      res.write(':keep-alive\n\n');
+    }, 30000);
+
+    // Cleanup ao desconectar
+    req.on('close', () => {
+      console.log('🔌 Cliente desconectou do stream de tarefas');
+      tasksClients.delete(clientObj);
+      clearInterval(keepAlive);
+    });
+
+    return;
+  }
+
   // Data Sync Endpoints
 
   // GET /api/sync/status - Status dos adaptadores e jobs
@@ -547,6 +625,7 @@ server.listen(PORT, async () => {
   console.log('║  • GET /api/stream/projects                 ║');
   console.log('║  • GET /api/stream/metrics                  ║');
   console.log('║  • GET /api/stream/insights                 ║');
+  console.log('║  • GET /api/stream/tasks                    ║');
   console.log('║                                              ║');
   console.log('║  Data Sync Endpoints:                       ║');
   console.log('║  • GET /api/sync/status                     ║');

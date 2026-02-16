@@ -353,6 +353,20 @@ export function subscribeToInsights(callback) {
   return subscription;
 }
 
+export function subscribeToTasks(callback) {
+  console.log('🔔 Subscrevendo a mudanças de tarefas...');
+
+  const subscription = supabase
+    .from('tasks')
+    .on('*', (payload) => {
+      console.log('📡 Mudança de tarefas detectada:', payload.eventType);
+      callback(payload);
+    })
+    .subscribe();
+
+  return subscription;
+}
+
 // Remover subscription
 export function unsubscribe(subscription) {
   if (subscription) {
