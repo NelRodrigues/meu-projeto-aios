@@ -2,12 +2,17 @@ import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { getClients, getProjects, getMetrics, getAIInsights, addClient, subscribeToClients, subscribeToProjects, subscribeToMetrics, subscribeToInsights } from './supabase-client.js';
+import { getClients, getProjects, getMetrics, getAIInsights, addClient, subscribeToClients, subscribeToProjects, subscribeToMetrics, subscribeToInsights, supabase } from './supabase-client.js';
+import DataSyncOrchestrator from './data-sync.js';
+import AdapterFactory from './adapter-factory.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const PORT = process.env.PORT || 3000;
+
+// Data Sync Orchestrator
+let dataSync = null;
 
 // Clientes SSE conectados
 const clients = new Set();
@@ -300,37 +305,147 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // Data Sync Endpoints
+
+  // GET /api/sync/status - Status dos adaptadores e jobs
+  if (req.url === '/api/sync/status' && req.method === 'GET') {
+    try {
+      const status = dataSync ? dataSync.getStatus() : { error: 'Sync not initialized' };
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(status));
+    } catch (error) {
+      console.error('Erro ao buscar status de sync:', error);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Erro ao buscar status' }));
+    }
+    return;
+  }
+
+  // POST /api/sync/:source - Trigger sync manual de um adaptador
+  if (req.url.startsWith('/api/sync/') && req.method === 'POST') {
+    const source = req.url.replace('/api/sync/', '');
+    if (source && source !== 'status' && source !== 'history') {
+      try {
+        if (!dataSync) {
+          throw new Error('Sync not initialized');
+        }
+
+        // Determinar tabela baseada no nome do adaptador
+        let tableName = 'clients';
+        if (source.includes('sheets') || source.includes('revenue')) {
+          tableName = 'revenues';
+        }
+
+        const result = await dataSync.syncAdapter(source, tableName);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(result));
+      } catch (error) {
+        console.error(`Erro ao sincronizar ${source}:`, error);
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: error.message }));
+      }
+    }
+    return;
+  }
+
+  // GET /api/sync/history - Histórico de syncs
+  if (req.url === '/api/sync/history' && req.method === 'GET') {
+    try {
+      const history = dataSync ? dataSync.getSyncHistory() : [];
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ data: history }));
+    } catch (error) {
+      console.error('Erro ao buscar histórico de sync:', error);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Erro ao buscar histórico' }));
+    }
+    return;
+  }
+
   // 404
   res.writeHead(404, { 'Content-Type': 'text/plain' });
   res.end('404 - Página não encontrada');
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
   console.log('');
-  console.log('╔════════════════════════════════════════╗');
-  console.log('║  ✅ CONTROL TOWER PRONTO              ║');
-  console.log('║                                        ║');
-  console.log(`║  🌐 http://localhost:${PORT}              ║`);
-  console.log('║  📊 Database: Supabase PostgreSQL      ║');
-  console.log('║  ⚡ Real-time Subscriptions Activas   ║');
-  console.log('║                                        ║');
-  console.log('║  REST Endpoints:                       ║');
-  console.log('║  • GET /api/metrics/latest             ║');
-  console.log('║  • GET /api/clients                    ║');
-  console.log('║  • GET /api/projects                   ║');
-  console.log('║  • GET /api/insights                   ║');
-  console.log('║  • POST /api/clients (add)             ║');
-  console.log('║                                        ║');
-  console.log('║  Real-time SSE Streams:                ║');
-  console.log('║  • GET /api/stream/clients             ║');
-  console.log('║  • GET /api/stream/projects            ║');
-  console.log('║  • GET /api/stream/metrics             ║');
-  console.log('║  • GET /api/stream/insights            ║');
-  console.log('║                                        ║');
-  console.log('║  Pressione CTRL+C para parar          ║');
-  console.log('╚════════════════════════════════════════╝');
+  console.log('╔══════════════════════════════════════════════╗');
+  console.log('║  ✅ CONTROL TOWER PRONTO                    ║');
+  console.log('║                                              ║');
+  console.log(`║  🌐 http://localhost:${PORT}                      ║`);
+  console.log('║  📊 Database: Supabase PostgreSQL            ║');
+  console.log('║  ⚡ Real-time Subscriptions Activas         ║');
+  console.log('║  📡 Data Adapters (Phase 2)                 ║');
+  console.log('║                                              ║');
+  console.log('║  REST Endpoints:                            ║');
+  console.log('║  • GET /api/metrics/latest                  ║');
+  console.log('║  • GET /api/clients                         ║');
+  console.log('║  • GET /api/projects                        ║');
+  console.log('║  • GET /api/insights                        ║');
+  console.log('║  • POST /api/clients (add)                  ║');
+  console.log('║                                              ║');
+  console.log('║  Real-time SSE Streams:                     ║');
+  console.log('║  • GET /api/stream/clients                  ║');
+  console.log('║  • GET /api/stream/projects                 ║');
+  console.log('║  • GET /api/stream/metrics                  ║');
+  console.log('║  • GET /api/stream/insights                 ║');
+  console.log('║                                              ║');
+  console.log('║  Data Sync Endpoints:                       ║');
+  console.log('║  • GET /api/sync/status                     ║');
+  console.log('║  • POST /api/sync/:source (trigger)         ║');
+  console.log('║  • GET /api/sync/history                    ║');
+  console.log('║                                              ║');
+  console.log('║  Pressione CTRL+C para parar               ║');
+  console.log('╚══════════════════════════════════════════════╝');
   console.log('');
 
   // Inicializar real-time subscriptions
   initializeRealTimeSubscriptions();
+
+  // Inicializar Data Sync Orchestrator
+  console.log('🔧 Inicializando Data Sync Orchestrator...');
+  try {
+    dataSync = new DataSyncOrchestrator(supabase);
+
+    // Registar adaptadores disponíveis (se configurados)
+    const hasZohoCRM = process.env.ZOHO_ACCESS_TOKEN || process.env.ZOHO_REFRESH_TOKEN;
+    const hasGoogleSheets = process.env.GOOGLE_SHEETS_ID && process.env.GOOGLE_SHEETS_API_KEY;
+
+    if (hasZohoCRM) {
+      dataSync.addAdapter('zoho-crm', 'zoho-crm', {
+        accessToken: process.env.ZOHO_ACCESS_TOKEN,
+        refreshToken: process.env.ZOHO_REFRESH_TOKEN,
+        clientId: process.env.ZOHO_CLIENT_ID,
+        clientSecret: process.env.ZOHO_CLIENT_SECRET,
+        organizationId: process.env.ZOHO_ORG_ID
+      });
+
+      // Agendar sync a cada 4 horas
+      dataSync.scheduleSyncJob('zoho-crm', 'clients', '0 */4 * * *', 'zoho-crm-4h');
+      console.log('✅ Zoho CRM sync agendado (4h/4h)');
+    } else {
+      console.log('⚠️  Zoho CRM não configurado (faltam environment variables)');
+    }
+
+    if (hasGoogleSheets) {
+      dataSync.addAdapter('google-sheets', 'google-sheets', {
+        spreadsheetId: process.env.GOOGLE_SHEETS_ID,
+        sheetName: process.env.GOOGLE_SHEETS_NAME || 'Receitas',
+        apiKey: process.env.GOOGLE_SHEETS_API_KEY
+      });
+
+      // Agendar sync a cada 6 horas
+      dataSync.scheduleSyncJob('google-sheets', 'revenues', '0 */6 * * *', 'sheets-6h');
+      console.log('✅ Google Sheets sync agendado (6h/6h)');
+    } else {
+      console.log('⚠️  Google Sheets não configurado (faltam environment variables)');
+    }
+
+    console.log('✅ Data Sync Orchestrator inicializado');
+    console.log(`   ${dataSync.adapters.size} adaptador(es) registado(s)`);
+    console.log(`   ${dataSync.jobs.size} cron job(s) agendado(s)`);
+  } catch (error) {
+    console.warn('⚠️  Erro ao inicializar Data Sync:', error.message);
+    console.log('   Sistema continuará sem sincronização automática');
+  }
 });
