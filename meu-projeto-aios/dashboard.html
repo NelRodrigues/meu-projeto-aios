@@ -644,6 +644,49 @@
       color: #c53030;
     }
 
+    /* Paginação */
+    .pagination-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 30px;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-pagination {
+      padding: 10px 20px;
+      background: #2a5298;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95em;
+      font-weight: 500;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    .btn-pagination:hover:not(:disabled) {
+      background: #1e3c72;
+      transform: scale(1.05);
+    }
+
+    .btn-pagination:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .page-info {
+      font-weight: 600;
+      color: #333;
+      min-width: 100px;
+      text-align: center;
+    }
+
     /* Loading Indicator */
     .loading-indicator {
       text-align: center;
@@ -992,7 +1035,7 @@
         <div class="kpi-card">
           <div class="kpi-icon">✅</div>
           <div class="kpi-content">
-            <div class="kpi-label">Concluídas (Este Mês)</div>
+            <div class="kpi-label">Concluídas (Total)</div>
             <div class="kpi-value" id="completedTasks">0</div>
             <div class="kpi-change positive" id="completedChange">-</div>
           </div>
@@ -1057,6 +1100,17 @@
           </thead>
           <tbody id="tasksTableBody"></tbody>
         </table>
+
+        <!-- Paginação -->
+        <div id="tasksPagination" class="pagination-container" style="display: none;">
+          <button class="btn-pagination" id="prevTasksBtn" onclick="previousTaskPage()" title="Página Anterior">
+            ⬅️ Anterior
+          </button>
+          <span id="tasksPageInfo" class="page-info">Página 1</span>
+          <button class="btn-pagination" id="nextTasksBtn" onclick="nextTaskPage()" title="Próxima Página">
+            Próxima ➡️
+          </button>
+        </div>
       </div>
 
       <!-- Loading Indicator -->
@@ -1638,6 +1692,8 @@
     let allTasks = [];
     let filteredTasks = [];
     let taskAssignees = [];
+    let currentTaskPage = 0;
+    const TASKS_PER_PAGE = 15;
 
     /**
      * Carregar tarefas do backend
@@ -1709,6 +1765,7 @@
         return matchStatus && matchAssignee;
       });
 
+      resetTaskPagination();
       renderTasksTable();
     }
 
@@ -1722,15 +1779,17 @@
     }
 
     /**
-     * Renderizar tabela de tarefas
+     * Renderizar tabela de tarefas com paginação
      */
     function renderTasksTable() {
       const tbody = document.getElementById('tasksTableBody');
       const table = document.getElementById('tasksTableContainer');
       const emptyState = document.getElementById('tasksEmptyState');
+      const pagination = document.getElementById('tasksPagination');
 
       if (filteredTasks.length === 0) {
         table.style.display = 'none';
+        pagination.style.display = 'none';
         emptyState.style.display = 'block';
         return;
       }
@@ -1738,7 +1797,20 @@
       table.style.display = 'table';
       emptyState.style.display = 'none';
 
-      tbody.innerHTML = filteredTasks.map(task => {
+      // Calcular índices para paginação
+      const totalPages = Math.ceil(filteredTasks.length / TASKS_PER_PAGE);
+
+      // Garantir que a página actual é válida
+      if (currentTaskPage >= totalPages) {
+        currentTaskPage = Math.max(0, totalPages - 1);
+      }
+
+      const startIndex = currentTaskPage * TASKS_PER_PAGE;
+      const endIndex = startIndex + TASKS_PER_PAGE;
+      const paginatedTasks = filteredTasks.slice(startIndex, endIndex);
+
+      // Renderizar apenas as tarefas da página actual
+      tbody.innerHTML = paginatedTasks.map(task => {
         const assignees = task.assignments?.map(a => a.assignee_name).join(', ') || 'Não atribuído';
         const dueDate = task.due_date ? formatDate(task.due_date) : '-';
         const isOverdue = task.due_date && new Date(task.due_date) < new Date() &&
@@ -1773,6 +1845,52 @@
           </tr>
         `;
       }).join('');
+
+      // Mostrar/esconder paginação
+      if (filteredTasks.length > TASKS_PER_PAGE) {
+        pagination.style.display = 'flex';
+
+        // Actualizar botões de navegação
+        const totalPages = Math.ceil(filteredTasks.length / TASKS_PER_PAGE);
+        document.getElementById('prevTasksBtn').disabled = currentTaskPage === 0;
+        document.getElementById('nextTasksBtn').disabled = currentTaskPage >= totalPages - 1;
+        document.getElementById('tasksPageInfo').textContent =
+          `Página ${currentTaskPage + 1} de ${totalPages} (${filteredTasks.length} tarefas)`;
+      } else {
+        pagination.style.display = 'none';
+      }
+    }
+
+    /**
+     * Navegar para página anterior
+     */
+    function previousTaskPage() {
+      if (currentTaskPage > 0) {
+        currentTaskPage--;
+        renderTasksTable();
+        // Scroll para o topo da tabela
+        document.getElementById('tasksTableContainer')?.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    /**
+     * Navegar para próxima página
+     */
+    function nextTaskPage() {
+      const totalPages = Math.ceil(filteredTasks.length / TASKS_PER_PAGE);
+      if (currentTaskPage < totalPages - 1) {
+        currentTaskPage++;
+        renderTasksTable();
+        // Scroll para o topo da tabela
+        document.getElementById('tasksTableContainer')?.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    /**
+     * Resetar página quando aplicar filtros
+     */
+    function resetTaskPagination() {
+      currentTaskPage = 0;
     }
 
     /**
@@ -1792,13 +1910,11 @@
       ).length;
       document.getElementById('openTasks').textContent = openCount;
 
-      // Tarefas concluídas este mês
-      const completedThisMonth = allTasks.filter(t => {
-        if (!['completed', 'closed'].includes(t.status)) return false;
-        const updatedDate = new Date(t.updated_at);
-        return updatedDate >= startOfMonth;
-      }).length;
-      document.getElementById('completedTasks').textContent = completedThisMonth;
+      // Tarefas concluídas (total)
+      const completedCount = allTasks.filter(t =>
+        ['completed', 'closed'].includes(t.status)
+      ).length;
+      document.getElementById('completedTasks').textContent = completedCount;
 
       // Tarefas atrasadas
       const overdueCount = allTasks.filter(t => {
