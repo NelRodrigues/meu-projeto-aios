@@ -31,15 +31,9 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route
-          path="/dashboard"
-          element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/analytics"
-          element={isAuthenticated ? <Analytics /> : <Navigate to="/login" />}
-        />
-        <Route path="/" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/analytics" element={<Analytics />} />
+        <Route path="/" element={<Navigate to="/dashboard" />} />
       </Routes>
     </BrowserRouter>
   );

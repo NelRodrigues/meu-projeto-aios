@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://seu-projeto.supabase.co';
-const supabaseKey = import.meta.env.VITE_SUPABASE_KEY || 'sua-chave-anon';
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sua-chave-anon';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
