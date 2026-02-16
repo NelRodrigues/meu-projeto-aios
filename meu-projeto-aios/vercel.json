@@ -1,7 +1,9 @@
 {
-  "buildCommand": "cd frontend && npm install && npm run build && cd .. && cp -r frontend/dist public",
-  "outputDirectory": "public",
-  "rewrites": [
-    { "source": "/:path((?!.*\\.).*)*", "destination": "/index.html" }
-  ]
+  "root": "frontend",
+  "buildCommand": "npm install && npm run build",
+  "outputDirectory": "dist",
+  "env": {
+    "VITE_SUPABASE_URL": "@supabase_url",
+    "VITE_SUPABASE_ANON_KEY": "@supabase_anon_key"
+  }
 }
