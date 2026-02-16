@@ -13,7 +13,7 @@
 
 #### 1. Abrir Supabase
 ```
-https://app.supabase.com/project/nvkcsojyjwzpiqwvmzwi/sql/new
+https://app.supabase.com/project/byfzlwkgzftpzduswxus/sql/new
 ```
 
 #### 2. Copiar SQL
@@ -172,7 +172,7 @@ curl http://localhost:3000/api/tasks | jq '.tasks | length'
 ## ❓ Dúvidas Frequentes
 
 ### "O SQL não executa"
-- Verificar se está no projecto correcto (nvkcsojyjwzpiqwvmzwi)
+- Verificar se está no projecto correcto (byfzlwkgzftpzduswxus)
 - Testar sintaxe com `-- test comment` primeiro
 - Ver erro exact no Supabase UI
 - Consultar CLICKUP-SETUP.md → Troubleshooting

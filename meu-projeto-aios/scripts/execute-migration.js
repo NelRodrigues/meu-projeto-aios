@@ -127,7 +127,7 @@ async function main() {
 }
 
 function printManualInstructions() {
-  const dashboardUrl = `https://app.supabase.com/project/${SUPABASE_URL.split('nvk')[1]?.split('.')[0] || 'nvkcsojyjwzpiqwvmzwi'}`;
+  const dashboardUrl = `https://app.supabase.com/project/${SUPABASE_URL.split('https://')[1]?.split('.')[0] || 'byfzlwkgzftpzduswxus'}`;
 
   console.log('1️⃣  Abrir: https://app.supabase.com');
   console.log('2️⃣  Seleccione o projeto');

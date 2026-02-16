@@ -321,7 +321,7 @@ time curl http://localhost:3000/api/tasks > /dev/null
 ```bash
 # Tentar acesso sem autenticação
 curl -X GET \
-  "https://nvkcsojyjwzpiqwvmzwi.supabase.co/rest/v1/tasks" \
+  "https://byfzlwkgzftpzduswxus.supabase.co/rest/v1/tasks" \
   -H "apikey: $SUPABASE_ANON_KEY"
 
 # Esperado: erro 403 Forbidden (sem token JWT)

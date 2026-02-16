@@ -36,7 +36,7 @@ start MIGRATION-SETUP.html  # Windows
 ### **Método 2️⃣: Via Supabase Dashboard (DIRECTO)**
 
 1. Abrir: https://app.supabase.com
-2. Seleccionar projecto: **nvkcsojyjwzpiqwvmzwi**
+2. Seleccionar projecto: **byfzlwkgzftpzduswxus**
 3. Menu: **SQL Editor** → **New Query**
 4. Copiar conteúdo de: `migrations/001_add_tasks_tables.sql`
 5. Colar no editor
@@ -90,8 +90,8 @@ node scripts/verify-migration.js
 
 ## 🔗 Links Diretos
 
-- **SQL Editor:** https://app.supabase.com/project/nvkcsojyjwzpiqwvmzwi/sql/new
-- **Tabelas:** https://app.supabase.com/project/nvkcsojyjwzpiqwvmzwi/editor
+- **SQL Editor:** https://app.supabase.com/project/byfzlwkgzftpzduswxus/sql/new
+- **Tabelas:** https://app.supabase.com/project/byfzlwkgzftpzduswxus/editor
 
 ---
 

@@ -31,7 +31,7 @@ Executar a migration SQL para criar as tabelas de tarefas no Supabase.
 
 #### OPÇÃO B: Via Supabase Dashboard Directo
 - [ ] Abrir: https://app.supabase.com
-- [ ] Seleccionar projecto: **nvkcsojyjwzpiqwvmzwi**
+- [ ] Seleccionar projecto: **byfzlwkgzftpzduswxus**
 - [ ] Menu lateral: **SQL Editor** → **+ New Query**
 - [ ] Ficheiro `migrations/001_add_tasks_tables.sql`
 - [ ] Copiar todo o conteúdo (Ctrl+A, Ctrl+C)
@@ -49,7 +49,7 @@ node scripts/execute-migration.js
 
 ### Passo 3: Executar Migration no Supabase
 - [ ] SQL está no editor Supabase (deve estar)
-- [ ] Verificar que está no projecto correcto (**nvkcsojyjwzpiqwvmzwi**)
+- [ ] Verificar que está no projecto correcto (**byfzlwkgzftpzduswxus**)
 - [ ] Clicar botão azul **"RUN"** (canto superior direito)
   - OU Pressionar: **Ctrl+Enter** (Windows/Linux) / **Cmd+Enter** (Mac)
 - [ ] Esperar 3-5 segundos pela execução
