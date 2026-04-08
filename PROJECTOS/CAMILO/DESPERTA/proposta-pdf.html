@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="pt-AO">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proposta de Implementação Estratégica — Desperta Academy</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap');
+
+  :root {
+    --verde: #1DB954;
+    --verde-escuro: #0D8A3E;
+    --azul: #2B5EA7;
+    --azul-escuro: #1A3A6A;
+    --dourado: #D4A843;
+    --dourado-claro: #E8C96A;
+    --cinza-escuro: #2C2C2C;
+    --cinza-medio: #555555;
+    --cinza-claro: #F5F6F8;
+    --branco: #FFFFFF;
+  }
+
+  @page {
+    size: A4;
+    margin: 15mm 16mm 20mm 16mm;
+    @bottom-center {
+      content: counter(page);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9px;
+      color: #999;
+    }
+    @bottom-right {
+      content: "Marca Digital — Confidencial";
+      font-family: 'Montserrat', sans-serif;
+      font-size: 7px;
+      color: #BBB;
+    }
+  }
+
+  @page :first {
+    margin: 0;
+    @bottom-center { content: none; }
+    @bottom-right { content: none; }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--cinza-escuro);
+  }
+
+  /* ============================
+     COVER PAGE
+     ============================ */
+  .cover {
+    page-break-after: always;
+    width: 210mm;
+    height: 297mm;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(160deg, var(--branco) 0%, var(--cinza-claro) 40%, var(--branco) 100%);
+    overflow: hidden;
+  }
+
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background: linear-gradient(90deg, var(--verde) 0%, var(--azul) 50%, var(--dourado) 100%);
+  }
+
+  .cover::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background: linear-gradient(90deg, var(--verde) 0%, var(--azul) 50%, var(--dourado) 100%);
+  }
+
+  .cover-accent-left {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--verde) 0%, var(--azul) 100%);
+  }
+
+  .cover-logo {
+    width: 140px;
+    height: auto;
+    margin-bottom: 30px;
+  }
+
+  .cover-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--azul) 0%, var(--azul-escuro) 100%);
+    color: white;
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 6px 20px;
+    border-radius: 2px;
+    margin-bottom: 25px;
+  }
+
+  .cover-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--azul-escuro);
+    text-align: center;
+    line-height: 1.2;
+    margin-bottom: 8px;
+    padding: 0 40px;
+  }
+
+  .cover-subtitle {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--dourado);
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .cover-line {
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--verde), var(--azul));
+    margin-bottom: 40px;
+    border-radius: 2px;
+  }
+
+  .cover-meta {
+    text-align: center;
+    font-size: 11px;
+    color: var(--cinza-medio);
+    line-height: 2;
+  }
+
+  .cover-meta strong {
+    color: var(--cinza-escuro);
+    font-weight: 600;
+  }
+
+  .cover-footer {
+    position: absolute;
+    bottom: 30px;
+    text-align: center;
+    font-size: 8px;
+    color: #AAA;
+    letter-spacing: 1px;
+  }
+
+  /* ============================
+     INNER PAGES
+     ============================ */
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--azul-escuro);
+    margin-top: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 3px solid var(--verde);
+    page-break-after: avoid;
+  }
+
+  h1 .section-num {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--branco);
+    background: linear-gradient(135deg, var(--verde) 0%, var(--verde-escuro) 100%);
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    border-radius: 50%;
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+
+  h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--azul);
+    margin-top: 14px;
+    margin-bottom: 6px;
+    page-break-after: avoid;
+  }
+
+  h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--verde-escuro);
+    margin-top: 10px;
+    margin-bottom: 5px;
+    page-break-after: avoid;
+  }
+
+  h4 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--cinza-escuro);
+    margin-top: 8px;
+    margin-bottom: 4px;
+  }
+
+  p {
+    margin-bottom: 6px;
+    text-align: justify;
+  }
+
+  .section {
+    page-break-before: auto;
+    page-break-inside: auto;
+  }
+
+  .section:first-of-type {
+    page-break-before: avoid;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0 10px 0;
+    font-size: 11px;
+    page-break-inside: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+  th {
+    background: linear-gradient(135deg, var(--azul) 0%, var(--azul-escuro) 100%);
+    color: white;
+    font-weight: 600;
+    text-align: left;
+    padding: 6px 8px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  td {
+    padding: 5px 8px;
+    border-bottom: 1px solid #E8E8E8;
+    vertical-align: top;
+  }
+
+  tr:nth-child(even) td {
+    background-color: #F8F9FB;
+  }
+
+  tr:hover td {
+    background-color: #EEF3FA;
+  }
+
+  /* Callout boxes */
+  .callout {
+    background: linear-gradient(135deg, #F0F7FF 0%, #E8F4FD 100%);
+    border-left: 4px solid var(--azul);
+    padding: 10px 14px;
+    margin: 8px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 11px;
+  }
+
+  .callout-green {
+    background: linear-gradient(135deg, #F0FFF4 0%, #E6F7ED 100%);
+    border-left-color: var(--verde);
+  }
+
+  .callout-gold {
+    background: linear-gradient(135deg, #FFFBF0 0%, #FFF6E0 100%);
+    border-left-color: var(--dourado);
+  }
+
+  .callout-conclusion {
+    background: linear-gradient(135deg, #F8F4FF 0%, #F0EAFF 100%);
+    border-left-color: #7C3AED;
+  }
+
+  .callout strong {
+    color: var(--azul-escuro);
+  }
+
+  blockquote {
+    background: var(--cinza-claro);
+    border-left: 4px solid var(--dourado);
+    padding: 10px 15px;
+    margin: 10px 0;
+    font-style: italic;
+    color: var(--cinza-medio);
+    border-radius: 0 4px 4px 0;
+  }
+
+  /* Lists */
+  ul, ol {
+    margin: 6px 0 10px 18px;
+  }
+
+  li {
+    margin-bottom: 3px;
+  }
+
+  /* Code blocks */
+  .diagram {
+    background: #1E293B;
+    color: #E2E8F0;
+    padding: 12px;
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    line-height: 1.4;
+    margin: 8px 0;
+    white-space: pre;
+    overflow: hidden;
+  }
+
+  /* Week headers */
+  .week-header {
+    background: linear-gradient(135deg, var(--verde) 0%, var(--azul) 100%);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin: 15px 0 10px 0;
+    page-break-after: avoid;
+  }
+
+  .week-header h3 {
+    color: white;
+    margin: 0;
+    font-size: 12px;
+  }
+
+  .week-header p {
+    color: rgba(255,255,255,0.85);
+    margin: 3px 0 0 0;
+    font-size: 11px;
+    text-align: left;
+  }
+
+  /* Highlight badge */
+  .badge {
+    display: inline-block;
+    font-size: 8.5px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .badge-critical { background: #FEE2E2; color: #991B1B; }
+  .badge-warning { background: #FEF3C7; color: #92400E; }
+  .badge-ok { background: #D1FAE5; color: #065F46; }
+  .badge-strong { background: #DBEAFE; color: #1E40AF; }
+
+  /* Stats row */
+  .stats-row {
+    display: flex;
+    gap: 10px;
+    margin: 12px 0;
+  }
+
+  .stat-card {
+    flex: 1;
+    background: var(--cinza-claro);
+    border-radius: 6px;
+    padding: 10px 12px;
+    text-align: center;
+    border-top: 3px solid var(--azul);
+  }
+
+  .stat-card.green { border-top-color: var(--verde); }
+  .stat-card.gold { border-top-color: var(--dourado); }
+
+  .stat-number {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--azul-escuro);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 9px;
+    color: var(--cinza-medio);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 3px;
+  }
+
+  /* TOC */
+  .toc {
+    page-break-after: always;
+  }
+
+  .toc-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px dotted #DDD;
+    font-size: 13px;
+  }
+
+  .toc-item:hover {
+    background: var(--cinza-claro);
+  }
+
+  .toc-num {
+    font-weight: 700;
+    color: var(--verde);
+    width: 25px;
+    display: inline-block;
+  }
+
+  .toc-title {
+    font-weight: 500;
+    color: var(--cinza-escuro);
+  }
+
+  /* Bio text */
+  .bio-box {
+    background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 8px 0;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--cinza-escuro);
+  }
+
+  /* Pillar cards */
+  .pillar-row {
+    display: flex;
+    gap: 8px;
+    margin: 10px 0;
+  }
+
+  .pillar-card {
+    flex: 1;
+    border-radius: 6px;
+    padding: 10px;
+    text-align: center;
+  }
+
+  .pillar-card.verde { background: linear-gradient(135deg, #D1FAE5, #A7F3D0); }
+  .pillar-card.azul { background: linear-gradient(135deg, #DBEAFE, #BFDBFE); }
+  .pillar-card.dourado { background: linear-gradient(135deg, #FEF3C7, #FDE68A); }
+
+  .pillar-card h4 {
+    font-size: 10px;
+    margin: 0 0 4px 0;
+  }
+
+  .pillar-card p {
+    font-size: 10px;
+    text-align: center;
+    margin: 0;
+    color: var(--cinza-medio);
+  }
+
+  /* Separator */
+  hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #DDD, transparent);
+    margin: 20px 0;
+  }
+
+  .page-break {
+    /* removed to reduce white space */
+  }
+
+  /* Footer CTA */
+  .final-cta {
+    background: linear-gradient(135deg, var(--azul-escuro) 0%, var(--azul) 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 8px;
+    text-align: center;
+    margin-top: 25px;
+  }
+
+  .final-cta h2 {
+    color: var(--dourado-claro);
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  .final-cta p {
+    color: rgba(255,255,255,0.9);
+    text-align: center;
+    font-size: 12px;
+  }
+
+  .signature-block {
+    margin-top: 20px;
+    padding-top: 12px;
+    border-top: 1px solid #DDD;
+    font-size: 11px;
+    color: var(--cinza-medio);
+  }
+</style>
+</head>
+<body>
+
+<!-- ========== COVER PAGE ========== -->
+<div class="cover">
+  <div class="cover-accent-left"></div>
+  <img src="unnamed.jpeg" alt="DESPERTA Logo" class="cover-logo">
+  <div class="cover-badge">Proposta Estratégica</div>
+  <div class="cover-title">Proposta de Implementação<br>Estratégica</div>
+  <div class="cover-subtitle">Refundação Desperta Academy</div>
+  <div class="cover-line"></div>
+  <div class="cover-meta">
+    <strong>Preparado por:</strong> Marca Digital<br>
+    <strong>Para:</strong> Dr. Camilo Ortet — CEO & Fundador, Desperta Academy<br>
+    <strong>Data:</strong> 6 de Abril de 2026<br>
+    <strong>Período:</strong> 6 de Abril — 30 de Abril de 2026<br>
+    <strong>Início da Execução Plena:</strong> 1 de Maio de 2026
+  </div>
+  <div class="cover-footer">CONFIDENCIAL — Marca Digital &bull; Luanda, Angola</div>
+</div>
+
+<!-- ========== TABLE OF CONTENTS ========== -->
+<div class="toc">
+  <h1 style="border-bottom-color: var(--dourado);">Índice</h1>
+
+  <div class="toc-item"><span><span class="toc-num">01</span> <span class="toc-title">Sumário Executivo</span></span></div>
+  <div class="toc-item"><span><span class="toc-num">02</span> <span class="toc-title">Contexto e Diagnóstico</span></span></div>
+  <div class="toc-item"><span><span class="toc-num">03</span> <span class="toc-title">Análise Competitiva</span></span></div>
+  <div class="toc-item"><span><span class="toc-num">04</span> <span class="toc-title">Estratégia de Posicionamento</span></span></div>
+  <div class="toc-item"><span><span class="toc-num">05</span> <span class="toc-title">Plano de Implementação — 4 Semanas</span></span></div>
+  <div class="toc-item"><span><span class="toc-num">06</span> <span class="toc-title">Plataforma CRM + Agente de Inteligência Artificial</span></span></div>
+  <div class="toc-item"><span><span class="toc-num">07</span> <span class="toc-title">Estratégia de Conteúdo e Comunicação</span></span></div>
+  <div class="toc-item"><span><span class="toc-num">08</span> <span class="toc-title">Indicadores de Sucesso (KPIs)</span></span></div>
+  <div class="toc-item"><span><span class="toc-num">09</span> <span class="toc-title">Visão de Refundação e Modelo de Mentoria</span></span></div>
+  <div class="toc-item"><span><span class="toc-num">10</span> <span class="toc-title">Orçamento e Modelo Comercial</span></span></div>
+  <div class="toc-item"><span><span class="toc-num">11</span> <span class="toc-title">Anexos</span></span></div>
+</div>
+
+<!-- ========== SECTION 1: SUMÁRIO EXECUTIVO ========== -->
+<div class="section">
+  <h1><span class="section-num">1</span> Sumário Executivo</h1>
+
+  <h2>A Oportunidade</h2>
+  <p>A Desperta Academy possui um activo relacional e reputacional acumulado ao longo de <strong>16 anos</strong> que está largamente invisível e subaproveitado. O seu fundador, Dr. Camilo Ortet, reúne uma trajectória profissional excepcional — <strong>BPI (Portugal), BFE e BCI (Moçambique), KPMG, BFA, BAI, BMF, CMC, INSS, Ministérios</strong> — com participação em projectos do <strong>Banco Mundial, FMI, APAD e PoDE</strong>, o que confere à Desperta uma credibilidade que nenhum concorrente directo consegue igualar no mercado angolano de formação executiva.</p>
+
+  <div class="stats-row">
+    <div class="stat-card green">
+      <div class="stat-number">16</div>
+      <div class="stat-label">Anos de Actividade</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">40+</div>
+      <div class="stat-label">Organizações Servidas</div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-number">28+</div>
+      <div class="stat-label">Anos Experiência Fundador</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-number">10+</div>
+      <div class="stat-label">Instituições de Topo</div>
+    </div>
+  </div>
+
+  <h2>O Problema</h2>
+  <ul>
+    <li>Os canais digitais estão inactivos ou desalinhados</li>
+    <li>A base de 40-50 clientes históricos está dormente</li>
+    <li>Não existe um sistema de gestão de contactos, leads ou relacionamento (CRM)</li>
+    <li>O conteúdo publicado não reflecte a profundidade e autoridade real da marca</li>
+    <li>A Desperta depende de contactos espontâneos, sem modelo de prospecção previsível</li>
+  </ul>
+
+  <h2>A Solução</h2>
+  <p>A Marca Digital propõe um programa de implementação intensivo de <strong>4 semanas</strong> (6 Abr — 30 Abr) que prepara toda a infraestrutura — digital, tecnológica e de conteúdo — para que a Desperta inicie execução plena a partir de <strong>1 de Maio de 2026</strong>.</p>
+
+  <div class="pillar-row">
+    <div class="pillar-card verde">
+      <h4>Presença Digital</h4>
+      <p>Website, LinkedIn, Instagram profissionais e estratégicos</p>
+    </div>
+    <div class="pillar-card azul">
+      <h4>CRM + Agente IA</h4>
+      <p>Plataforma própria com inteligência artificial integrada</p>
+    </div>
+    <div class="pillar-card dourado">
+      <h4>Reactivação</h4>
+      <p>Base de clientes segmentada e campanha de reaproximação</p>
+    </div>
+  </div>
+
+  <div class="callout-green callout">
+    <strong>Resultado Esperado:</strong> No dia 1 de Maio de 2026, a Desperta terá um ecossistema digital operacional, uma base de clientes reactivada e as ferramentas para crescer de forma consistente, previsível e escalável.
+  </div>
+</div>
+
+<!-- ========== SECTION 2: CONTEXTO E DIAGNÓSTICO ========== -->
+<div class="section">
+  <h1><span class="section-num">2</span> Contexto e Diagnóstico</h1>
+
+  <h2>2.1 Perfil do Fundador — Dr. Camilo Ortet</h2>
+  <p>O Dr. Camilo Ortet é um profissional com mais de 28 anos de experiência nos sectores bancário, financeiro, governamental e de formação, com carreira internacional em <strong>Portugal, Moçambique e Angola</strong>.</p>
+
+  <h3>Sector Bancário e Financeiro (20+ anos — Portugal, Moçambique e Angola)</h3>
+  <table>
+    <thead><tr><th>Período</th><th>Cargo</th><th>Organização</th></tr></thead>
+    <tbody>
+      <tr><td>2014–2015</td><td>Assessor da Comissão Executiva — Levantamento crítico Carteira de Crédito e Portfólio do Mútuo (Auditoria Forense)</td><td><strong>BMF — BAI Micro Finanças</strong> (Angola)</td></tr>
+      <tr><td>2012–2015</td><td>Assessor da Comissão Executiva e Director para o Acompanhamento, Controlo e Recuperação do Crédito</td><td><strong>BAI — Banco Angolano de Investimentos</strong></td></tr>
+      <tr><td>2009–2010</td><td>Director de Acompanhamento e Recuperação de Crédito</td><td><strong>BFA — Banco de Fomento Angola</strong></td></tr>
+      <tr><td>2008–2009</td><td>Recovery and Restructuring Manager of Financial Advisory Services and Forehead for Financial Services</td><td><strong>KPMG Angola</strong></td></tr>
+      <tr><td>2006–2008</td><td>Director do GRC — Gabinete de Recuperação de Crédito</td><td><strong>BCI — Banco Comercial e de Investimentos</strong> (Moçambique)</td></tr>
+      <tr><td>2004–2006</td><td>Co-Director da Direção de Empresas, Corporate Finance — Unidade das Grandes Empresas</td><td><strong>BCI Fomento</strong> (Moçambique) — Banca de Empresas e Banca de Particular</td></tr>
+      <tr><td>1999–2004</td><td>Analista de Crédito e Gerente de Conta/Corporate (Sénior)</td><td><strong>BFE — Banco de Fomento Exterior de Moçambique</strong> (Grupo BPI, Portugal)</td></tr>
+      <tr><td>1998–1999</td><td>Estágio Multidisciplinar e Gestor Júnior de apoio ao GPS</td><td><strong>BPI — Banco Português de Investimentos</strong> (Portugal)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Sector Público, Regulador e Empresarial</h3>
+  <table>
+    <thead><tr><th>Período</th><th>Cargo</th><th>Organização</th></tr></thead>
+    <tbody>
+      <tr><td>2020–2023</td><td>Assessor/Consultor para a Reforma Estratégica do INSS — Coordenar Comissão dos Activos + Coaching e Mentoria + PCA da Osilo, Lda.</td><td><strong>INSS – MAPTSS</strong></td></tr>
+      <tr><td>2017–2020</td><td>Consultor do Director Geral do SIAC — Coaching e Mentoria / Formação, Treinamento e Desenvolvimento</td><td><strong>SIAC – MAPTSS</strong></td></tr>
+      <tr><td>2016–Actual</td><td>Director Geral</td><td><strong>Angocajú, Lda</strong> (agro-indústria)</td></tr>
+      <tr><td>2015–2016</td><td>Director Dept. Supervisão Auditores e Emitentes</td><td><strong>CMC/MINFIN — Comissão Mercado de Capitais</strong></td></tr>
+      <tr><td>2010–2012</td><td>Consultor/Assessor do Gabinete do Vice Ministro do Comércio</td><td><strong>MINCO — Ministério do Comércio</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Projectos Internacionais</h3>
+  <p>Para além da carreira institucional, o Dr. Camilo Ortet participou em projectos de organismos internacionais de referência:</p>
+  <table>
+    <thead><tr><th>Organismo</th><th>Âmbito</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Banco Mundial (BM)</strong></td><td>Projectos de desenvolvimento em Moçambique</td></tr>
+      <tr><td><strong>FMI — Fundo Monetário Internacional</strong></td><td>Projectos de reforma e estabilização financeira</td></tr>
+      <tr><td><strong>APAD</strong></td><td>Apoio ao desenvolvimento empresarial</td></tr>
+      <tr><td><strong>PoDE — Programa de Desenvolvimento Empresarial</strong></td><td>Patrocinado pelo Banco Mundial e União Europeia (Maputo)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Ensino, Formação e Coaching</h3>
+  <table>
+    <thead><tr><th>Período</th><th>Cargo</th><th>Organização</th></tr></thead>
+    <tbody>
+      <tr><td>2019–Presente</td><td>Trainer, Master Coach, Speaker, Mentor — Director Geral</td><td><strong>DESPERTA Academy</strong> (Angola)</td></tr>
+      <tr><td>2002–2008</td><td>Docente Coordenador — Introdução à Gestão, Finanças Públicas e Finanças Internacionais</td><td><strong>ESGT/ISPU — Universidade Politécnica</strong> (Maputo)</td></tr>
+      <tr><td>2004–2008</td><td>Docente Coordenador — Propedêutica Comercial</td><td><strong>IMEP — Universidade Politécnica</strong> (Maputo)</td></tr>
+      <tr><td>1987–1991</td><td>Professor de Matemática, Física e Português — II e III Níveis</td><td><strong>Escola Secundária Eurico Gonçalves e Nicolau Gomes Spencer</strong> (Luanda)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>Nota:</strong> O Dr. Camilo Ortet começou a ensinar aos 17 anos, após concluir o Ensino Médio no INE — Instituto Normal de Educação (1985–1989), com especialização em Pedagogia e Didática Geral para Matemática e Física. A vocação para formar pessoas é anterior à carreira bancária.
+  </div>
+
+  <p><strong>Certificações:</strong> FEBRACIS (Federação Brasileira de Coaching Integral Sistémico) + IBC (Instituto Brasileiro de Coaching) + <strong>Bras-Coaching</strong> (Formação para Mentoria Profissional Pessoal e Organizacional) + Instituto Kaercher (Treinador Comportamental, Brasil) + MTI (Método de Treinamento de Instrutores)</p>
+  <p><strong>Formação Académica:</strong> Licenciatura em Gestão e Administração Pública — ISCSP, Universidade Técnica de Lisboa (1993–1998). Especialização em Gestão Urbana e Municipal. Frequência do curso de Gestão de Empresas no ISEG — UTL (1992–1993).</p>
+  <p><strong>Ensino Médio:</strong> INE — Instituto Normal de Educação, Pedagogia e Didática Geral com opção para Matemática e Física (1985–1989), Angola.</p>
+
+  <div class="callout-gold callout">
+    <strong>Conclusão:</strong> O Dr. Camilo Ortet não precisa de construir credibilidade — precisa de a <strong>tornar visível</strong>. O seu curriculum é mais forte que o de 90% dos concorrentes no mercado angolano de formação executiva.
+  </div>
+
+  <h2>2.2 A Desperta Academy — Identidade</h2>
+
+  <table>
+    <thead><tr><th>Campo</th><th>Detalhe</th></tr></thead>
+    <tbody>
+      <tr><td>Razão Social</td><td>DESPERTA (SU), Lda</td></tr>
+      <tr><td>Actividade</td><td>FTD — Formação, Treinamento e Desenvolvimento + Workshops Palestrais</td></tr>
+      <tr><td>Localização</td><td>Patriota, Luanda, Angola</td></tr>
+      <tr><td>Website</td><td>www.despertaacademy.com</td></tr>
+      <tr><td>Contactos</td><td>+244 921 544 899 / +244 921 943 448</td></tr>
+      <tr><td>Email</td><td>camiloortet.desperta@gmail.com</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Programas Assinatura (3 Pilares)</h3>
+  <div class="pillar-row">
+    <div class="pillar-card verde">
+      <h4>"Eu, o Líder"</h4>
+      <p>Liderança consciente, transformação pessoal, crenças limitantes</p>
+    </div>
+    <div class="pillar-card azul">
+      <h4>"Eu, o Team"</h4>
+      <p>Equipas de alto rendimento, empoderamento colectivo</p>
+    </div>
+    <div class="pillar-card dourado">
+      <h4>"Eu, o Dream Building"</h4>
+      <p>Alta performance, comunicação, liderança aplicada</p>
+    </div>
+  </div>
+
+  <p><strong>Modelo Pedagógico:</strong> Três dimensões — Saber-Saber (conhecimento) + Saber-Fazer (competências) + Saber-Ser/Estar (atitude e comportamento).</p>
+  <p><strong>Catálogo Técnico:</strong> 20+ formações nas áreas de gestão, liderança, negociação, banca, crédito, risco, estratégia e finanças.</p>
+  <p><strong>Parceiros:</strong> Dr. Fábio Galvão — Instituto Fábio Galvão (Brasil), mentor e formador pontual em liderança, burnout e desenvolvimento emocional.</p>
+
+  <div class="page-break"></div>
+
+  <h2>2.3 Auditoria dos Canais Digitais</h2>
+
+  <h3>Website (despertaacademy.com)</h3>
+  <table>
+    <thead><tr><th>Critério</th><th>Estado</th><th>Avaliação</th></tr></thead>
+    <tbody>
+      <tr><td>Plataforma</td><td>Wix (Thunderbolt)</td><td>Funcional mas limitado para SEO</td></tr>
+      <tr><td>Páginas</td><td>13 + 23 de serviços</td><td>Estrutura existente, conteúdo fraco</td></tr>
+      <tr><td>Última actualização sitemap</td><td>Abril 2025</td><td><span class="badge badge-critical">11 meses desactualizado</span></td></tr>
+      <tr><td>Blog / Conteúdo</td><td>Inexistente</td><td><span class="badge badge-critical">Sem autoridade orgânica</span></td></tr>
+      <tr><td>Testemunhos</td><td>Ausentes</td><td><span class="badge badge-critical">16 anos sem prova social</span></td></tr>
+      <tr><td>SEO</td><td>Títulos genéricos</td><td><span class="badge badge-warning">Precisa reescrita</span></td></tr>
+      <tr><td>Agendamento online</td><td>Wix Bookings activo</td><td><span class="badge badge-ok">Funcional</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Instagram @camiloortet (Perfil Pessoal)</h3>
+  <table>
+    <thead><tr><th>Métrica</th><th>Valor</th><th>Análise</th></tr></thead>
+    <tbody>
+      <tr><td>Posts</td><td>1.291</td><td>Volume elevado</td></tr>
+      <tr><td>Seguidores</td><td>831</td><td><span class="badge badge-warning">Baixo para o volume</span></td></tr>
+      <tr><td>Seguindo</td><td>102</td><td><span class="badge badge-ok">Rácio saudável</span></td></tr>
+      <tr><td>Website na bio</td><td>www.desperta.co</td><td><span class="badge badge-ok">Activo</span></td></tr>
+      <tr><td>Rácio seg/post</td><td>0.64</td><td><span class="badge badge-critical">Benchmark: >3</span></td></tr>
+    </tbody>
+  </table>
+
+  <h4>Análise de Conteúdo</h4>
+  <table>
+    <thead><tr><th>Tipo</th><th>Frequência</th><th>Avaliação</th></tr></thead>
+    <tbody>
+      <tr><td>Frases motivacionais genéricas</td><td>~40%</td><td><span class="badge badge-critical">Demasiado — posiciona como "mais um coach"</span></td></tr>
+      <tr><td>Fotos de formações/eventos</td><td>~25%</td><td><span class="badge badge-ok">Autênticas, bom potencial</span></td></tr>
+      <tr><td>Vídeos/Reels</td><td>~15%</td><td><span class="badge badge-ok">Conteúdo genuíno</span></td></tr>
+      <tr><td>Conteúdo Angocajú</td><td>~10%</td><td><span class="badge badge-warning">Dilui posicionamento</span></td></tr>
+      <tr><td>Conteúdo religioso</td><td>~10%</td><td><span class="badge badge-warning">Pode desalinhar público corporativo</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Instagram @desperta.co (Perfil Institucional)</h3>
+  <table>
+    <thead><tr><th>Métrica</th><th>Valor</th><th>Análise</th></tr></thead>
+    <tbody>
+      <tr><td>Posts</td><td>357</td><td>Volume moderado</td></tr>
+      <tr><td>Seguidores</td><td>322</td><td><span class="badge badge-critical">Muito baixo</span></td></tr>
+      <tr><td>Seguindo</td><td>549</td><td><span class="badge badge-critical">Rácio negativo (follow-for-follow)</span></td></tr>
+      <tr><td>Bio</td><td>Vazia</td><td><span class="badge badge-critical">Crítico</span></td></tr>
+      <tr><td>Website na bio</td><td>Nenhum</td><td><span class="badge badge-critical">Crítico</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>LinkedIn — Camilo Ortet</h3>
+  <table>
+    <thead><tr><th>Métrica</th><th>Valor</th><th>Análise</th></tr></thead>
+    <tbody>
+      <tr><td>Conexões</td><td>500+</td><td><span class="badge badge-strong">Base sólida</span></td></tr>
+      <tr><td>Banner</td><td>Personalizado DESPERTA</td><td><span class="badge badge-ok">Profissional</span></td></tr>
+      <tr><td>Resumo</td><td>Lista de cargos</td><td><span class="badge badge-warning">Funcional mas não narrativo</span></td></tr>
+      <tr><td>Competências</td><td>Business Strategy, Financial Advisory, Internal Audit</td><td><span class="badge badge-ok">Alinhadas</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>Oportunidade principal:</strong> O LinkedIn é o canal de maior ROI para o Camilo. O público-alvo (executivos, gestores, banca, sector público) vive no LinkedIn. Com o CV dele e 500+ conexões, publicações regulares podem alcançar milhares de profissionais angolanos.
+  </div>
+
+  <h2>2.4 Base de Clientes Existente</h2>
+  <p>A Desperta serviu aproximadamente <strong>40-50 organizações</strong> ao longo de 16 anos, incluindo instituições bancárias (BAI, BFA, BCI, Banco de Fomento), organismos governamentais (Ministério das Finanças, INSS/MAPTSS), empresas brasileiras a operar em Angola e igrejas/instituições sociais.</p>
+
+  <div class="callout-green callout">
+    <strong>Este é o activo de maior valor da Desperta.</strong> O custo de aquisição destes clientes já foi suportado. Reactivá-los representa a oportunidade de maior retorno com menor investimento.
+  </div>
+</div>
+
+<!-- ========== SECTION 3: ANÁLISE COMPETITIVA ========== -->
+<div class="section">
+  <h1><span class="section-num">3</span> Análise Competitiva</h1>
+
+  <h2>3.1 Concorrentes Locais Directos</h2>
+  <table>
+    <thead><tr><th>Concorrente</th><th>Posicionamento</th><th>Força</th><th>Fraqueza vs Desperta</th></tr></thead>
+    <tbody>
+      <tr><td><strong>MOVE Angola</strong> (Dardano Santos)</td><td>Conferência internacional de liderança</td><td>2.500+ participantes</td><td>Evento pontual, não formação contínua</td></tr>
+      <tr><td><strong>Exec Angola</strong></td><td>Educação executiva premium</td><td>Networking C-level</td><td>Elitista, pouco acessível</td></tr>
+      <tr><td><strong>Angola Business School</strong> (Nova SBE)</td><td>Business school internacional</td><td>Marca Nova, 2.000+ formados</td><td>Académico, não transformacional</td></tr>
+      <tr><td><strong>Academia BAI</strong></td><td>Academia corporativa</td><td>Respaldo institucional BAI</td><td>Fechada ao ecossistema BAI</td></tr>
+      <tr><td><strong>ALGL</strong></td><td>Formação executiva/liderança</td><td>Nome directo a liderança</td><td>Menos experiência</td></tr>
+      <tr><td><strong>NOX Angola</strong></td><td>Capital humano integrado</td><td>RH + coaching + formação</td><td>Generalista</td></tr>
+      <tr><td><strong>Insignis West</strong></td><td>Consultoria + academia</td><td>Multi-sector</td><td>Consultoria > formação</td></tr>
+      <tr><td><strong>GetTraining</strong></td><td>500+ cursos, escala</td><td>Presença Moçambique</td><td>Volume sem profundidade</td></tr>
+      <tr><td><strong>LIDERA Angola</strong></td><td>Formação profissional</td><td>Foco exclusivo</td><td>Posicionamento genérico</td></tr>
+      <tr><td><strong>Novacademia</strong></td><td>Plataforma digital, INEFOP</td><td>Modelo digital-first</td><td>Limitado a vendas/BPM</td></tr>
+    </tbody>
+  </table>
+
+  <h2>3.2 Operadores Internacionais em Angola</h2>
+  <table>
+    <thead><tr><th>Concorrente</th><th>Origem</th><th>Força</th><th>Limitação</th></tr></thead>
+    <tbody>
+      <tr><td><strong>PwC Academy</strong></td><td>Global (Big4)</td><td>Marca global, credibilidade</td><td>Hard skills, não humano</td></tr>
+      <tr><td><strong>CEGOC / Luanda Business School</strong></td><td>Portugal</td><td>35+ anos em Angola</td><td>Modelo português</td></tr>
+      <tr><td><strong>HighSkills</strong></td><td>Portugal</td><td>Catálogo amplo PALOP</td><td>Sem raízes locais</td></tr>
+      <tr><td><strong>KEY Corporate</strong></td><td>Portugal</td><td>1.000+ cursos, CPLP</td><td>Volume sem personalidade</td></tr>
+      <tr><td><strong>TeamWork</strong></td><td>Portugal</td><td>Metodologia desportiva, 25.000+ formandos</td><td>Portuguesa, não angolana</td></tr>
+      <tr><td><strong>Vantagem+</strong></td><td>Portugal</td><td>30+ anos, escritório Luanda</td><td>Modelo genérico</td></tr>
+    </tbody>
+  </table>
+
+  <h2>3.3 Lacunas de Mercado = Oportunidades</h2>
+  <table>
+    <thead><tr><th>Lacuna Identificada</th><th>Oportunidade para Desperta</th></tr></thead>
+    <tbody>
+      <tr><td>Ninguém combina desenvolvimento humano + formação técnica bancária</td><td>Posicionamento único: quem viveu a banca por dentro E forma líderes por dentro</td></tr>
+      <tr><td>Poucas empresas angolanas dominam (maioria é portuguesa)</td><td>Autenticidade angolana como diferenciador real</td></tr>
+      <tr><td>Zero conteúdo em português angolano genuíno</td><td>Linguagem local = conexão mais profunda</td></tr>
+      <tr><td>Sem comunidade pós-formação no mercado</td><td>Programa alumni = receita recorrente</td></tr>
+      <tr><td>Nenhum concorrente usa IA como suporte operacional</td><td>Desperta + IA = eficiência, escala e diferenciação</td></tr>
+      <tr><td>Desenvolvimento pessoal holístico sub-representado</td><td>Território "transformação de dentro para fora" proprietário</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ========== SECTION 4: POSICIONAMENTO ========== -->
+<div class="section">
+  <h1><span class="section-num">4</span> Estratégia de Posicionamento</h1>
+
+  <h2>4.1 Posicionamento Proposto</h2>
+  <blockquote>
+    "A Desperta é a única academia angolana fundada por quem viveu a liderança por dentro — de Portugal a Moçambique, do BPI ao BAI, da KPMG ao INSS, do Banco Mundial ao palco — com 16 anos a transformar pessoas e organizações de dentro para fora."
+  </blockquote>
+
+  <h2>4.2 Território de Marca</h2>
+  <table>
+    <thead><tr><th>Território</th><th>Desperta</th><th>Concorrência</th></tr></thead>
+    <tbody>
+      <tr><td>Transformação interior → exterior (Saber-Ser)</td><td><span class="badge badge-ok">Exclusivo</span></td><td>Ninguém ocupa</td></tr>
+      <tr><td>Experiência real em banca + governo</td><td><span class="badge badge-ok">Exclusivo</span></td><td>Ninguém tem CV equivalente</td></tr>
+      <tr><td>Competências humanas face à IA</td><td><span class="badge badge-strong">Relevante</span></td><td>Apenas Academia BAI tangencia</td></tr>
+      <tr><td>Metodologias proprietárias</td><td><span class="badge badge-strong">Diferenciador</span></td><td>TeamWork tem metáfora desportiva</td></tr>
+      <tr><td>Voz angolana autêntica</td><td><span class="badge badge-ok">Genuíno</span></td><td>Maioria são portugueses</td></tr>
+      <tr><td>Formação bancária + desenvolvimento humano</td><td><span class="badge badge-ok">Único</span></td><td>Nenhum faz as duas</td></tr>
+    </tbody>
+  </table>
+
+  <h2>4.3 Proposta de Valor por Segmento</h2>
+
+  <h3>Sector Bancário e Financeiro</h3>
+  <div class="callout">
+    "O Dr. Camilo Ortet começou no BPI em Portugal, foi Gerente Corporate no BFE e Co-Director no BCI Fomento em Moçambique, Director no BAI e BFA em Angola, Manager na KPMG e Director na CMC. Participou em projectos do Banco Mundial e FMI. Ele não ensina banca — ele viveu-a em três países. A Desperta é a única academia que combina conhecimento técnico real com desenvolvimento de liderança e inteligência emocional para equipas bancárias."
+  </div>
+
+  <h3>Sector Público e Governamental</h3>
+  <div class="callout-green callout">
+    "Com experiência como Assessor/Consultor da Reforma Estratégica do INSS, Consultor do Director Geral do SIAC, Consultor do Ministério do Comércio e Director na CMC, o Dr. Camilo Ortet compreende a complexidade institucional angolana. A Desperta transforma gestores públicos em líderes conscientes e equipas em agentes de mudança."
+  </div>
+
+  <h3>Empresas e Organizações</h3>
+  <div class="callout-gold callout">
+    "Em 16 anos, a Desperta transformou mais de 40 organizações em Angola. O nosso modelo — saber-saber, saber-fazer, saber-ser — produz mudanças que ficam, porque começa por dentro."
+  </div>
+
+  <h2>4.4 Slogan e Assinatura</h2>
+  <p><strong>Slogan proposto:</strong> "Desperta. Transforma. Lidera."</p>
+  <p><strong>Assinatura de autoridade:</strong> "16 anos a despertar líderes em Angola"</p>
+</div>
+
+<!-- ========== SECTION 5: PLANO DE IMPLEMENTAÇÃO ========== -->
+<div class="section">
+  <h1><span class="section-num">5</span> Plano de Implementação — 4 Semanas</h1>
+
+  <div class="diagram">SEMANA 1 (6 - 12 Abr)    ▓▓▓▓  FUNDAÇÕES — Correcções urgentes + CRM setup
+SEMANA 2 (13 - 19 Abr)   ▓▓▓▓  ORGANIZAÇÃO — Base clientes + conteúdo + Website
+SEMANA 3 (20 - 26 Abr)   ▓▓▓▓  CONSTRUÇÃO + ACTIVAÇÃO — Reactivação + conteúdo
+SEMANA 4 (27 - 30 Abr)   ▓▓▓▓  LANÇAMENTO — Tudo operacional + go-live
+──────────────────────────────────────────────────────────────────
+1 DE MAIO                 ████  EXECUÇÃO PLENA</div>
+
+  <!-- WEEK 1 -->
+  <div class="week-header">
+    <h3>SEMANA 1: FUNDAÇÕES</h3>
+    <p>6 — 12 de Abril de 2026</p>
+  </div>
+
+  <h3>Acções Urgentes (Dia 1-2)</h3>
+  <table>
+    <thead><tr><th>#</th><th>Acção</th><th>Responsável</th><th>Entregável</th></tr></thead>
+    <tbody>
+      <tr><td>1.1</td><td>Preencher bio do Instagram @desperta.co</td><td>Marca Digital</td><td>Bio optimizada com proposta de valor + link</td></tr>
+      <tr><td>1.2</td><td>Adicionar link website na bio @desperta.co</td><td>Marca Digital</td><td>Link activo</td></tr>
+      <tr><td>1.3</td><td>Criar 4-5 destaques no Instagram @desperta.co</td><td>Marca Digital</td><td>Sobre, Programas, Testemunhos, Contacto, Resultados</td></tr>
+      <tr><td>1.4</td><td>Actualizar foto de perfil @desperta.co</td><td>Marca Digital + Camilo</td><td>Logo profissional consistente</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Setup CRM + Agente IA (Dia 1-7)</h3>
+  <table>
+    <thead><tr><th>#</th><th>Acção</th><th>Responsável</th><th>Entregável</th></tr></thead>
+    <tbody>
+      <tr><td>1.5</td><td>Definir requisitos do CRM Desperta</td><td>Marca Digital</td><td>Documento de requisitos</td></tr>
+      <tr><td>1.6</td><td>Configurar ambiente de desenvolvimento CRM</td><td>Marca Digital (dev)</td><td>Ambiente staging activo</td></tr>
+      <tr><td>1.7</td><td>Estruturar base de dados: contactos, empresas, pipeline</td><td>Marca Digital (dev)</td><td>Schema da BD definido</td></tr>
+      <tr><td>1.8</td><td>Iniciar desenvolvimento módulo de contactos e empresas</td><td>Marca Digital (dev)</td><td>Sprint 1 iniciado</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Recolha de Materiais (Dia 1-7)</h3>
+  <table>
+    <thead><tr><th>#</th><th>Acção</th><th>Responsável</th><th>Prazo</th></tr></thead>
+    <tbody>
+      <tr><td>1.9</td><td>Lista completa de clientes históricos</td><td><strong>Dr. Camilo Ortet</strong></td><td>09/04</td></tr>
+      <tr><td>1.10</td><td>Vídeos de palestras/formações existentes</td><td><strong>Dr. Camilo Ortet</strong></td><td>12/04</td></tr>
+      <tr><td>1.11</td><td>Fotos de eventos passados</td><td><strong>Dr. Camilo Ortet</strong></td><td>12/04</td></tr>
+      <tr><td>1.12</td><td>Testemunhos existentes (escritos ou vídeo)</td><td><strong>Dr. Camilo Ortet</strong></td><td>12/04</td></tr>
+      <tr><td>1.13</td><td>Materiais de formação (slides, manuais)</td><td><strong>Dr. Camilo Ortet</strong></td><td>12/04</td></tr>
+      <tr><td>1.14</td><td>Logos das empresas onde trabalhou</td><td><strong>Dr. Camilo Ortet</strong></td><td>12/04</td></tr>
+    </tbody>
+  </table>
+
+  <div class="page-break"></div>
+
+  <!-- WEEK 2 -->
+  <div class="week-header">
+    <h3>SEMANA 2: ORGANIZAÇÃO + CONSTRUÇÃO</h3>
+    <p>13 — 19 de Abril de 2026</p>
+  </div>
+
+  <h3>Organização da Base de Clientes</h3>
+  <table>
+    <thead><tr><th>#</th><th>Acção</th><th>Responsável</th><th>Entregável</th></tr></thead>
+    <tbody>
+      <tr><td>2.1</td><td>Segmentar base de clientes em 3 tiers (Premium / Estratégico / Relacional)</td><td>Marca Digital</td><td>Segmentação documentada</td></tr>
+      <tr><td>2.2</td><td>Identificar decisores actuais (podem ter mudado)</td><td>Marca Digital + Camilo</td><td>Lista actualizada</td></tr>
+      <tr><td>2.3</td><td>Criar ficha por cliente no CRM</td><td>Marca Digital</td><td>Fichas importadas</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Catalogação de Conteúdo</h3>
+  <table>
+    <thead><tr><th>#</th><th>Acção</th><th>Responsável</th><th>Entregável</th></tr></thead>
+    <tbody>
+      <tr><td>2.4</td><td>Catalogar e etiquetar vídeos (tema, duração, qualidade)</td><td>Marca Digital</td><td>Catálogo de vídeos</td></tr>
+      <tr><td>2.5</td><td>Seleccionar melhores fotos para redes sociais e website</td><td>Marca Digital</td><td>Banco de imagens curado</td></tr>
+      <tr><td>2.6</td><td>Transcrever e formatar testemunhos</td><td>Marca Digital</td><td>Testemunhos prontos</td></tr>
+      <tr><td>2.7</td><td>Identificar conteúdo reutilizável dos materiais de formação</td><td>Marca Digital</td><td>Lista de assets</td></tr>
+    </tbody>
+  </table>
+
+  <h3>CRM — Sprint 2</h3>
+  <table>
+    <thead><tr><th>#</th><th>Acção</th><th>Entregável</th></tr></thead>
+    <tbody>
+      <tr><td>2.8</td><td>Pipeline de vendas (leads → contacto → proposta → contrato)</td><td>Pipeline funcional</td></tr>
+      <tr><td>2.9</td><td>Histórico de interacções (chamadas, emails, reuniões)</td><td>Log de interacções</td></tr>
+      <tr><td>2.10</td><td>Importar base de clientes existente</td><td>Dados migrados</td></tr>
+      <tr><td>2.11</td><td>Integração agente IA — fase 1 (resumos e sugestões)</td><td>Agente IA v1</td></tr>
+    </tbody>
+  </table>
+
+  <!-- WEEK 3 -->
+  <div class="week-header">
+    <h3>SEMANA 3: CONSTRUÇÃO + ACTIVAÇÃO</h3>
+    <p>20 — 26 de Abril de 2026</p>
+  </div>
+
+  <h3>Website — Reescrita Estratégica</h3>
+  <table>
+    <thead><tr><th>#</th><th>Acção</th><th>Entregável</th></tr></thead>
+    <tbody>
+      <tr><td>3.1</td><td>Reescrever homepage com proposta de valor clara</td><td>Copy homepage</td></tr>
+      <tr><td>3.2</td><td>Criar página "Sobre o Fundador" com trajectória + logos</td><td>Página publicada</td></tr>
+      <tr><td>3.3</td><td>Secção de testemunhos com logos de empresas</td><td>Secção na homepage</td></tr>
+      <tr><td>3.4</td><td>Reescrever páginas dos 3 programas assinatura</td><td>3 páginas actualizadas</td></tr>
+      <tr><td>3.5</td><td>Optimizar SEO (títulos, meta descriptions, keywords)</td><td>SEO implementado</td></tr>
+      <tr><td>3.6</td><td>"Empresas que confiaram na Desperta" com logos</td><td>Barra de logos</td></tr>
+      <tr><td>3.7</td><td>Formulário de contacto integrado com CRM</td><td>Formulário activo</td></tr>
+    </tbody>
+  </table>
+
+  <h3>LinkedIn — Optimização Estratégica</h3>
+  <table>
+    <thead><tr><th>#</th><th>Acção</th><th>Entregável</th></tr></thead>
+    <tbody>
+      <tr><td>3.8</td><td>Reescrever resumo LinkedIn com narrativa</td><td>Novo resumo publicado</td></tr>
+      <tr><td>3.9</td><td>Artigo inaugural: "25 anos de carreira"</td><td>Artigo publicado</td></tr>
+      <tr><td>3.10</td><td>Preparar 8 posts para as próximas 4 semanas</td><td>Posts agendados</td></tr>
+      <tr><td>3.11</td><td>Optimizar secção de experiência</td><td>Perfil actualizado</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Instagram + CRM Sprint 3</h3>
+  <table>
+    <thead><tr><th>#</th><th>Acção</th><th>Entregável</th></tr></thead>
+    <tbody>
+      <tr><td>3.12</td><td>Criar template visual unificado (cores, fontes, layout)</td><td>Kit de templates</td></tr>
+      <tr><td>3.13</td><td>Preparar 12 posts Instagram (3 semanas)</td><td>Posts prontos</td></tr>
+      <tr><td>3.14</td><td>Editar 3-5 reels de vídeos existentes</td><td>Reels editados</td></tr>
+      <tr><td>3.15</td><td>Definir estratégia de hashtags Angola</td><td>Lista hashtags</td></tr>
+      <tr><td>3.16</td><td>CRM: Dashboard principal</td><td>Dashboard funcional</td></tr>
+      <tr><td>3.17</td><td>CRM: Agente IA fase 2 (sugestões + alertas)</td><td>Agente IA v2</td></tr>
+      <tr><td>3.18</td><td>CRM: Templates email/WhatsApp</td><td>Templates prontos</td></tr>
+      <tr><td>3.19</td><td>CRM: Testes internos com dados reais</td><td>Relatório de testes</td></tr>
+    </tbody>
+  </table>
+
+  <div class="page-break"></div>
+
+  <!-- WEEK 4 -->
+  <!-- Activação agora integrada na Semana 3 -->
+
+  <h3>Campanha de Reactivação de Clientes</h3>
+  <table>
+    <thead><tr><th>#</th><th>Acção</th><th>Responsável</th><th>Entregável</th></tr></thead>
+    <tbody>
+      <tr><td>4.1</td><td>Tier 1: contacto directo pelo Dr. Camilo (chamada + WhatsApp)</td><td><strong>Dr. Camilo</strong> + Marca Digital</td><td>10-15 contactos directos</td></tr>
+      <tr><td>4.2</td><td>Tier 2: email personalizado via CRM</td><td>Marca Digital</td><td>Emails enviados</td></tr>
+      <tr><td>4.3</td><td>Follow-up Tier 1: mensagem de valor</td><td>Marca Digital</td><td>Follow-up enviado</td></tr>
+      <tr><td>4.4</td><td>Solicitar testemunhos a clientes que respondem</td><td>Marca Digital + Camilo</td><td>Pedidos enviados</td></tr>
+      <tr><td>4.5</td><td>Agendar reuniões com clientes interessados</td><td>Marca Digital + Camilo</td><td>Reuniões no calendário</td></tr>
+    </tbody>
+  </table>
+
+  <h4>Sequência de Reactivação (3 Toques)</h4>
+  <table>
+    <thead><tr><th>Toque</th><th>Timing</th><th>Canal</th><th>Mensagem</th></tr></thead>
+    <tbody>
+      <tr><td><strong>1. Reaproximação</strong></td><td>Dia 1</td><td>Chamada (T1) / Email (T2)</td><td>Retomar contacto, partilhar novidades</td></tr>
+      <tr><td><strong>2. Valor gratuito</strong></td><td>Dia 4-5</td><td>WhatsApp / Email</td><td>Artigo, vídeo ou insight relevante</td></tr>
+      <tr><td><strong>3. Proposta</strong></td><td>Dia 8-10</td><td>Email + chamada</td><td>Programa específico para necessidade</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Conteúdo + CRM Sprint 4</h3>
+  <table>
+    <thead><tr><th>#</th><th>Acção</th><th>Entregável</th></tr></thead>
+    <tbody>
+      <tr><td>4.6</td><td>Publicar 2 posts LinkedIn</td><td>Posts publicados</td></tr>
+      <tr><td>4.7</td><td>Publicar 4 posts Instagram @camiloortet</td><td>Posts publicados</td></tr>
+      <tr><td>4.8</td><td>Publicar 2 posts Instagram @desperta.co</td><td>Posts publicados</td></tr>
+      <tr><td>4.9</td><td>Publicar 1-2 reels</td><td>Reels publicados</td></tr>
+      <tr><td>4.10</td><td>Recolher 1-2 testemunhos em vídeo (30-60 seg)</td><td>Vídeos testemunho</td></tr>
+      <tr><td>4.11</td><td>CRM: Agente IA fase 3 (prospecção + follow-up automático)</td><td>Agente IA v3</td></tr>
+      <tr><td>4.12</td><td>Formação do Dr. Camilo no CRM (1h)</td><td>Sessão realizada</td></tr>
+      <tr><td>4.13</td><td>Registar interacções da campanha no CRM</td><td>Dados actualizados</td></tr>
+    </tbody>
+  </table>
+
+  <!-- WEEK 5 -->
+  <div class="week-header">
+    <h3>SEMANA 4: LANÇAMENTO</h3>
+    <p>27 — 30 de Abril de 2026</p>
+  </div>
+
+  <h3>Validação e Go-Live</h3>
+  <table>
+    <thead><tr><th>#</th><th>Acção</th><th>Entregável</th></tr></thead>
+    <tbody>
+      <tr><td>5.1</td><td>Revisão final do website (textos, links, formulários, SEO)</td><td>Website validado</td></tr>
+      <tr><td>5.2</td><td>Revisão final dos perfis de redes sociais</td><td>Perfis alinhados</td></tr>
+      <tr><td>5.3</td><td>Teste end-to-end do CRM</td><td>CRM validado</td></tr>
+      <tr><td>5.4</td><td>Teste do agente de IA</td><td>Agente IA validado</td></tr>
+      <tr><td>5.5</td><td>Calendário editorial de Maio (30 dias)</td><td>Calendário completo</td></tr>
+      <tr><td>5.6</td><td>Relatório de resultados da campanha de reactivação</td><td>Relatório de métricas</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Documentação e Preparação</h3>
+  <table>
+    <thead><tr><th>#</th><th>Acção</th><th>Entregável</th></tr></thead>
+    <tbody>
+      <tr><td>5.7</td><td>Manual de uso do CRM</td><td>PDF/vídeo</td></tr>
+      <tr><td>5.8</td><td>Guia de publicação em redes sociais</td><td>Brand guide</td></tr>
+      <tr><td>5.9</td><td>Kit de prospecção (scripts, templates, sequências)</td><td>Documento</td></tr>
+      <tr><td>5.10</td><td>Apresentação de resultados ao Dr. Camilo</td><td>Reunião de encerramento</td></tr>
+      <tr><td>5.11</td><td>Metas mensais de prospecção</td><td>Funil de vendas</td></tr>
+      <tr><td>5.12</td><td>Calendário de eventos/workshops Q2-Q3</td><td>Calendário</td></tr>
+      <tr><td>5.13</td><td>Oportunidades mídia tradicional para Maio</td><td>Lista</td></tr>
+      <tr><td>5.14</td><td>Roadmap expansão PALOP (Moçambique)</td><td>Roadmap</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ========== SECTION 6: CRM + IA ========== -->
+<div class="section">
+  <h1><span class="section-num">6</span> Plataforma CRM + Agente de Inteligência Artificial</h1>
+
+  <h2>6.1 Arquitectura</h2>
+
+  <div class="diagram">┌──────────────────────────────────────────────────────┐
+│                    CRM DESPERTA                       │
+├──────────────────────────────────────────────────────┤
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
+│  │  CONTACTOS   │  │  EMPRESAS   │  │  FORMADORES  │  │
+│  │  &amp; LEADS     │  │  &amp; CLIENTES │  │  &amp; MENTORES  │  │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │
+│         └────────────────┼─────────────────┘         │
+│  ┌───────────────────────▼───────────────────────┐   │
+│  │           PIPELINE DE VENDAS                   │   │
+│  │  Lead → Contacto → Proposta → Contrato →      │   │
+│  │  Activo → Renovação                           │   │
+│  └───────────────────────┬───────────────────────┘   │
+│  ┌───────────────────────▼───────────────────────┐   │
+│  │       AGENTE DE INTELIGÊNCIA ARTIFICIAL        │   │
+│  │  • Sugestões de próximo passo por lead         │   │
+│  │  • Resumo automático de interacções            │   │
+│  │  • Alertas de follow-up                        │   │
+│  │  • Geração de emails/WhatsApp personalizados   │   │
+│  │  • Lead scoring (0-100)                        │   │
+│  │  • Previsão de pipeline e receita              │   │
+│  └───────────────────────┬───────────────────────┘   │
+│  ┌───────────────────────▼───────────────────────┐   │
+│  │           DASHBOARD &amp; RELATÓRIOS               │   │
+│  └───────────────────────────────────────────────┘   │
+├──────────────────────────────────────────────────────┤
+│  INTEGRAÇÕES: WhatsApp | Email | Website | Calendário │
+└──────────────────────────────────────────────────────┘</div>
+
+  <h2>6.2 Módulos Principais</h2>
+
+  <h3>Módulo 1: Contactos e Empresas</h3>
+  <table>
+    <thead><tr><th>Funcionalidade</th><th>Descrição</th></tr></thead>
+    <tbody>
+      <tr><td>Ficha de contacto</td><td>Nome, cargo, empresa, telefone, email, WhatsApp, notas</td></tr>
+      <tr><td>Ficha de empresa</td><td>Nome, sector, dimensão, histórico com Desperta, tier</td></tr>
+      <tr><td>Tags e segmentos</td><td>Banca, Governo, Empresas, PALOP, Ex-cliente, Lead</td></tr>
+      <tr><td>Importação em massa</td><td>Upload de ficheiro Excel/CSV</td></tr>
+      <tr><td>Pesquisa inteligente</td><td>Por nome, empresa, sector, tag</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Módulo 2: Pipeline de Vendas</h3>
+  <table>
+    <thead><tr><th>Estágio</th><th>Descrição</th><th>Acção Esperada</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Lead</strong></td><td>Contacto identificado</td><td>Primeiro contacto</td></tr>
+      <tr><td><strong>Contacto</strong></td><td>Primeira interacção realizada</td><td>Qualificar necessidade</td></tr>
+      <tr><td><strong>Qualificado</strong></td><td>Necessidade identificada</td><td>Preparar proposta</td></tr>
+      <tr><td><strong>Proposta</strong></td><td>Proposta enviada</td><td>Follow-up e negociação</td></tr>
+      <tr><td><strong>Negociação</strong></td><td>Discussão de termos</td><td>Fechar acordo</td></tr>
+      <tr><td><strong>Contrato</strong></td><td>Acordo fechado</td><td>Executar formação</td></tr>
+      <tr><td><strong>Activo</strong></td><td>Formação em curso/concluída</td><td>Recolher feedback</td></tr>
+      <tr><td><strong>Renovação</strong></td><td>Cliente passado</td><td>Campanha de reactivação</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Módulo 3: Agente de Inteligência Artificial</h3>
+  <table>
+    <thead><tr><th>Capacidade</th><th>Descrição</th><th>Valor</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Sugestão de próximo passo</strong></td><td>Analisa histórico e sugere acção</td><td>Nenhum lead esquecido</td></tr>
+      <tr><td><strong>Resumo de interacções</strong></td><td>Gera resumo automático</td><td>Poupança de tempo</td></tr>
+      <tr><td><strong>Alertas inteligentes</strong></td><td>Notifica leads frios e renovações</td><td>Proactividade</td></tr>
+      <tr><td><strong>Geração de mensagens</strong></td><td>Emails/WhatsApp personalizados</td><td>Comunicação consistente</td></tr>
+      <tr><td><strong>Lead scoring</strong></td><td>Pontuação 0-100 por lead</td><td>Priorização de esforço</td></tr>
+      <tr><td><strong>Previsão de pipeline</strong></td><td>Receita provável por estágio</td><td>Planeamento financeiro</td></tr>
+      <tr><td><strong>Sugestão de conteúdo</strong></td><td>Recomenda conteúdo por segmento</td><td>Social selling</td></tr>
+      <tr><td><strong>Análise de sentimento</strong></td><td>Avalia tom das interacções</td><td>Retenção</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Módulo 4: Bolsa de Formadores e Mentores</h3>
+  <table>
+    <thead><tr><th>Funcionalidade</th><th>Descrição</th></tr></thead>
+    <tbody>
+      <tr><td>Perfil de formador</td><td>Nome, especialidade, certificações, disponibilidade, tarifa</td></tr>
+      <tr><td>Matching IA</td><td>Sugere formador ideal por tema e perfil do cliente</td></tr>
+      <tr><td>Agenda partilhada</td><td>Disponibilidade de todos os formadores</td></tr>
+      <tr><td>Avaliação</td><td>Classificação por cliente após formação</td></tr>
+    </tbody>
+  </table>
+
+  <h2>6.3 Stack Tecnológica</h2>
+  <table>
+    <thead><tr><th>Componente</th><th>Tecnologia</th><th>Justificação</th></tr></thead>
+    <tbody>
+      <tr><td>Frontend</td><td>Next.js + Tailwind CSS</td><td>Performance, SSR, experiência moderna</td></tr>
+      <tr><td>Backend / BD</td><td>Supabase (PostgreSQL)</td><td>RLS, real-time, auth integrado</td></tr>
+      <tr><td>Agente IA</td><td>Claude API (Anthropic)</td><td>Raciocínio avançado e geração</td></tr>
+      <tr><td>Hosting</td><td>Vercel</td><td>Deploy automático, CDN global</td></tr>
+      <tr><td>WhatsApp</td><td>API Business (webhook)</td><td>Canal principal em Angola</td></tr>
+      <tr><td>Email</td><td>Resend / SendGrid</td><td>Transaccional + campanhas</td></tr>
+    </tbody>
+  </table>
+
+  <h2>6.4 Cronograma de Desenvolvimento</h2>
+  <table>
+    <thead><tr><th>Sprint</th><th>Semana</th><th>Entregáveis</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Sprint 1</strong></td><td>6 – 12 Abr</td><td>Schema BD + módulo contactos/empresas (CRUD)</td></tr>
+      <tr><td><strong>Sprint 2</strong></td><td>13 – 19 Abr</td><td>Pipeline + histórico + importação dados + IA fase 1</td></tr>
+      <tr><td><strong>Sprint 3</strong></td><td>20 – 26 Abr</td><td>Dashboard + Agente IA completo + templates + testes</td></tr>
+      <tr><td><strong>Sprint 4</strong></td><td>27 – 30 Abr</td><td>Bolsa formadores + relatórios + formação + go-live</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ========== SECTION 7: CONTEÚDO ========== -->
+<div class="section">
+  <h1><span class="section-num">7</span> Estratégia de Conteúdo e Comunicação</h1>
+
+  <h2>7.1 Pilares de Conteúdo</h2>
+  <table>
+    <thead><tr><th>Pilar</th><th>%</th><th>Objectivo</th><th>Exemplos</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Autoridade</strong></td><td>35%</td><td>Posicionar como referência</td><td>Insights liderança, frameworks, tendências</td></tr>
+      <tr><td><strong>Prova Social</strong></td><td>25%</td><td>Demonstrar resultados</td><td>Testemunhos, logos clientes, fotos formações</td></tr>
+      <tr><td><strong>Storytelling</strong></td><td>20%</td><td>Humanizar e diferenciar</td><td>Histórias da carreira, lições, bastidores</td></tr>
+      <tr><td><strong>Educação</strong></td><td>15%</td><td>Gerar valor gratuito</td><td>Dicas, frameworks, carrosséis</td></tr>
+      <tr><td><strong>Chamada à Acção</strong></td><td>5%</td><td>Converter em leads</td><td>Workshops, diagnóstico gratuito</td></tr>
+    </tbody>
+  </table>
+
+  <h2>7.2 Calendário por Canal</h2>
+
+  <h3>LinkedIn (Dr. Camilo Ortet)</h3>
+  <p><strong>Frequência:</strong> 2-3 publicações/semana | <strong>Formato:</strong> Texto longo + imagem | <strong>Horário:</strong> Terça e Quinta, 8h-9h</p>
+
+  <h4>Temas para Abril</h4>
+  <ol>
+    <li>"25 anos de carreira: o que descobri sobre liderança" (artigo inaugural)</li>
+    <li>"O que a KPMG me ensinou sobre recuperar — crédito e pessoas"</li>
+    <li>"Porque é que os bancos angolanos precisam de inteligência emocional"</li>
+    <li>"Eu, o Líder: a formação que começa por dentro"</li>
+    <li>"O que 40 organizações me ensinaram sobre equipas"</li>
+    <li>"Saber-Saber, Saber-Fazer, Saber-Ser — as 3 dimensões que faltam"</li>
+    <li>"A Desperta está de volta. E vem diferente."</li>
+    <li>"IA vai substituir formadores? Não. Vai substituir os que não formam pessoas."</li>
+  </ol>
+
+  <h3>Instagram @camiloortet</h3>
+  <p><strong>Frequência:</strong> 4-5 publicações/semana | <strong>Formatos:</strong> Reels (40%), Carrosséis (30%), Estáticos (20%), Stories (diário)</p>
+
+  <h4>Mudanças imediatas de conteúdo</h4>
+  <table>
+    <thead><tr><th>De</th><th>Para</th></tr></thead>
+    <tbody>
+      <tr><td>40% frases motivacionais genéricas</td><td>10% — só frases com substância real</td></tr>
+      <tr><td>0% storytelling da trajectória</td><td>25% — histórias reais diferenciadores</td></tr>
+      <tr><td>10% conteúdo Angocajú</td><td>0% — separar marcas</td></tr>
+      <tr><td>0% call-to-action</td><td>Cada post com CTA claro</td></tr>
+    </tbody>
+  </table>
+
+  <h2>7.3 Conteúdo Prioritário</h2>
+  <table>
+    <thead><tr><th>#</th><th>Conteúdo</th><th>Formato</th><th>Canal</th><th>Prazo</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Artigo "25 anos de carreira"</td><td>Texto longo</td><td>LinkedIn</td><td>Sem 3</td></tr>
+      <tr><td>2</td><td>Vídeo "A Desperta está de volta" (manifesto)</td><td>Reel 60-90s</td><td>IG + LI</td><td>Sem 3</td></tr>
+      <tr><td>3</td><td>Carrossel "Modelo Saber-Saber/Fazer/Ser"</td><td>10 slides</td><td>Instagram</td><td>Sem 3</td></tr>
+      <tr><td>4</td><td>Testemunho em vídeo de ex-cliente</td><td>Reel 30-60s</td><td>IG + LI</td><td>Sem 4</td></tr>
+      <tr><td>5</td><td>"Empresas que confiaram na Desperta"</td><td>Imagem logos</td><td>IG + LI</td><td>Sem 4</td></tr>
+      <tr><td>6</td><td>"O que aprendi no BAI sobre liderança"</td><td>Reel 60s</td><td>IG + LI</td><td>Sem 4</td></tr>
+      <tr><td>7</td><td>Carrossel "Eu, o Líder — explicado"</td><td>8 slides</td><td>Instagram</td><td>Sem 5</td></tr>
+      <tr><td>8</td><td>Post "1 de Maio — novo capítulo"</td><td>Imagem + texto</td><td>Todos</td><td>30 Abr</td></tr>
+    </tbody>
+  </table>
+
+  <h2>7.4 Mídia Tradicional (Maio em diante)</h2>
+  <table>
+    <thead><tr><th>Canal</th><th>Abordagem</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Jornal Expansão</strong></td><td>Artigos de opinião sobre liderança + IA</td></tr>
+      <tr><td><strong>Jornal de Angola</strong></td><td>Entrevistas sobre formação executiva</td></tr>
+      <tr><td><strong>TPA / TV Zimbo</strong></td><td>Participação em programas de economia</td></tr>
+      <tr><td><strong>Rádio</strong></td><td>Entrevistas sobre liderança e empreendedorismo</td></tr>
+    </tbody>
+  </table>
+
+  <h2>7.5 Parcerias Estratégicas</h2>
+  <table>
+    <thead><tr><th>Parceiro</th><th>Tipo</th><th>Valor</th></tr></thead>
+    <tbody>
+      <tr><td><strong>MOVE Angola</strong> (Dardano Santos)</td><td>Camilo como speaker</td><td>Exposição a 2.500+ líderes</td></tr>
+      <tr><td><strong>Academia BAI</strong></td><td>Parceria de conteúdo</td><td>Acesso à rede BAI</td></tr>
+      <tr><td><strong>CEGOC / Luanda Business School</strong></td><td>Parceria de distribuição</td><td>Infraestrutura e rede</td></tr>
+      <tr><td><strong>Universidade Politécnica</strong></td><td>Docente convidado</td><td>Credibilidade académica</td></tr>
+      <tr><td><strong>Instituto Fábio Galvão</strong> (Brasil)</td><td>Co-criação de programas</td><td>Diferenciação metodológica</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ========== SECTION 8: KPIs ========== -->
+<div class="section">
+  <h1><span class="section-num">8</span> Indicadores de Sucesso (KPIs)</h1>
+
+  <h2>8.1 KPIs da Fase de Implementação (6 Abr — 30 Abr)</h2>
+  <table>
+    <thead><tr><th>Indicador</th><th>Meta</th></tr></thead>
+    <tbody>
+      <tr><td>Website reescrito e optimizado</td><td>100% das páginas prioritárias</td></tr>
+      <tr><td>CRM operacional com agente IA</td><td>Go-live até 30/04</td></tr>
+      <tr><td>Base de clientes importada e segmentada</td><td>100% dos contactos</td></tr>
+      <tr><td>Clientes Tier 1 contactados</td><td>100%</td></tr>
+      <tr><td>Clientes com resposta positiva</td><td>≥30%</td></tr>
+      <tr><td>Reuniões agendadas com ex-clientes</td><td>≥10</td></tr>
+      <tr><td>Testemunhos recolhidos</td><td>≥5</td></tr>
+      <tr><td>Posts LinkedIn publicados</td><td>≥6</td></tr>
+      <tr><td>Posts Instagram publicados</td><td>≥16</td></tr>
+      <tr><td>Calendário editorial Maio preparado</td><td>30 dias completos</td></tr>
+    </tbody>
+  </table>
+
+  <h2>8.2 KPIs de Execução (a partir de 1 Maio)</h2>
+  <table>
+    <thead><tr><th>Indicador</th><th>Meta Mensal</th><th>Meta Trimestral (Mai-Jul)</th></tr></thead>
+    <tbody>
+      <tr><td>Seguidores Instagram @camiloortet</td><td>+200/mês</td><td>1.500+ total</td></tr>
+      <tr><td>Conexões LinkedIn</td><td>+100/mês</td><td>800+ total</td></tr>
+      <tr><td>Leads gerados (CRM)</td><td>15-20</td><td>50+</td></tr>
+      <tr><td>Propostas enviadas</td><td>5-8</td><td>18+</td></tr>
+      <tr><td>Contratos fechados</td><td>2-3</td><td>6-8</td></tr>
+      <tr><td>Testemunhos publicados</td><td>2-3</td><td>10+</td></tr>
+      <tr><td>Aparições mídia</td><td>1-2</td><td>4+</td></tr>
+      <tr><td>Taxa de conversão pipeline</td><td>≥20%</td><td>≥25%</td></tr>
+      <tr><td>NPS clientes</td><td>≥8/10</td><td>≥8.5/10</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ========== SECTION 9: REFUNDAÇÃO E MENTORIA ========== -->
+<div class="section">
+  <h1><span class="section-num">9</span> Visão de Refundação e Modelo de Mentoria</h1>
+
+  <h2>9.1 Da Reactivação à Refundação</h2>
+  <p>Este projecto vai além de um simples relançamento digital. Trata-se de uma <strong>refundação profunda e extensiva</strong> da DESPERTA — uma contextualização do projecto original aos modelos actuais de desenvolvimento, sustentabilidade e melhores referências do mercado.</p>
+
+  <div class="callout-gold callout">
+    <strong>A diferença entre relançar e refundar:</strong> Relançar é voltar com a mesma proposta e novas ferramentas. Refundar é repensar o posicionamento, alinhar a persona do fundador ao projecto de forma estratégica, e criar novos processos que garantam disciplina organizacional e cultura de excelência.
+  </div>
+
+  <h3>Os 4 Pilares da Refundação</h3>
+  <table>
+    <thead><tr><th>#</th><th>Pilar</th><th>Descrição</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><strong>Levantamento Profundo</strong></td><td>Diagnóstico abrangente de 16 anos de activos — relacional, reputacional, metodológico e digital — para identificar o que preservar, o que actualizar e o que criar</td></tr>
+      <tr><td>2</td><td><strong>Reforma Faseada</strong></td><td>Contextualização da DESPERTA aos modelos de desenvolvimento, sustentabilidade e melhores referências do mercado angolano e internacional</td></tr>
+      <tr><td>3</td><td><strong>Alinhamento Persona–Projecto</strong></td><td>Linkar a persona Camilo Ortet ao DESPERTA de forma estratégica e tacticamente alinhada — a marca pessoal e a marca institucional devem reforçar-se mutuamente</td></tr>
+      <tr><td>4</td><td><strong>Disciplina Organizacional</strong></td><td>Promoção de novos processos e procedimentos que criem um novo clima organizacional, reforçando os ganhos históricos e instalando uma cultura organizacional de crescimento sustentável</td></tr>
+    </tbody>
+  </table>
+
+  <h2>9.2 Modelo de Mentoria — A Experiência DESPERTA</h2>
+  <p>A DESPERTA não é apenas uma academia de formação — é um modelo de <strong>mentoria baseada em ferramentas de coaching</strong>, potenciado pela experiência pessoal excepcional do seu principal promotor. Este modelo é o verdadeiro diferenciador no mercado angolano.</p>
+
+  <h3>O que distingue a mentoria DESPERTA</h3>
+  <table>
+    <thead><tr><th>Dimensão</th><th>Formação Tradicional</th><th>Mentoria DESPERTA</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Base</strong></td><td>Conteúdo teórico e académico</td><td>Experiência vivida em 3 países + frameworks de coaching</td></tr>
+      <tr><td><strong>Método</strong></td><td>Transferência de conhecimento</td><td>Transformação pessoal + desenvolvimento de competências</td></tr>
+      <tr><td><strong>Duração do impacto</strong></td><td>Dias/semanas após formação</td><td>Mudança comportamental duradoura</td></tr>
+      <tr><td><strong>Relação</strong></td><td>Formador → formando</td><td>Mentor → mentorado (acompanhamento)</td></tr>
+      <tr><td><strong>Credibilidade</strong></td><td>Certificação académica</td><td>Historial de 28+ anos em posições de liderança real</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Modelo Saber-Saber / Saber-Fazer / Saber-Ser aplicado à mentoria</h3>
+  <div class="pillar-row">
+    <div class="pillar-card verde">
+      <h4>Saber-Saber</h4>
+      <p>Conhecimento técnico — banca, finanças, gestão, estratégia. Vindo de quem viveu estas realidades.</p>
+    </div>
+    <div class="pillar-card azul">
+      <h4>Saber-Fazer</h4>
+      <p>Competências práticas — liderança, negociação, gestão de equipas, tomada de decisão. Treinadas com casos reais.</p>
+    </div>
+    <div class="pillar-card dourado">
+      <h4>Saber-Ser/Estar</h4>
+      <p>Atitude e comportamento — inteligência emocional, consciência, valores. O interior que transforma o exterior.</p>
+    </div>
+  </div>
+
+  <h2>9.3 "Uma Hora com Camilo Ortet" — Isca de Lead Estratégica</h2>
+  <p>Uma das formas mais poderosas de gerar leads qualificados é oferecer acesso directo ao fundador num formato exclusivo e acessível.</p>
+
+  <div class="callout-green callout">
+    <strong>Conceito:</strong> Um "café" ou sessão de 1 hora com o Dr. Camilo Ortet, onde executivos, gestores ou equipas de RH podem explorar os seus desafios de liderança e receber orientação personalizada — sem compromisso.
+  </div>
+
+  <h3>Formato e Mecânica</h3>
+  <table>
+    <thead><tr><th>Elemento</th><th>Detalhe</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Nome</strong></td><td>"Uma Hora com Camilo Ortet" / "Café com o Dr. Camilo"</td></tr>
+      <tr><td><strong>Duração</strong></td><td>60 minutos</td></tr>
+      <tr><td><strong>Formato</strong></td><td>Presencial (café/escritório) ou Zoom</td></tr>
+      <tr><td><strong>Público</strong></td><td>Decisores: directores, gestores RH, C-level</td></tr>
+      <tr><td><strong>Custo</strong></td><td>Gratuito (isca) ou valor simbólico (posicionamento premium)</td></tr>
+      <tr><td><strong>Objectivo</strong></td><td>Diagnóstico inicial → identificar necessidade → propor programa DESPERTA</td></tr>
+      <tr><td><strong>Capacidade</strong></td><td>4-6 sessões/mês (máximo para manter exclusividade)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Funil de Conversão</h3>
+  <div class="diagram">  Post LinkedIn/Instagram → CTA "Agende o seu café com Camilo"
+          ↓
+  Formulário no website (nome, empresa, cargo, desafio)
+          ↓
+  CRM regista lead → Agente IA qualifica automaticamente
+          ↓
+  Sessão "Uma Hora com Camilo Ortet"
+          ↓
+  Diagnóstico pessoal → Proposta de programa DESPERTA
+          ↓
+  Follow-up personalizado (CRM + Agente IA)
+          ↓
+  Contrato fechado</div>
+
+  <h3>Valor estratégico</h3>
+  <ul>
+    <li><strong>Para o lead:</strong> Acesso directo a um profissional com 28+ anos de experiência — sem custo e sem compromisso</li>
+    <li><strong>Para a DESPERTA:</strong> Leads qualificados, com necessidade identificada e relação pessoal estabelecida</li>
+    <li><strong>Para o CRM:</strong> Cada sessão gera dados ricos — desafio, sector, dimensão da equipa, urgência — que alimentam o pipeline e o agente IA</li>
+  </ul>
+</div>
+
+<!-- ========== SECTION 10: ORÇAMENTO ========== -->
+<div class="section">
+  <h1><span class="section-num">10</span> Orçamento e Modelo Comercial</h1>
+
+  <h2>10.1 Fase 1 — Implementação (6 Abr — 30 Abr)</h2>
+  <table>
+    <thead><tr><th>Serviço</th><th>Descrição</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Auditoria e Estratégia</strong></td><td>Diagnóstico completo, análise competitiva, posicionamento (CONCLUÍDO)</td></tr>
+      <tr><td><strong>Desenvolvimento CRM + Agente IA</strong></td><td>Plataforma gestão contactos, pipeline, dashboard, IA integrada</td></tr>
+      <tr><td><strong>Reescrita Website</strong></td><td>Homepage, Sobre, Programas, Testemunhos, Contacto — copy e SEO</td></tr>
+      <tr><td><strong>Optimização Redes Sociais</strong></td><td>LinkedIn e Instagram — perfis, templates, conteúdo inicial</td></tr>
+      <tr><td><strong>Campanha Reactivação</strong></td><td>Segmentação, templates, execução da primeira campanha</td></tr>
+      <tr><td><strong>Produção Conteúdo</strong></td><td>6+ posts LinkedIn, 16+ posts Instagram, 3-5 reels, artigo inaugural</td></tr>
+      <tr><td><strong>Formação</strong></td><td>Sessão CRM + guia de publicação em redes sociais</td></tr>
+      <tr><td><strong>Documentação</strong></td><td>Manual CRM, brand guide, kit de prospecção</td></tr>
+    </tbody>
+  </table>
+
+  <h2>10.2 Fase 2 — Execução Contínua (a partir de 1 Maio)</h2>
+  <table>
+    <thead><tr><th>Serviço</th><th>Descrição</th><th>Frequência</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Gestão Redes Sociais</strong></td><td>Criação e publicação LinkedIn + Instagram</td><td>Mensal</td></tr>
+      <tr><td><strong>Gestão Campanhas</strong></td><td>Prospecção, follow-up, relatórios pipeline</td><td>Mensal</td></tr>
+      <tr><td><strong>Manutenção CRM</strong></td><td>Suporte, melhorias, novos módulos</td><td>Contínuo</td></tr>
+      <tr><td><strong>Evolução Agente IA</strong></td><td>Novas capacidades, refinamento</td><td>Mensal</td></tr>
+      <tr><td><strong>Consultoria Estratégica</strong></td><td>Reunião mensal de alinhamento</td><td>Mensal</td></tr>
+      <tr><td><strong>Produção Conteúdo</strong></td><td>Posts, reels, artigos, design</td><td>Mensal</td></tr>
+    </tbody>
+  </table>
+
+  <h2>10.3 Modelo de Pagamento</h2>
+  <p><em>A definir em conjunto com o Dr. Camilo Ortet na próxima reunião.</em></p>
+  <table>
+    <thead><tr><th>Opção</th><th>Modelo</th><th>Adequado para</th></tr></thead>
+    <tbody>
+      <tr><td><strong>A</strong></td><td>Fee fixo mensal (retainer)</td><td>Previsibilidade de custos</td></tr>
+      <tr><td><strong>B</strong></td><td>Fee por fase + retainer mensal</td><td>Investimento faseado</td></tr>
+      <tr><td><strong>C</strong></td><td>Retainer base + performance</td><td>Alinhamento de incentivos</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ========== SECTION 11: ANEXOS ========== -->
+<div class="section">
+  <h1><span class="section-num">11</span> Anexos</h1>
+
+  <h2>Anexo A — Responsabilidades do Dr. Camilo Ortet</h2>
+  <table>
+    <thead><tr><th>Entregável</th><th>Prazo</th><th>Formato</th></tr></thead>
+    <tbody>
+      <tr><td>Lista completa de clientes históricos</td><td>09/04</td><td>Excel: empresa, contacto, formação, ano</td></tr>
+      <tr><td>Vídeos de palestras/formações</td><td>12/04</td><td>Google Drive / WeTransfer</td></tr>
+      <tr><td>Fotos de eventos passados</td><td>12/04</td><td>Google Drive / WeTransfer</td></tr>
+      <tr><td>Testemunhos existentes</td><td>12/04</td><td>Texto, áudio ou vídeo</td></tr>
+      <tr><td>Materiais de formação (slides, manuais)</td><td>12/04</td><td>PDF / PPT</td></tr>
+      <tr><td>Logos das empresas onde trabalhou</td><td>12/04</td><td>PNG/SVG</td></tr>
+      <tr><td>Aprovação textos website</td><td>19/04</td><td>Feedback email/WhatsApp</td></tr>
+      <tr><td>Aprovação resumo LinkedIn</td><td>19/04</td><td>Feedback email/WhatsApp</td></tr>
+      <tr><td>Chamadas reactivação Tier 1</td><td>20-26/04</td><td>10-15 chamadas</td></tr>
+      <tr><td>Pedido testemunhos a clientes</td><td>20-26/04</td><td>Chamadas/WhatsApp</td></tr>
+      <tr><td>Sessão formação CRM</td><td>26/04</td><td>Presencial ou Zoom (1h)</td></tr>
+      <tr><td>Gravação 2-3 vídeos curtos (reels)</td><td>20-26/04</td><td>Smartphone, 30-90 seg</td></tr>
+      <tr><td>Validação final canais</td><td>29/04</td><td>Revisão conjunta</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Anexo B — Cronograma Visual</h2>
+  <div class="diagram">                     ABRIL                              MAIO
+                6    12    19    26    30                    1
+                │     │     │     │     │                    │
+ FUNDAÇÕES      ██████│     │     │     │                    │
+ ORG+CONSTRUÇÃO │     ██████│     │     │                    │
+ CONSTRUÇÃO+ACT │     │     ██████│     │                    │
+ LANÇAMENTO     │     │     │     ██████│                    │
+                │     │     │     │     │                    │
+ CRM Sprint 1   ██████│     │     │     │                    │
+ CRM Sprint 2   │     ██████│     │     │                    │
+ CRM Sprint 3   │     │     ██████│     │                    │
+ CRM Sprint 4   │     │     │     ██████│                    │
+                │     │     │     │     │                    │
+ WEBSITE        │     ████████████│     │                    │
+ LINKEDIN       ██████████████████████████████████████████████
+ INSTAGRAM      ██████████████████████████████████████████████
+ REACTIVAÇÃO    │     │     ████████████████████████████████████
+ AGENTE IA      ██████████████████████████│                    │
+                │     │     │     │     │                    │
+                └─────┴─────┴─────┴─────┘                    │
+                  IMPLEMENTAÇÃO (4 semanas)           EXECUÇÃO ▶</div>
+
+  <h2>Anexo C — Referências</h2>
+  <ul>
+    <li>Acta de Reunião de Alinhamento Estratégico — 19 de Março de 2026</li>
+    <li>Documento "Sobre Desperta Academia"</li>
+    <li>Perfil LinkedIn exportado — Camilo Ortet (25/03/2026)</li>
+    <li>Perfil Instagram — @camiloortet (screenshot 25/03/2026)</li>
+    <li>Auditoria Website — despertaacademy.com</li>
+    <li>Auditoria Instagram — @desperta.co</li>
+    <li>Análise competitiva — 20+ concorrentes mapeados</li>
+  </ul>
+
+  <hr>
+
+  <div class="final-cta">
+    <h2>Desperta. Transforma. Lidera.</h2>
+    <p>A Desperta não "relança" — ela refunda-se. Mostra ao mercado o que sempre foi,<br>mas agora com as ferramentas, a disciplina e a visão certas para crescer.</p>
+    <p style="margin-top: 15px; font-size: 9px; color: rgba(255,255,255,0.7);">16 anos a despertar líderes em Angola</p>
+  </div>
+
+  <div class="signature-block">
+    <p><strong>Documento preparado por:</strong></p>
+    <p>Nelson Rodrigues — CEO, Marca Digital</p>
+    <p>Luanda, Angola — 6 de Abril de 2026</p>
+    <br>
+    <p><em>CONFIDENCIAL — Este documento é propriedade da Marca Digital e destina-se exclusivamente ao Dr. Camilo Ortet e à Desperta Academy.</em></p>
+  </div>
+</div>
+
+</body>
+</html>

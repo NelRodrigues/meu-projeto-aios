@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="pt-AO">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DESPERTA Academy — Dashboard de Implementação</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════ */
+/* RESET & BASE                           */
+/* ═══════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy: #1A3A52;
+  --navy-dark: #112a3d;
+  --navy-light: #2a5070;
+  --teal: #2B7A5F;
+  --teal-light: #3d9e7a;
+  --teal-pale: #e0f2ec;
+  --gold: #C4A053;
+  --gold-light: #e0c77a;
+  --gold-pale: #faf3e0;
+  --coral: #cf645f;
+  --coral-light: #f0a8a4;
+  --coral-pale: #fce8e7;
+  --bg: #F5F7FA;
+  --bg-dark: #e8ecf0;
+  --white: #ffffff;
+  --text: #1a2a3a;
+  --text-light: #5a6a7a;
+  --shadow: rgba(26,58,82,0.06);
+  --shadow-md: rgba(26,58,82,0.12);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ═══════════════════════════════════════ */
+/* HEADER                                 */
+/* ═══════════════════════════════════════ */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-dark) 100%);
+  color: #e8ecf0;
+  padding: 0;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.header-brand { display: flex; align-items: center; gap: 14px; }
+
+.header-brand .logo {
+  width: 44px;
+  height: 44px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+.header-brand h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.header-brand p {
+  font-size: 0.78rem;
+  opacity: 0.8;
+  font-weight: 300;
+  margin-top: 2px;
+}
+
+.countdown-box {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.countdown-unit {
+  text-align: center;
+  background: rgba(255,255,255,0.1);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  min-width: 60px;
+  backdrop-filter: blur(4px);
+}
+
+.countdown-unit .number {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  display: block;
+  line-height: 1;
+  color: var(--gold-light);
+}
+
+.countdown-unit .label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+  margin-top: 4px;
+  display: block;
+}
+
+.progress-bar-container {
+  padding: 0 24px 14px;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  margin-bottom: 6px;
+  opacity: 0.9;
+}
+
+.progress-bar-outer {
+  background: rgba(255,255,255,0.12);
+  border-radius: 20px;
+  height: 10px;
+  overflow: hidden;
+}
+
+.progress-bar-inner {
+  background: linear-gradient(90deg, var(--teal-light), var(--teal));
+  height: 100%;
+  border-radius: 20px;
+  transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+  min-width: 0;
+}
+
+/* ═══════════════════════════════════════ */
+/* NAVIGATION                             */
+/* ═══════════════════════════════════════ */
+.nav-container {
+  background: var(--white);
+  border-bottom: 1px solid var(--bg-dark);
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.nav-tabs {
+  display: flex;
+  overflow-x: auto;
+  padding: 0 16px;
+  gap: 4px;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.nav-tabs::-webkit-scrollbar { height: 3px; }
+.nav-tabs::-webkit-scrollbar-thumb { background: var(--gold-light); border-radius: 4px; }
+
+.nav-tab {
+  border: none;
+  background: none;
+  padding: 12px 16px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-light);
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+  transition: var(--transition);
+  position: relative;
+}
+
+.nav-tab:hover { color: var(--navy); background: var(--bg); }
+.nav-tab.active {
+  color: var(--navy);
+  border-bottom-color: var(--gold);
+  font-weight: 600;
+}
+
+.nav-tab .tab-badge {
+  position: absolute;
+  top: 6px;
+  right: 4px;
+  background: var(--teal);
+  color: white;
+  font-size: 0.6rem;
+  padding: 1px 5px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════ */
+/* MAIN CONTENT                           */
+/* ═══════════════════════════════════════ */
+.main { padding: 24px; max-width: 1200px; margin: 0 auto; }
+
+.view { display: none; }
+.view.active { display: block; animation: fadeIn 0.3s ease; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ═══════════════════════════════════════ */
+/* WEEK VIEW                              */
+/* ═══════════════════════════════════════ */
+.week-header {
+  margin-bottom: 24px;
+  padding: 24px;
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 12px var(--shadow);
+  border-left: 4px solid var(--navy);
+}
+
+.week-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+
+.week-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.week-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--text-light);
+}
+
+.week-meta-item .icon { font-size: 1rem; }
+
+.week-progress { margin-top: 16px; }
+
+.week-progress-bar {
+  background: var(--bg-dark);
+  border-radius: 8px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.week-progress-fill {
+  background: linear-gradient(90deg, var(--teal-light), var(--teal));
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.5s ease;
+}
+
+.week-progress-text {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  margin-top: 4px;
+  text-align: right;
+}
+
+/* ═══════════════════════════════════════ */
+/* SECTION DIVIDERS                       */
+/* ═══════════════════════════════════════ */
+.section-divider {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+  color: var(--navy-light);
+  margin: 20px 0 12px;
+  padding: 8px 16px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--gold);
+}
+
+/* ═══════════════════════════════════════ */
+/* TASK CARDS                             */
+/* ═══════════════════════════════════════ */
+.tasks-grid { display: grid; gap: 10px; }
+
+.task-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  box-shadow: 0 2px 8px var(--shadow);
+  transition: var(--transition);
+  cursor: pointer;
+  border-left: 4px solid transparent;
+}
+
+.task-card:hover {
+  box-shadow: 0 4px 16px var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.task-card.completed {
+  border-left-color: var(--teal);
+  background: linear-gradient(135deg, var(--white) 0%, var(--teal-pale) 100%);
+}
+
+.task-card.completed .task-desc { text-decoration: line-through; opacity: 0.55; }
+
+.task-card.blocker { border-left-color: var(--coral); }
+
+.task-checkbox {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--bg-dark);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: var(--transition);
+  margin-top: 2px;
+  cursor: pointer;
+}
+
+.task-checkbox:hover { border-color: var(--teal); }
+
+.task-card.completed .task-checkbox {
+  background: var(--teal);
+  border-color: var(--teal);
+}
+
+.task-checkbox svg {
+  width: 14px;
+  height: 14px;
+  stroke: white;
+  stroke-width: 3;
+  fill: none;
+  opacity: 0;
+  transition: var(--transition);
+}
+
+.task-card.completed .task-checkbox svg { opacity: 1; }
+
+.task-content { flex: 1; min-width: 0; }
+
+.task-desc {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 6px;
+  transition: var(--transition);
+}
+
+.task-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.task-badge {
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.badge-md { background: var(--gold-pale); color: #8a6d20; }
+.badge-camilo { background: #e3edf5; color: var(--navy); }
+.badge-dev { background: var(--teal-pale); color: var(--teal); }
+.badge-date { background: var(--bg-dark); color: var(--text-light); }
+.badge-blocker { background: var(--coral); color: white; }
+.badge-section { background: var(--navy); color: white; font-size: 0.6rem; }
+
+/* ═══════════════════════════════════════ */
+/* OVERVIEW VIEW                          */
+/* ═══════════════════════════════════════ */
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.overview-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: 0 2px 12px var(--shadow);
+  border-top: 4px solid var(--navy);
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.overview-card:hover {
+  box-shadow: 0 4px 20px var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.overview-card.week-active { border-top-color: var(--gold); }
+.overview-card.week-done { border-top-color: var(--teal); }
+
+.overview-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+
+.overview-card .period {
+  font-size: 0.78rem;
+  color: var(--text-light);
+  margin-bottom: 12px;
+}
+
+.overview-card .stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.overview-card .stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.overview-card .stat-label {
+  font-size: 0.65rem;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.mini-progress {
+  background: var(--bg-dark);
+  border-radius: 6px;
+  height: 6px;
+  overflow: hidden;
+}
+
+.mini-progress-fill {
+  background: linear-gradient(90deg, var(--teal-light), var(--teal));
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.5s ease;
+}
+
+/* ═══════════════════════════════════════ */
+/* TEAM VIEW                              */
+/* ═══════════════════════════════════════ */
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.team-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: 0 2px 12px var(--shadow);
+  transition: var(--transition);
+}
+
+.team-card:hover { box-shadow: 0 4px 20px var(--shadow-md); }
+
+.team-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.team-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: white;
+  flex-shrink: 0;
+}
+
+.team-card-header h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  color: var(--navy);
+}
+
+.team-card-header p {
+  font-size: 0.75rem;
+  color: var(--text-light);
+}
+
+.team-stats {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.team-stat {
+  flex: 1;
+  text-align: center;
+  padding: 8px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+}
+
+.team-stat .num {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--navy);
+  display: block;
+}
+
+.team-stat .lbl {
+  font-size: 0.65rem;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.team-tasks-list {
+  max-height: 220px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.team-task-item {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--bg-dark);
+  font-size: 0.78rem;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.team-task-item:last-child { border-bottom: none; }
+.team-task-item .dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+.team-task-item.done .dot { background: var(--teal); }
+.team-task-item.pending .dot { background: var(--bg-dark); }
+.team-task-item.done span { text-decoration: line-through; opacity: 0.55; }
+
+/* ═══════════════════════════════════════ */
+/* KPI VIEW                               */
+/* ═══════════════════════════════════════ */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.kpi-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: 0 2px 12px var(--shadow);
+  text-align: center;
+}
+
+.kpi-card .kpi-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.kpi-card .kpi-label {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  margin-top: 4px;
+}
+
+.kpi-card .kpi-target {
+  font-size: 0.7rem;
+  color: var(--teal);
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════ */
+/* FOOTER                                 */
+/* ═══════════════════════════════════════ */
+.footer {
+  background: var(--white);
+  border-top: 1px solid var(--bg-dark);
+  padding: 20px 24px;
+  margin-top: 40px;
+}
+
+.footer-stats {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.footer-stat { text-align: center; }
+
+.footer-stat .value {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.footer-stat .label {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ═══════════════════════════════════════ */
+/* RESPONSIVE                             */
+/* ═══════════════════════════════════════ */
+@media (max-width: 768px) {
+  .header-top { flex-direction: column; text-align: center; }
+  .header-brand { flex-direction: column; }
+  .countdown-box { justify-content: center; }
+  .countdown-unit { padding: 6px 10px; min-width: 50px; }
+  .countdown-unit .number { font-size: 1.2rem; }
+  .main { padding: 16px; }
+  .overview-grid { grid-template-columns: 1fr 1fr; }
+  .team-grid { grid-template-columns: 1fr; }
+  .week-header h2 { font-size: 1.2rem; }
+  .footer-stats { gap: 20px; }
+  .footer-stat .value { font-size: 1.4rem; }
+}
+
+@media (max-width: 480px) {
+  .overview-grid { grid-template-columns: 1fr; }
+  .header-brand h1 { font-size: 1.1rem; }
+  .nav-tab { padding: 10px 12px; font-size: 0.75rem; }
+}
+
+/* ═══════════════════════════════════════ */
+/* PRINT                                  */
+/* ═══════════════════════════════════════ */
+@media print {
+  .header { position: static; }
+  .nav-container { display: none; }
+  .view { display: block !important; page-break-inside: avoid; margin-bottom: 24px; }
+  .task-card { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
+  .footer { position: static; }
+  body { background: white; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-top">
+    <div class="header-brand">
+      <div class="logo">D</div>
+      <div>
+        <h1>DESPERTA Academy — Refundação</h1>
+        <p>Implementação Estratégica &middot; Marca Digital &times; Dr. Camilo Ortet</p>
+      </div>
+    </div>
+    <div class="countdown-box" id="countdown">
+      <div class="countdown-unit"><span class="number" id="cd-days">--</span><span class="label">Dias</span></div>
+      <div class="countdown-unit"><span class="number" id="cd-hours">--</span><span class="label">Horas</span></div>
+      <div class="countdown-unit"><span class="number" id="cd-mins">--</span><span class="label">Min</span></div>
+    </div>
+  </div>
+  <div class="progress-bar-container">
+    <div class="progress-info">
+      <span id="progress-label">0 de 0 tarefas concluídas</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-bar-outer">
+      <div class="progress-bar-inner" id="progress-bar" style="width:0%"></div>
+    </div>
+  </div>
+</header>
+
+<!-- NAVIGATION -->
+<nav class="nav-container">
+  <div class="nav-tabs" id="nav-tabs"></div>
+</nav>
+
+<!-- MAIN -->
+<main class="main" id="main-content"></main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-stats">
+    <div class="footer-stat">
+      <div class="value" id="foot-completed">0</div>
+      <div class="label">Concluídas</div>
+    </div>
+    <div class="footer-stat">
+      <div class="value" id="foot-pending">0</div>
+      <div class="label">Pendentes</div>
+    </div>
+    <div class="footer-stat">
+      <div class="value" id="foot-days">--</div>
+      <div class="label">Dias Restantes</div>
+    </div>
+    <div class="footer-stat">
+      <div class="value" id="foot-pct">0%</div>
+      <div class="label">Progresso</div>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+/* ═══════════════════════════════════════════════ */
+/* SUPABASE CONFIG                                */
+/* ═══════════════════════════════════════════════ */
+const SUPABASE_URL = 'https://qhotgpgavwpdvhvagiih.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFob3RncGdhdndwZHZodmFnaWloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2MjEwODksImV4cCI6MjA5MTE5NzA4OX0.8kFWXd03jcs6DivZlZ52wS6UmgcIBJOqth9WYWyBj9A';
+let sb = null;
+
+/* ═══════════════════════════════════════════════ */
+/* CONSTANTS                                      */
+/* ═══════════════════════════════════════════════ */
+const GO_LIVE_DATE = new Date('2026-05-01T08:00:00+01:00');
+const STORAGE_KEY = 'desperta-dashboard-tasks';
+
+/* ═══════════════════════════════════════════════ */
+/* TEAM & DATA (loaded from Supabase)             */
+/* ═══════════════════════════════════════════════ */
+let teamMembers = [];
+// tarefaMap: codigo → { id (UUID), concluida }
+let tarefaMap = {};
+
+/* ═══════════════════════════════════════════════ */
+/* DATA — 4 SEMANAS                               */
+/* ═══════════════════════════════════════════════ */
+const weeks = [
+  {
+    id: 1,
+    title: 'Fundações',
+    period: '6 — 12 de Abril',
+    objective: 'Correcções urgentes nos canais digitais + setup do CRM + recolha de materiais',
+    phase: 'FUNDAÇÕES',
+    sections: [
+      {
+        title: 'Acções Urgentes (Dia 1-2)',
+        tasks: [
+          { id: '1.1', desc: 'Preencher bio do Instagram @desperta.co', responsible: 'md', date: '06-07/04' },
+          { id: '1.2', desc: 'Adicionar link website na bio @desperta.co', responsible: 'md', date: '06-07/04' },
+          { id: '1.3', desc: 'Criar 4-5 destaques no Instagram @desperta.co (Sobre, Programas, Testemunhos, Contacto, Resultados)', responsible: 'md', date: '06-07/04' },
+          { id: '1.4', desc: 'Actualizar foto de perfil @desperta.co — logo profissional consistente', responsible: 'md+camilo', date: '06-07/04' }
+        ]
+      },
+      {
+        title: 'Setup CRM + Agente IA (Dia 1-7)',
+        tasks: [
+          { id: '1.5', desc: 'Definir requisitos do CRM Desperta', responsible: 'md', date: '06-08/04' },
+          { id: '1.6', desc: 'Configurar ambiente de desenvolvimento CRM (Next.js + Supabase)', responsible: 'dev', date: '07-08/04' },
+          { id: '1.7', desc: 'Estruturar base de dados: contactos, empresas, pipeline', responsible: 'dev', date: '08-09/04' },
+          { id: '1.8', desc: 'Iniciar desenvolvimento módulo de contactos e empresas (CRUD)', responsible: 'dev', date: '09-12/04' }
+        ]
+      },
+      {
+        title: 'Recolha de Materiais (Dia 1-7)',
+        tasks: [
+          { id: '1.9', desc: 'Lista completa de clientes históricos (Excel: empresa, contacto, formação, ano)', responsible: 'camilo', date: '09/04', blocker: true },
+          { id: '1.10', desc: 'Vídeos de palestras/formações existentes', responsible: 'camilo', date: '12/04' },
+          { id: '1.11', desc: 'Fotos de eventos passados', responsible: 'camilo', date: '12/04' },
+          { id: '1.12', desc: 'Testemunhos existentes (escritos ou vídeo)', responsible: 'camilo', date: '12/04' },
+          { id: '1.13', desc: 'Materiais de formação (slides, manuais)', responsible: 'camilo', date: '12/04' },
+          { id: '1.14', desc: 'Logos das empresas onde trabalhou', responsible: 'camilo', date: '12/04' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 2,
+    title: 'Organização + Construção',
+    period: '13 — 19 de Abril',
+    objective: 'Organizar base de clientes + catalogar conteúdo + CRM Sprint 2 (pipeline + IA fase 1)',
+    phase: 'ORGANIZAÇÃO',
+    sections: [
+      {
+        title: 'Organização da Base de Clientes',
+        tasks: [
+          { id: '2.1', desc: 'Segmentar base de clientes em 3 tiers (Premium / Estratégico / Relacional)', responsible: 'md', date: '13-14/04' },
+          { id: '2.2', desc: 'Identificar decisores actuais (podem ter mudado de cargo)', responsible: 'md+camilo', date: '14-15/04' },
+          { id: '2.3', desc: 'Criar ficha por cliente no CRM — dados importados', responsible: 'md', date: '15-16/04' }
+        ]
+      },
+      {
+        title: 'Catalogação de Conteúdo',
+        tasks: [
+          { id: '2.4', desc: 'Catalogar e etiquetar vídeos (tema, duração, qualidade)', responsible: 'md', date: '13-15/04' },
+          { id: '2.5', desc: 'Seleccionar melhores fotos para redes sociais e website', responsible: 'md', date: '13-15/04' },
+          { id: '2.6', desc: 'Transcrever e formatar testemunhos', responsible: 'md', date: '15-17/04' },
+          { id: '2.7', desc: 'Identificar conteúdo reutilizável dos materiais de formação', responsible: 'md', date: '16-18/04' }
+        ]
+      },
+      {
+        title: 'CRM — Sprint 2',
+        tasks: [
+          { id: '2.8', desc: 'Pipeline de vendas (leads → contacto → proposta → contrato)', responsible: 'dev', date: '13-16/04' },
+          { id: '2.9', desc: 'Histórico de interacções (chamadas, emails, reuniões)', responsible: 'dev', date: '14-17/04' },
+          { id: '2.10', desc: 'Importar base de clientes existente no CRM', responsible: 'dev', date: '16-17/04' },
+          { id: '2.11', desc: 'Integração agente IA — fase 1 (resumos e sugestões)', responsible: 'dev', date: '17-19/04' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 3,
+    title: 'Construção + Activação',
+    period: '20 — 26 de Abril',
+    objective: 'Reescrita estratégica do website + optimização LinkedIn/Instagram + CRM Sprint 3',
+    phase: 'CONSTRUÇÃO',
+    sections: [
+      {
+        title: 'Website — Reescrita Estratégica',
+        tasks: [
+          { id: '3.1', desc: 'Reescrever homepage com proposta de valor clara', responsible: 'md', date: '20-21/04' },
+          { id: '3.2', desc: 'Criar página "Sobre o Fundador" com trajectória + logos', responsible: 'md', date: '21-22/04' },
+          { id: '3.3', desc: 'Secção de testemunhos com logos de empresas', responsible: 'md', date: '22/04' },
+          { id: '3.4', desc: 'Reescrever páginas dos 3 programas assinatura', responsible: 'md', date: '22-23/04' },
+          { id: '3.5', desc: 'Optimizar SEO (títulos, meta descriptions, keywords)', responsible: 'md', date: '23/04' },
+          { id: '3.6', desc: '"Empresas que confiaram na Desperta" — barra de logos', responsible: 'md', date: '23/04' },
+          { id: '3.7', desc: 'Formulário de contacto integrado com CRM', responsible: 'dev', date: '23-24/04' }
+        ]
+      },
+      {
+        title: 'LinkedIn — Optimização Estratégica',
+        tasks: [
+          { id: '3.8', desc: 'Reescrever resumo LinkedIn com narrativa estratégica', responsible: 'md', date: '20-21/04' },
+          { id: '3.9', desc: 'Artigo inaugural: "25 anos de carreira"', responsible: 'md', date: '21-23/04' },
+          { id: '3.10', desc: 'Preparar 8 posts para as próximas 4 semanas', responsible: 'md', date: '22-25/04' },
+          { id: '3.11', desc: 'Optimizar secção de experiência no perfil', responsible: 'md', date: '24/04' }
+        ]
+      },
+      {
+        title: 'Instagram + CRM Sprint 3',
+        tasks: [
+          { id: '3.12', desc: 'Criar template visual unificado (cores, fontes, layout)', responsible: 'md', date: '20-21/04' },
+          { id: '3.13', desc: 'Preparar 12 posts Instagram (3 semanas de conteúdo)', responsible: 'md', date: '21-24/04' },
+          { id: '3.14', desc: 'Editar 3-5 reels de vídeos existentes', responsible: 'md', date: '22-25/04' },
+          { id: '3.15', desc: 'Definir estratégia de hashtags Angola', responsible: 'md', date: '24/04' },
+          { id: '3.16', desc: 'CRM: Dashboard principal funcional', responsible: 'dev', date: '20-23/04' },
+          { id: '3.17', desc: 'CRM: Agente IA fase 2 (sugestões + alertas inteligentes)', responsible: 'dev', date: '23-25/04' },
+          { id: '3.18', desc: 'CRM: Templates email/WhatsApp prontos', responsible: 'dev', date: '24-25/04' },
+          { id: '3.19', desc: 'CRM: Testes internos com dados reais', responsible: 'dev', date: '25-26/04' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 4,
+    title: 'Lançamento',
+    period: '27 — 30 de Abril',
+    objective: 'Campanha de reactivação de clientes + publicação de conteúdo + validação final + go-live',
+    phase: 'LANÇAMENTO',
+    sections: [
+      {
+        title: 'Campanha de Reactivação de Clientes',
+        tasks: [
+          { id: '4.1', desc: 'Tier 1: contacto directo pelo Dr. Camilo (chamada + WhatsApp) — 10-15 contactos', responsible: 'md+camilo', date: '20-26/04', blocker: true },
+          { id: '4.2', desc: 'Tier 2: email personalizado via CRM para base alargada', responsible: 'md', date: '21-26/04' },
+          { id: '4.3', desc: 'Follow-up Tier 1: mensagem de valor gratuito', responsible: 'md', date: '23-26/04' },
+          { id: '4.4', desc: 'Solicitar testemunhos a clientes que respondem', responsible: 'md+camilo', date: '24-28/04' },
+          { id: '4.5', desc: 'Agendar reuniões com clientes interessados', responsible: 'md+camilo', date: '25-30/04' }
+        ]
+      },
+      {
+        title: 'Conteúdo + CRM Sprint 4',
+        tasks: [
+          { id: '4.6', desc: 'Publicar 2 posts LinkedIn', responsible: 'md', date: '27-30/04' },
+          { id: '4.7', desc: 'Publicar 4 posts Instagram @camiloortet', responsible: 'md', date: '27-30/04' },
+          { id: '4.8', desc: 'Publicar 2 posts Instagram @desperta.co', responsible: 'md', date: '27-30/04' },
+          { id: '4.9', desc: 'Publicar 1-2 reels', responsible: 'md', date: '27-30/04' },
+          { id: '4.10', desc: 'Recolher 1-2 testemunhos em vídeo (30-60 seg)', responsible: 'camilo', date: '20-26/04' },
+          { id: '4.11', desc: 'CRM: Agente IA fase 3 (prospecção + follow-up automático)', responsible: 'dev', date: '27-29/04' },
+          { id: '4.12', desc: 'Formação do Dr. Camilo no CRM (sessão 1h)', responsible: 'md+camilo', date: '26/04' },
+          { id: '4.13', desc: 'Registar interacções da campanha no CRM', responsible: 'md', date: '27-30/04' }
+        ]
+      },
+      {
+        title: 'Validação e Go-Live',
+        tasks: [
+          { id: '5.1', desc: 'Revisão final do website (textos, links, formulários, SEO)', responsible: 'md', date: '27-28/04' },
+          { id: '5.2', desc: 'Revisão final dos perfis de redes sociais', responsible: 'md', date: '28/04' },
+          { id: '5.3', desc: 'Teste end-to-end do CRM', responsible: 'dev', date: '28-29/04' },
+          { id: '5.4', desc: 'Teste do agente de IA', responsible: 'dev', date: '29/04' },
+          { id: '5.5', desc: 'Calendário editorial de Maio (30 dias completos)', responsible: 'md', date: '29-30/04' },
+          { id: '5.6', desc: 'Relatório de resultados da campanha de reactivação', responsible: 'md', date: '30/04' }
+        ]
+      },
+      {
+        title: 'Documentação e Preparação',
+        tasks: [
+          { id: '5.7', desc: 'Manual de uso do CRM (PDF/vídeo)', responsible: 'md', date: '28-29/04' },
+          { id: '5.8', desc: 'Guia de publicação em redes sociais (brand guide)', responsible: 'md', date: '29/04' },
+          { id: '5.9', desc: 'Kit de prospecção (scripts, templates, sequências)', responsible: 'md', date: '29-30/04' },
+          { id: '5.10', desc: 'Apresentação de resultados ao Dr. Camilo (reunião de encerramento)', responsible: 'md', date: '30/04' },
+          { id: '5.11', desc: 'Metas mensais de prospecção — funil de vendas', responsible: 'md', date: '30/04' },
+          { id: '5.12', desc: 'Calendário de eventos/workshops Q2-Q3', responsible: 'md', date: '30/04' },
+          { id: '5.13', desc: 'Oportunidades mídia tradicional para Maio', responsible: 'md', date: '30/04' },
+          { id: '5.14', desc: 'Roadmap expansão PALOP (Moçambique)', responsible: 'md', date: '30/04' }
+        ]
+      }
+    ]
+  }
+];
+
+/* ═══════════════════════════════════════════════ */
+/* KPIs (from proposal section 8)                 */
+/* ═══════════════════════════════════════════════ */
+const kpis = [
+  { label: 'Website Reescrito', target: '100% páginas prioritárias', icon: '🌐' },
+  { label: 'CRM Operacional', target: 'Go-live até 30/04', icon: '💻' },
+  { label: 'Base Importada', target: '100% dos contactos', icon: '👥' },
+  { label: 'Clientes Tier 1', target: '100% contactados', icon: '📞' },
+  { label: 'Resposta Positiva', target: '≥30%', icon: '✅' },
+  { label: 'Reuniões Agendadas', target: '≥10', icon: '📅' },
+  { label: 'Testemunhos', target: '≥5 recolhidos', icon: '🎤' },
+  { label: 'Posts LinkedIn', target: '≥6 publicados', icon: '💼' },
+  { label: 'Posts Instagram', target: '≥16 publicados', icon: '📸' },
+  { label: 'Calendário Maio', target: '30 dias completos', icon: '🗓️' }
+];
+
+/* ═══════════════════════════════════════════════ */
+/* LOAD DATA FROM SUPABASE                        */
+/* ═══════════════════════════════════════════════ */
+async function loadData() {
+  const [equipaRes, semanasRes, tarefasRes] = await Promise.all([
+    sb.from('desperta_equipa').select('*').order('ordem'),
+    sb.from('desperta_semanas').select('*').order('ordem'),
+    sb.from('desperta_tarefas').select('*').order('ordem')
+  ]);
+
+  if (equipaRes.error) throw equipaRes.error;
+  if (semanasRes.error) throw semanasRes.error;
+  if (tarefasRes.error) throw tarefasRes.error;
+
+  // Transform equipa
+  teamMembers = equipaRes.data.map(e => ({
+    id: e.codigo,
+    name: e.nome,
+    role: e.funcao,
+    color: e.cor
+  }));
+
+  // Build semana lookup: UUID → numero
+  const semanaLookup = {};
+  semanasRes.data.forEach(s => { semanaLookup[s.id] = s.numero; });
+
+  // Build tarefaMap and populate weeks sections
+  const tarefasBySemanaAndSection = {};
+
+  tarefasRes.data.forEach(t => {
+    tarefaMap[t.codigo] = { id: t.id, concluida: t.concluida };
+
+    const weekNum = semanaLookup[t.semana_id];
+    if (!tarefasBySemanaAndSection[weekNum]) tarefasBySemanaAndSection[weekNum] = {};
+    if (!tarefasBySemanaAndSection[weekNum][t.seccao]) tarefasBySemanaAndSection[weekNum][t.seccao] = [];
+
+    tarefasBySemanaAndSection[weekNum][t.seccao].push({
+      id: t.codigo,
+      desc: t.descricao,
+      responsible: t.responsaveis || '',
+      date: t.data_prevista || '',
+      blocker: t.bloqueador
+    });
+  });
+
+  // Update weeks with DB sections
+  weeks.forEach(w => {
+    const weekSections = tarefasBySemanaAndSection[w.id];
+    if (weekSections) {
+      w.sections = Object.entries(weekSections).map(([title, tasks]) => ({ title, tasks }));
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════ */
+/* STATE (Supabase-backed)                        */
+/* ═══════════════════════════════════════════════ */
+function isCompleted(taskId) {
+  return tarefaMap[taskId] ? tarefaMap[taskId].concluida : false;
+}
+
+async function toggleTask(taskId) {
+  const entry = tarefaMap[taskId];
+  if (!entry) return;
+
+  // Optimistic update
+  const newState = !entry.concluida;
+  entry.concluida = newState;
+  renderCurrentView();
+  updateGlobalProgress();
+
+  // Persist to Supabase
+  const { error } = await sb
+    .from('desperta_tarefas')
+    .update({ concluida: newState })
+    .eq('id', entry.id);
+
+  if (error) {
+    console.error('Erro ao actualizar tarefa:', error);
+    // Revert on failure
+    entry.concluida = !newState;
+    renderCurrentView();
+    updateGlobalProgress();
+  }
+}
+
+function getAllTasks() {
+  const all = [];
+  weeks.forEach(w => {
+    w.sections.forEach(s => {
+      s.tasks.forEach(t => all.push({ ...t, week: w.id, section: s.title }));
+    });
+  });
+  return all;
+}
+
+/* ═══════════════════════════════════════════════ */
+/* REAL-TIME SYNC                                 */
+/* ═══════════════════════════════════════════════ */
+function setupRealtime() {
+  sb
+    .channel('desperta-tarefas-changes')
+    .on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'desperta_tarefas'
+    }, (payload) => {
+      const updated = payload.new;
+      for (const [code, entry] of Object.entries(tarefaMap)) {
+        if (entry.id === updated.id) {
+          entry.concluida = updated.concluida;
+          break;
+        }
+      }
+      renderCurrentView();
+      updateGlobalProgress();
+    })
+    .subscribe();
+}
+
+/* ═══════════════════════════════════════════════ */
+/* COUNTDOWN                                      */
+/* ═══════════════════════════════════════════════ */
+function updateCountdown() {
+  const now = new Date();
+  const diff = GO_LIVE_DATE - now;
+  if (diff <= 0) {
+    document.getElementById('cd-days').textContent = '0';
+    document.getElementById('cd-hours').textContent = '0';
+    document.getElementById('cd-mins').textContent = '0';
+    document.getElementById('foot-days').textContent = '0';
+    return;
+  }
+  const days = Math.floor(diff / (1000*60*60*24));
+  const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+  const mins = Math.floor((diff % (1000*60*60)) / (1000*60));
+  document.getElementById('cd-days').textContent = days;
+  document.getElementById('cd-hours').textContent = hours;
+  document.getElementById('cd-mins').textContent = mins;
+  document.getElementById('foot-days').textContent = days;
+}
+
+/* ═══════════════════════════════════════════════ */
+/* PROGRESS                                       */
+/* ═══════════════════════════════════════════════ */
+function updateGlobalProgress() {
+  const all = getAllTasks();
+  const total = all.length;
+  const done = all.filter(t => isCompleted(t.id)).length;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  document.getElementById('progress-label').textContent = `${done} de ${total} tarefas concluídas`;
+  document.getElementById('progress-pct').textContent = `${pct}%`;
+  document.getElementById('progress-bar').style.width = `${pct}%`;
+
+  document.getElementById('foot-completed').textContent = done;
+  document.getElementById('foot-pending').textContent = total - done;
+  document.getElementById('foot-pct').textContent = `${pct}%`;
+}
+
+/* ═══════════════════════════════════════════════ */
+/* NAVIGATION                                     */
+/* ═══════════════════════════════════════════════ */
+let currentView = 'overview';
+
+function buildNav() {
+  const nav = document.getElementById('nav-tabs');
+  let html = `<button class="nav-tab" data-view="overview">Visão Geral</button>`;
+
+  weeks.forEach(w => {
+    const allTasks = [];
+    w.sections.forEach(s => allTasks.push(...s.tasks));
+    const done = allTasks.filter(t => isCompleted(t.id)).length;
+    const total = allTasks.length;
+    const badge = done === total && total > 0 ? `<span class="tab-badge">✓</span>` : '';
+    html += `<button class="nav-tab" data-view="week-${w.id}">S${w.id}${badge}</button>`;
+  });
+
+  html += `<button class="nav-tab" data-view="team">Equipa</button>`;
+  html += `<button class="nav-tab" data-view="kpis">KPIs</button>`;
+
+  nav.innerHTML = html;
+
+  nav.querySelectorAll('.nav-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      currentView = tab.dataset.view;
+      renderCurrentView();
+      nav.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+
+  nav.querySelector(`[data-view="${currentView}"]`).classList.add('active');
+}
+
+/* ═══════════════════════════════════════════════ */
+/* RENDER                                         */
+/* ═══════════════════════════════════════════════ */
+const checkSvg = `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+function renderCurrentView() {
+  const main = document.getElementById('main-content');
+
+  if (currentView === 'overview') {
+    renderOverview(main);
+  } else if (currentView.startsWith('week-')) {
+    const weekId = parseInt(currentView.split('-')[1]);
+    renderWeek(main, weekId);
+  } else if (currentView === 'team') {
+    renderTeam(main);
+  } else if (currentView === 'kpis') {
+    renderKPIs(main);
+  }
+
+  buildNav();
+}
+
+function getResponsibleBadge(resp) {
+  const map = {
+    'md': { label: 'Marca Digital', cls: 'badge-md' },
+    'dev': { label: 'Dev (CRM)', cls: 'badge-dev' },
+    'camilo': { label: 'Dr. Camilo', cls: 'badge-camilo' },
+    'md+camilo': { label: 'MD + Camilo', cls: 'badge-md' }
+  };
+  return map[resp] || { label: resp, cls: 'badge-md' };
+}
+
+function renderOverview(container) {
+  const now = new Date();
+  let html = `<div class="view active">
+    <div class="week-header" style="border-left-color:var(--gold);margin-bottom:28px">
+      <h2>Plano de Implementação — 4 Semanas</h2>
+      <p style="color:var(--text-light);font-size:0.88rem;margin-top:4px">
+        Refundação Desperta Academy &middot; 6 de Abril — 30 de Abril de 2026 &middot; Execução plena: 1 de Maio
+      </p>
+    </div>
+    <div class="overview-grid">`;
+
+  weeks.forEach(w => {
+    const allTasks = [];
+    w.sections.forEach(s => allTasks.push(...s.tasks));
+    const done = allTasks.filter(t => isCompleted(t.id)).length;
+    const total = allTasks.length;
+    const pct = total > 0 ? Math.round((done/total)*100) : 0;
+
+    // Determine if this week is current, past, or future
+    const weekDates = w.period.match(/(\d+)/g);
+    let cardClass = '';
+    if (done === total && total > 0) {
+      cardClass = 'week-done';
+    } else if (w.id <= getCurrentWeek()) {
+      cardClass = 'week-active';
+    }
+
+    html += `
+      <div class="overview-card ${cardClass}" onclick="navigateToWeek(${w.id})">
+        <h3>Semana ${w.id} — ${w.title}</h3>
+        <div class="period">${w.period}</div>
+        <div class="stats">
+          <div><span class="stat-num">${done}</span><br><span class="stat-label">Feitas</span></div>
+          <div><span class="stat-num">${total - done}</span><br><span class="stat-label">Pendentes</span></div>
+          <div><span class="stat-num">${pct}%</span><br><span class="stat-label">Progresso</span></div>
+        </div>
+        <div class="mini-progress"><div class="mini-progress-fill" style="width:${pct}%"></div></div>
+      </div>`;
+  });
+
+  html += `</div>`;
+
+  // Quick summary of what's due now
+  const currentWeek = getCurrentWeek();
+  if (currentWeek >= 1 && currentWeek <= 4) {
+    const w = weeks[currentWeek - 1];
+    const pendingTasks = [];
+    w.sections.forEach(s => {
+      s.tasks.forEach(t => {
+        if (!isCompleted(t.id)) pendingTasks.push(t);
+      });
+    });
+
+    if (pendingTasks.length > 0) {
+      html += `
+        <div class="week-header" style="border-left-color:var(--coral);margin-top:8px">
+          <h2 style="font-size:1.2rem">Tarefas Pendentes — Semana ${currentWeek}</h2>
+          <p style="color:var(--text-light);font-size:0.82rem;margin-top:4px">${pendingTasks.length} tarefas por concluir esta semana</p>
+        </div>
+        <div class="tasks-grid" style="margin-top:12px">`;
+
+      pendingTasks.slice(0, 8).forEach(task => {
+        const badge = getResponsibleBadge(task.responsible);
+        html += `
+          <div class="task-card ${task.blocker ? 'blocker' : ''}" onclick="toggleTask('${task.id}')">
+            <div class="task-checkbox">${checkSvg}</div>
+            <div class="task-content">
+              <div class="task-desc">${task.desc}</div>
+              <div class="task-meta">
+                <span class="task-badge ${badge.cls}">${badge.label}</span>
+                <span class="task-badge badge-date">${task.date}</span>
+                ${task.blocker ? '<span class="task-badge badge-blocker">Bloqueador</span>' : ''}
+              </div>
+            </div>
+          </div>`;
+      });
+
+      if (pendingTasks.length > 8) {
+        html += `<div style="text-align:center;padding:12px;color:var(--text-light);font-size:0.85rem;cursor:pointer" onclick="navigateToWeek(${currentWeek})">
+          Ver todas as ${pendingTasks.length} tarefas →
+        </div>`;
+      }
+
+      html += `</div>`;
+    }
+  }
+
+  html += `</div>`;
+  container.innerHTML = html;
+}
+
+function getCurrentWeek() {
+  const now = new Date();
+  const w1Start = new Date('2026-04-06');
+  const w2Start = new Date('2026-04-13');
+  const w3Start = new Date('2026-04-20');
+  const w4Start = new Date('2026-04-27');
+  const end = new Date('2026-05-01');
+
+  if (now < w1Start) return 0;
+  if (now < w2Start) return 1;
+  if (now < w3Start) return 2;
+  if (now < w4Start) return 3;
+  if (now < end) return 4;
+  return 5;
+}
+
+function navigateToWeek(weekId) {
+  currentView = `week-${weekId}`;
+  renderCurrentView();
+}
+
+function renderWeek(container, weekId) {
+  const week = weeks.find(w => w.id === weekId);
+  if (!week) return;
+
+  const allTasks = [];
+  week.sections.forEach(s => allTasks.push(...s.tasks));
+  const done = allTasks.filter(t => isCompleted(t.id)).length;
+  const total = allTasks.length;
+  const pct = total > 0 ? Math.round((done/total)*100) : 0;
+
+  let html = `
+    <div class="view active">
+      <div class="week-header">
+        <h2>Semana ${week.id} — ${week.title}</h2>
+        <p style="color:var(--text-light);font-size:0.88rem;margin-top:4px">${week.objective}</p>
+        <div class="week-meta">
+          <div class="week-meta-item"><span class="icon">📅</span> ${week.period}</div>
+          <div class="week-meta-item"><span class="icon">🎯</span> ${week.phase}</div>
+        </div>
+        <div class="week-progress">
+          <div class="week-progress-bar"><div class="week-progress-fill" style="width:${pct}%"></div></div>
+          <div class="week-progress-text">${done}/${total} concluídas (${pct}%)</div>
+        </div>
+      </div>`;
+
+  week.sections.forEach(section => {
+    const sDone = section.tasks.filter(t => isCompleted(t.id)).length;
+    const sTotal = section.tasks.length;
+    html += `<div class="section-divider">${section.title} <span style="float:right;font-family:'Montserrat';font-size:0.75rem;color:var(--text-light)">${sDone}/${sTotal}</span></div>`;
+    html += `<div class="tasks-grid">`;
+
+    section.tasks.forEach(task => {
+      const completed = isCompleted(task.id);
+      const classes = ['task-card'];
+      if (completed) classes.push('completed');
+      if (task.blocker) classes.push('blocker');
+
+      const badge = getResponsibleBadge(task.responsible);
+
+      html += `
+        <div class="${classes.join(' ')}" onclick="toggleTask('${task.id}')">
+          <div class="task-checkbox">${checkSvg}</div>
+          <div class="task-content">
+            <div class="task-desc"><span style="color:var(--text-light);font-weight:400;font-size:0.78rem;margin-right:6px">${task.id}</span>${task.desc}</div>
+            <div class="task-meta">
+              <span class="task-badge ${badge.cls}">${badge.label}</span>
+              <span class="task-badge badge-date">${task.date}</span>
+              ${task.blocker ? '<span class="task-badge badge-blocker">Bloqueador</span>' : ''}
+            </div>
+          </div>
+        </div>`;
+    });
+
+    html += `</div>`;
+  });
+
+  // Week navigation
+  html += `<div style="display:flex;justify-content:space-between;margin-top:24px;gap:12px">`;
+  if (weekId > 1) {
+    html += `<button onclick="navigateToWeek(${weekId-1})" style="padding:10px 20px;background:var(--white);border:1px solid var(--bg-dark);border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;font-size:0.85rem;color:var(--navy)">← Semana ${weekId-1}</button>`;
+  } else {
+    html += `<div></div>`;
+  }
+  if (weekId < 4) {
+    html += `<button onclick="navigateToWeek(${weekId+1})" style="padding:10px 20px;background:var(--navy);border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;font-size:0.85rem;color:white">Semana ${weekId+1} →</button>`;
+  }
+  html += `</div>`;
+
+  html += `</div>`;
+  container.innerHTML = html;
+}
+
+function renderTeam(container) {
+  const allTasks = getAllTasks();
+
+  let html = `<div class="view active">
+    <div class="week-header" style="border-left-color:var(--teal);margin-bottom:24px">
+      <h2>Equipa — Responsabilidades</h2>
+      <p style="color:var(--text-light);font-size:0.85rem;margin-top:4px">Distribuição de tarefas por responsável</p>
+    </div>
+    <div class="team-grid">`;
+
+  teamMembers.forEach(member => {
+    const memberTasks = allTasks.filter(t => t.responsible === member.id);
+    const doneTasks = memberTasks.filter(t => isCompleted(t.id)).length;
+    const totalTasks = memberTasks.length;
+    const initials = member.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+
+    if (totalTasks === 0) return;
+
+    html += `
+      <div class="team-card">
+        <div class="team-card-header">
+          <div class="team-avatar" style="background:${member.color}">${initials}</div>
+          <div>
+            <h3>${member.name}</h3>
+            <p>${member.role}</p>
+          </div>
+        </div>
+        <div class="team-stats">
+          <div class="team-stat"><span class="num">${totalTasks}</span><span class="lbl">Total</span></div>
+          <div class="team-stat"><span class="num">${doneTasks}</span><span class="lbl">Feitas</span></div>
+          <div class="team-stat"><span class="num">${totalTasks - doneTasks}</span><span class="lbl">Pendentes</span></div>
+        </div>
+        <div class="team-tasks-list">`;
+
+    memberTasks.forEach(t => {
+      const isDone = isCompleted(t.id);
+      html += `
+        <div class="team-task-item ${isDone ? 'done' : 'pending'}" onclick="toggleTask('${t.id}')" style="cursor:pointer">
+          <div class="dot"></div>
+          <span>S${t.week}: ${t.desc}</span>
+        </div>`;
+    });
+
+    html += `</div></div>`;
+  });
+
+  html += `</div></div>`;
+  container.innerHTML = html;
+}
+
+function renderKPIs(container) {
+  const allTasks = getAllTasks();
+  const done = allTasks.filter(t => isCompleted(t.id)).length;
+  const total = allTasks.length;
+
+  let html = `<div class="view active">
+    <div class="week-header" style="border-left-color:var(--gold);margin-bottom:24px">
+      <h2>Indicadores de Sucesso (KPIs)</h2>
+      <p style="color:var(--text-light);font-size:0.85rem;margin-top:4px">Metas da fase de implementação (6 Abr — 30 Abr) &middot; ${done}/${total} tarefas concluídas</p>
+    </div>
+    <div class="kpi-grid">`;
+
+  kpis.forEach(kpi => {
+    html += `
+      <div class="kpi-card">
+        <div style="font-size:2rem;margin-bottom:8px">${kpi.icon}</div>
+        <div class="kpi-label">${kpi.label}</div>
+        <div class="kpi-target">${kpi.target}</div>
+      </div>`;
+  });
+
+  html += `</div>`;
+
+  // Execution KPIs
+  html += `
+    <div class="week-header" style="border-left-color:var(--teal);margin-top:28px;margin-bottom:24px">
+      <h2 style="font-size:1.2rem">KPIs de Execução Contínua (a partir de 1 Maio)</h2>
+    </div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;background:var(--white);border-radius:var(--radius);overflow:hidden;box-shadow:0 2px 12px var(--shadow)">
+        <thead>
+          <tr style="background:var(--navy);color:white">
+            <th style="padding:12px 16px;text-align:left;font-size:0.82rem;font-weight:600">Indicador</th>
+            <th style="padding:12px 16px;text-align:center;font-size:0.82rem;font-weight:600">Meta Mensal</th>
+            <th style="padding:12px 16px;text-align:center;font-size:0.82rem;font-weight:600">Meta Trimestral (Mai-Jul)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:10px 16px;border-bottom:1px solid var(--bg-dark);font-size:0.85rem">Seguidores Instagram @camiloortet</td><td style="padding:10px 16px;text-align:center;border-bottom:1px solid var(--bg-dark);font-weight:600;color:var(--teal)">+200/mês</td><td style="padding:10px 16px;text-align:center;border-bottom:1px solid var(--bg-dark)">1.500+ total</td></tr>
+          <tr><td style="padding:10px 16px;border-bottom:1px solid var(--bg-dark);font-size:0.85rem">Conexões LinkedIn</td><td style="padding:10px 16px;text-align:center;border-bottom:1px solid var(--bg-dark);font-weight:600;color:var(--teal)">+100/mês</td><td style="padding:10px 16px;text-align:center;border-bottom:1px solid var(--bg-dark)">800+ total</td></tr>
+          <tr><td style="padding:10px 16px;border-bottom:1px solid var(--bg-dark);font-size:0.85rem">Leads gerados (CRM)</td><td style="padding:10px 16px;text-align:center;border-bottom:1px solid var(--bg-dark);font-weight:600;color:var(--teal)">15-20</td><td style="padding:10px 16px;text-align:center;border-bottom:1px solid var(--bg-dark)">50+</td></tr>
+          <tr><td style="padding:10px 16px;border-bottom:1px solid var(--bg-dark);font-size:0.85rem">Propostas enviadas</td><td style="padding:10px 16px;text-align:center;border-bottom:1px solid var(--bg-dark);font-weight:600;color:var(--teal)">5-8</td><td style="padding:10px 16px;text-align:center;border-bottom:1px solid var(--bg-dark)">18+</td></tr>
+          <tr><td style="padding:10px 16px;border-bottom:1px solid var(--bg-dark);font-size:0.85rem">Contratos fechados</td><td style="padding:10px 16px;text-align:center;border-bottom:1px solid var(--bg-dark);font-weight:600;color:var(--teal)">2-3</td><td style="padding:10px 16px;text-align:center;border-bottom:1px solid var(--bg-dark)">6-8</td></tr>
+          <tr><td style="padding:10px 16px;border-bottom:1px solid var(--bg-dark);font-size:0.85rem">Taxa conversão pipeline</td><td style="padding:10px 16px;text-align:center;border-bottom:1px solid var(--bg-dark);font-weight:600;color:var(--teal)">≥20%</td><td style="padding:10px 16px;text-align:center;border-bottom:1px solid var(--bg-dark)">≥25%</td></tr>
+          <tr><td style="padding:10px 16px;font-size:0.85rem">NPS clientes</td><td style="padding:10px 16px;text-align:center;font-weight:600;color:var(--teal)">≥8/10</td><td style="padding:10px 16px;text-align:center">≥8.5/10</td></tr>
+        </tbody>
+      </table>
+    </div>`;
+
+  html += `</div>`;
+  container.innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════════ */
+/* LOADING STATE                                  */
+/* ═══════════════════════════════════════════════ */
+function showLoading() {
+  document.getElementById('main-content').innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;gap:16px">
+      <div style="width:40px;height:40px;border:3px solid var(--bg-dark);border-top-color:var(--navy);border-radius:50%;animation:spin 0.8s linear infinite"></div>
+      <p style="color:var(--text-light);font-size:0.9rem">A carregar dados...</p>
+    </div>
+    <style>@keyframes spin { to { transform: rotate(360deg); } }</style>`;
+}
+
+function showError(msg) {
+  document.getElementById('main-content').innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;gap:16px">
+      <p style="color:var(--coral);font-size:1.1rem;font-weight:600">Erro ao carregar</p>
+      <p style="color:var(--text-light);font-size:0.85rem;max-width:400px;text-align:center">${msg}</p>
+      <button onclick="init()" style="margin-top:8px;padding:8px 20px;background:var(--navy);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:inherit">Tentar novamente</button>
+    </div>`;
+}
+
+/* ═══════════════════════════════════════════════ */
+/* INIT                                           */
+/* ═══════════════════════════════════════════════ */
+async function init() {
+  showLoading();
+  updateCountdown();
+  setInterval(updateCountdown, 60000);
+
+  try {
+    if (!window.supabase || !window.supabase.createClient) {
+      throw new Error('Biblioteca Supabase não carregou. Verifica a tua ligação à internet.');
+    }
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    await loadData();
+    setupRealtime();
+    buildNav();
+    renderCurrentView();
+    updateGlobalProgress();
+  } catch (err) {
+    console.error('Falha ao inicializar:', err);
+    showError(err.message || 'Não foi possível conectar ao Supabase.');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
