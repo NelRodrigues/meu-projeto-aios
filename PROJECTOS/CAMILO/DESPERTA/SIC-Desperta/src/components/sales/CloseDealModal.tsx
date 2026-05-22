@@ -139,8 +139,8 @@ export function RegisterNegotiationModal({
     // Validate
     if (isIntegration && !cpfCnpj) {
       toast({
-        title: "CPF/CNPJ obrigatorio",
-        description: "Para gerar cobrancas no Asaas, informe o CPF/CNPJ do cliente",
+        title: "NIF/Documento obrigatorio",
+        description: "Para gerar cobrancas no gateway, informe o NIF ou documento do cliente",
         variant: "destructive",
       });
       return;
@@ -357,10 +357,10 @@ export function RegisterNegotiationModal({
             {/* CPF/CNPJ for integration mode */}
             {isIntegration && (
               <div className="space-y-2">
-                <Label htmlFor="cpf">CPF/CNPJ do Cliente *</Label>
+                <Label htmlFor="cpf">NIF / Documento do Cliente *</Label>
                 <Input
                   id="cpf"
-                  placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                  placeholder="NIF ou número de identificação"
                   value={cpfCnpj}
                   onChange={(e) => setCpfCnpj(e.target.value)}
                 />

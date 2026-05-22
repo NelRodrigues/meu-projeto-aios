@@ -162,7 +162,9 @@ async function handleIncomingMessage(
   
   if (fromMe) {
     actualContactPhone = String(remoteJid).replace('@s.whatsapp.net', '').replace('@g.us', '').replace('@lid', '');
-    senderPhone = payload.owner || '553123917958';
+    // Numero do proprio dono da instancia (vendedor). Sem fallback hardcoded:
+    // se a UAZAPI nao mandar `owner`, usamos o JID do chat para nao poluir com numeros fixos.
+    senderPhone = payload.owner || actualContactPhone;
   } else {
     senderPhone = payload.sender_pn || payload.sender || payload.Sender || remoteJid;
     actualContactPhone = String(senderPhone).replace('@s.whatsapp.net', '').replace('@g.us', '').replace('@lid', '');
