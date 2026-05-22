@@ -172,10 +172,10 @@ export default function Login() {
             transition={{ delay: 0.3, duration: 0.8 }}
           >
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
-                <span className="text-[#07070a] font-bold text-sm">AI</span>
+              <div className="w-11 h-11 rounded-xl bg-white/95 flex items-center justify-center shadow-lg shadow-black/20 p-1.5">
+                <img src="/desperta-symbol.svg" alt="DESPERTA" className="w-full h-full object-contain" />
               </div>
-              <span className="text-[#f8f6f1]/60 text-sm font-medium tracking-[0.2em] uppercase">
+              <span className="text-[#f8f6f1]/70 text-sm font-medium tracking-[0.2em] uppercase">
                 {BRAND.name}
               </span>
             </div>
@@ -193,7 +193,7 @@ export default function Login() {
               {BRAND.tagline.split(' ').map((word, i) => (
                 <span key={i}>
                   {i === BRAND.tagline.split(' ').length - 1 ? (
-                    <span className="text-amber-400 font-semibold">{word}</span>
+                    <span className="font-semibold bg-gradient-to-r from-[#5BC236] via-[#F2C200] to-[#2E9BE6] bg-clip-text text-transparent">{word}</span>
                   ) : (
                     word
                   )}{' '}
@@ -276,8 +276,8 @@ export default function Login() {
           {/* Mobile brand (hidden on desktop) */}
           <div className="lg:hidden text-center mb-10">
             <div className="flex items-center justify-center gap-3 mb-3">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
-                <span className="text-[#07070a] font-bold text-sm">AI</span>
+              <div className="w-16 h-16 rounded-2xl bg-white/95 flex items-center justify-center shadow-lg shadow-black/20 p-2">
+                <img src="/desperta-symbol.svg" alt="DESPERTA" className="w-full h-full object-contain" />
               </div>
             </div>
             <h1

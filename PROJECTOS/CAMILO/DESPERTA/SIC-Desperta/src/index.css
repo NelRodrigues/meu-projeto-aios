@@ -2,74 +2,79 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Control Tower Design System
-   Based on: Dark sidebar, orange accent, clean white cards
-   All colors MUST be HSL.
+/* DESPERTA Design System — Camilo Ortet
+   Paleta da marca: Azul (#1565C0), Verde (#3DA80E), Amarelo (#F2C200)
+   Tema claro como principal. All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    /* Base colors - Light theme */
-    --background: 220 20% 97%;
-    --foreground: 222 47% 11%;
+    /* Base colors - Light theme (DESPERTA) */
+    --background: 210 30% 98%;
+    --foreground: 209 40% 16%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 209 40% 16%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 209 40% 16%;
 
-    /* Primary = Dark Navy (like sidebar) */
-    --primary: 222 47% 15%;
+    /* Primary = Azul DESPERTA */
+    --primary: 211 80% 42%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary = Light gray backgrounds */
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 222 47% 11%;
+    /* Secondary = Light blue-gray backgrounds */
+    --secondary: 210 24% 95%;
+    --secondary-foreground: 209 40% 16%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
+    --muted: 210 24% 95%;
+    --muted-foreground: 209 14% 45%;
 
-    /* Accent = Orange (brand color) */
-    --accent: 24 95% 53%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent = Amarelo/Dourado DESPERTA */
+    --accent: 48 100% 47%;
+    --accent-foreground: 209 45% 14%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 24 95% 53%;
+    --border: 210 20% 90%;
+    --input: 210 20% 90%;
+    --ring: 211 80% 42%;
 
     --radius: 0.5rem;
 
-    /* CS System Status Colors */
-    --cs-healthy: 142 71% 45%;
+    /* DESPERTA brand colors (uso directo via var) */
+    --desperta-green: 99 85% 36%;
+    --desperta-blue: 211 80% 42%;
+    --desperta-yellow: 48 100% 47%;
+
+    /* CS System Status Colors (alinhados à marca) */
+    --cs-healthy: 99 75% 38%;
     --cs-healthy-foreground: 0 0% 100%;
-    --cs-alert: 45 93% 47%;
-    --cs-alert-foreground: 0 0% 0%;
+    --cs-alert: 48 100% 47%;
+    --cs-alert-foreground: 209 45% 14%;
     --cs-risk: 0 84% 60%;
     --cs-risk-foreground: 0 0% 100%;
-    --cs-info: 217 91% 60%;
+    --cs-info: 211 80% 50%;
     --cs-info-foreground: 0 0% 100%;
 
-    /* Sidebar = Dark Navy */
-    --sidebar-background: 222 47% 11%;
-    --sidebar-foreground: 220 14% 80%;
-    --sidebar-primary: 24 95% 53%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 47% 18%;
+    /* Sidebar = Azul DESPERTA profundo */
+    --sidebar-background: 211 70% 18%;
+    --sidebar-foreground: 210 30% 85%;
+    --sidebar-primary: 48 100% 47%;
+    --sidebar-primary-foreground: 209 45% 14%;
+    --sidebar-accent: 211 65% 24%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 222 47% 20%;
-    --sidebar-ring: 24 95% 53%;
-    --sidebar-muted: 220 14% 60%;
+    --sidebar-border: 211 60% 26%;
+    --sidebar-ring: 48 100% 47%;
+    --sidebar-muted: 210 25% 65%;
 
-    /* Chart colors */
-    --chart-1: 24 95% 53%;
-    --chart-2: 142 71% 45%;
-    --chart-3: 217 91% 60%;
-    --chart-4: 45 93% 47%;
-    --chart-5: 280 65% 60%;
+    /* Chart colors (paleta DESPERTA) */
+    --chart-1: 211 80% 45%;
+    --chart-2: 99 75% 40%;
+    --chart-3: 48 100% 47%;
+    --chart-4: 188 70% 45%;
+    --chart-5: 152 55% 45%;
   }
 
   .dark {
@@ -82,7 +87,7 @@
     --popover: 222 47% 11%;
     --popover-foreground: 220 14% 96%;
 
-    --primary: 24 95% 53%;
+    --primary: 211 80% 55%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 222 47% 15%;
@@ -91,15 +96,20 @@
     --muted: 222 47% 15%;
     --muted-foreground: 220 14% 60%;
 
-    --accent: 24 95% 53%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 48 100% 52%;
+    --accent-foreground: 209 45% 14%;
 
     --destructive: 0 62% 30%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 222 47% 20%;
     --input: 222 47% 20%;
-    --ring: 24 95% 53%;
+    --ring: 211 80% 55%;
+
+    /* DESPERTA brand colors (dark) */
+    --desperta-green: 99 65% 48%;
+    --desperta-blue: 211 80% 55%;
+    --desperta-yellow: 48 100% 52%;
 
     /* CS System Colors - Dark */
     --cs-healthy: 142 70% 45%;
@@ -111,16 +121,16 @@
     --cs-info: 217 91% 65%;
     --cs-info-foreground: 0 0% 100%;
 
-    /* Sidebar stays dark */
-    --sidebar-background: 222 47% 8%;
-    --sidebar-foreground: 220 14% 80%;
-    --sidebar-primary: 24 95% 53%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 47% 15%;
+    /* Sidebar stays dark (accent amarelo DESPERTA) */
+    --sidebar-background: 211 55% 12%;
+    --sidebar-foreground: 210 25% 82%;
+    --sidebar-primary: 48 100% 52%;
+    --sidebar-primary-foreground: 209 45% 14%;
+    --sidebar-accent: 211 50% 18%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 222 47% 15%;
-    --sidebar-ring: 24 95% 53%;
-    --sidebar-muted: 220 14% 50%;
+    --sidebar-border: 211 45% 20%;
+    --sidebar-ring: 48 100% 52%;
+    --sidebar-muted: 210 20% 55%;
   }
 }
 

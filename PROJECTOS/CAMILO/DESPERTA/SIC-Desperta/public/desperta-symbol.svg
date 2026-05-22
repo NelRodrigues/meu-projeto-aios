@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" fill="none">
+  <!-- DESPERTA — símbolo (coração+cérebro, X verde/azul, onda tricolor) -->
+  <defs>
+    <linearGradient id="dGreen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5BC236"/>
+      <stop offset="1" stop-color="#3DA80E"/>
+    </linearGradient>
+    <linearGradient id="dBlue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2E9BE6"/>
+      <stop offset="1" stop-color="#1565C0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Coração + cérebro (amarelo) no topo -->
+  <g fill="#F2C200">
+    <!-- coração base -->
+    <path d="M100 86c-3-7-10-12-18-12-11 0-19 8-19 19 0 14 19 27 37 39 18-12 37-25 37-39 0-11-8-19-19-19-8 0-15 5-18 12z"/>
+    <!-- cérebro (pequenos lóbulos sobre o coração) -->
+    <g fill="#F2C200">
+      <circle cx="86" cy="74" r="11"/>
+      <circle cx="100" cy="68" r="12"/>
+      <circle cx="114" cy="74" r="11"/>
+      <circle cx="93" cy="84" r="10"/>
+      <circle cx="107" cy="84" r="10"/>
+    </g>
+  </g>
+
+  <!-- X estilizado — meia-lua verde (esquerda), abertura voltada para dentro -->
+  <path d="M78 116
+           C 44 120, 26 140, 26 160
+           C 26 182, 46 202, 80 204
+           C 64 196, 50 180, 50 160
+           C 50 142, 62 126, 78 116 Z"
+        fill="url(#dGreen)"/>
+
+  <!-- X estilizado — meia-lua azul (direita), abertura voltada para dentro -->
+  <path d="M122 116
+           C 156 120, 174 140, 174 160
+           C 174 182, 154 202, 120 204
+           C 136 196, 150 180, 150 160
+           C 150 142, 138 126, 122 116 Z"
+        fill="url(#dBlue)"/>
+
+  <!-- Onda tricolor -->
+  <path d="M34 214 C 60 204, 78 224, 100 214 C 122 204, 140 224, 166 214"
+        stroke="#5BC236" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M34 222 C 60 212, 78 232, 100 222 C 122 212, 140 232, 166 222"
+        stroke="#F2C200" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M34 230 C 60 220, 78 240, 100 230 C 122 220, 140 240, 166 230"
+        stroke="#2E9BE6" stroke-width="4" stroke-linecap="round" fill="none"/>
+</svg>

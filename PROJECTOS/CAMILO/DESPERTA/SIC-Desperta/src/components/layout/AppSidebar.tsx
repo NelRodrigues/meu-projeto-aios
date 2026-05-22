@@ -12,7 +12,6 @@ import {
   Headphones,
   Kanban,
   LogOut,
-  Sparkles,
   TrendingUp,
   User2,
 } from "lucide-react";
@@ -164,25 +163,25 @@ export function AppSidebar() {
             <div
               className={cn(
                 "relative shrink-0 w-9 h-9 rounded-xl",
-                "bg-gradient-to-br from-sidebar-primary to-sidebar-primary/70",
-                "flex items-center justify-center",
-                "shadow-[0_2px_8px_-2px_hsl(var(--sidebar-primary)/0.5)]",
-                "ring-1 ring-sidebar-primary/30",
+                "bg-white/95",
+                "flex items-center justify-center p-1.5",
+                "shadow-[0_2px_8px_-2px_rgba(0,0,0,0.4)]",
+                "ring-1 ring-white/20",
                 "transition-transform duration-300 group-hover:scale-105"
               )}
             >
-              <Sparkles className="w-4 h-4 text-sidebar-primary-foreground" strokeWidth={2.25} />
+              <img src="/desperta-symbol.svg" alt="DESPERTA" className="w-full h-full object-contain" />
               {/* Glow sutil atrás do logo */}
               <div className="absolute inset-0 rounded-xl bg-sidebar-primary/20 blur-md -z-10" />
             </div>
 
             {!isCollapsed && (
               <div className="flex flex-col min-w-0 leading-tight">
-                <span className="text-[13px] font-semibold tracking-tight text-sidebar-accent-foreground truncate">
-                  SIC Desperta
+                <span className="text-[13px] font-semibold tracking-[0.12em] text-sidebar-accent-foreground truncate">
+                  DESPERTA
                 </span>
                 <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-sidebar-muted/80">
-                  Control Tower
+                  Camilo Ortet
                 </span>
               </div>
             )}

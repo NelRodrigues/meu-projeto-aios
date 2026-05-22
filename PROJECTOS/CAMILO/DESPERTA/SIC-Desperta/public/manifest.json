@@ -1,14 +1,20 @@
 {
-  "name": "SIC Desperta",
-  "short_name": "SIC Desperta",
-  "description": "CRM com Inteligência Artificial",
+  "name": "DESPERTA — Camilo Ortet",
+  "short_name": "DESPERTA",
+  "description": "CRM com Inteligência Artificial — DESPERTA",
   "start_url": "/app/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "#FFFFFF",
+  "theme_color": "#1565C0",
   "icons": [
     {
+      "src": "/icons/desperta-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
       "src": "/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
@@ -21,18 +27,12 @@
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
+      "src": "/icons/desperta-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "maskable"
     }
   ],
-  "categories": ["events", "social"],
+  "categories": ["business", "productivity"],
   "lang": "pt-AO"
 }

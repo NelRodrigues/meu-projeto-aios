@@ -63,7 +63,7 @@ const s = StyleSheet.create({
   // === HEADER ===
   header: { backgroundColor: C.bg, paddingHorizontal: 36, paddingTop: 28, paddingBottom: 24 },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  logo: { width: 90, height: 40 },
+  logo: { width: 42, height: 50, objectFit: 'contain' },
   headerBadge: { backgroundColor: C.bgLight, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 4 },
   headerBadgeText: { fontSize: 8, color: C.orangeLight, letterSpacing: 2, fontFamily: 'Helvetica-Bold' },
   headerDivider: { height: 1, backgroundColor: '#3f3f46', marginBottom: 14 },
@@ -162,7 +162,7 @@ const MeetingPDFDocument = ({ data, logoBase64 }: { data: MeetingPDFData; logoBa
             {logoBase64 ? (
               <Image src={logoBase64} style={s.logo} />
             ) : (
-              <Text style={{ fontSize: 16, fontFamily: 'Helvetica-Bold', color: C.orange }}>CRM</Text>
+              <Text style={{ fontSize: 16, fontFamily: 'Helvetica-Bold', color: C.orange }}>DESPERTA</Text>
             )}
             <View style={s.headerBadge}>
               <Text style={s.headerBadgeText}>RESUMO DE REUNIAO</Text>
@@ -284,7 +284,7 @@ const MeetingPDFDocument = ({ data, logoBase64 }: { data: MeetingPDFData; logoBa
 
 async function loadLogoAsBase64(): Promise<string> {
   try {
-    const response = await fetch('/logo-iap-white.png');
+    const response = await fetch('/desperta-logo-pdf.png');
     const blob = await response.blob();
     return new Promise((resolve) => {
       const reader = new FileReader();
