@@ -1,0 +1,114 @@
+schema_version: aiox-research-validation-report-v1
+research_slug: 2026-05-30-rate-limiting-agentes-whatsapp-claude-api-producao
+generated_at: '2026-05-30'
+derived_from_research: true
+status: warn
+checks:
+- id: TAB-map
+  check: TAB-map
+  status: warn
+  message: 'map: rich (5/6 artifacts present)'
+  evidence:
+  - README.md
+  - metrics.yaml
+  - pipeline-state.yaml
+  - research-graph.json
+  - matrices.yaml
+- id: TAB-recommendations
+  check: TAB-recommendations
+  status: pass
+  message: 'recommendations: complete (5/5 artifacts present)'
+  evidence:
+  - 03-recommendations.md
+  - action-plan.yaml
+  - quick-wins.md
+  - risk-register.yaml
+  - decision-ledger.yaml
+- id: TAB-evidence
+  check: TAB-evidence
+  status: pass
+  message: 'evidence: complete (4/4 artifacts present)'
+  evidence:
+  - sources.yaml
+  - research-graph.json
+  - claims.yaml
+  - validation-report.yaml
+- id: TAB-waves
+  check: TAB-waves
+  status: warn
+  message: 'waves: missing (0/1 artifacts present)'
+- id: TAB-sources
+  check: TAB-sources
+  status: pass
+  message: 'sources: complete (1/1 artifacts present)'
+  evidence:
+  - sources.yaml
+- id: TAB-players
+  check: TAB-players
+  status: warn
+  message: 'players: partial (1/2 artifacts present)'
+  evidence:
+  - players.yaml
+- id: TAB-curiosity
+  check: TAB-curiosity
+  status: pass
+  message: 'curiosity: complete (1/1 artifacts present)'
+  evidence:
+  - curiosity_queue.yaml
+- id: TAB-document
+  check: TAB-document
+  status: pass
+  message: 'document: complete (1/1 artifacts present)'
+  evidence:
+  - README.md
+- id: GRAPH-EDGES
+  check: GRAPH-EDGES
+  status: pass
+  message: 120 graph edges detected.
+- id: ACTIONS
+  check: ACTIONS
+  status: pass
+  message: 3 action rows detected.
+- id: RISKS
+  check: RISKS
+  status: pass
+  message: 5 risk rows detected.
+- id: CLAIMS
+  check: CLAIMS
+  status: pass
+  message: 7 claims detected.
+- id: DECISIONS
+  check: DECISIONS
+  status: pass
+  message: 1 ledger decisions detected.
+- id: RESEARCH-PROFILE
+  check: RESEARCH-PROFILE
+  status: warn
+  message: 'research-profile.yaml type: missing.'
+- id: DECISION-RUBRIC
+  check: DECISION-RUBRIC
+  status: warn
+  message: 'decision-rubric.yaml status: missing.'
+- id: RUBRIC-DIMENSION-PACK
+  check: RUBRIC-DIMENSION-PACK
+  status: warn
+  message: 'decision-rubric.yaml dimension_pack: missing; profile.type: missing.'
+- id: RESEARCH-CONTRACT
+  check: RESEARCH-CONTRACT
+  status: warn
+  message: 'research-contract.json missing or incomplete; missing: research_kind, objective, decision_context, taxonomy, rubric_model,
+    evidence_model, stop_rules.'
+- id: EXECUTION-LOG
+  check: EXECUTION-LOG
+  status: warn
+  message: execution-log.jsonl parsed.
+known_limits:
+- 'map: rich (5/6 artifacts present)'
+- 'waves: missing (0/1 artifacts present)'
+- 'players: partial (1/2 artifacts present)'
+- 'research-profile.yaml type: missing.'
+- 'decision-rubric.yaml status: missing.'
+- 'decision-rubric.yaml dimension_pack: missing; profile.type: missing.'
+- 'research-contract.json missing or incomplete; missing: research_kind, objective, decision_context, taxonomy, rubric_model,
+  evidence_model, stop_rules.'
+- execution-log.jsonl parsed.

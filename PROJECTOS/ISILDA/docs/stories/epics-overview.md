@@ -21,8 +21,11 @@
 | **E8 — Visao Multi-Modal** | 3 | 4 dias | 8.1-8.3 | D2 |
 | **E9 — Recompra por Ocasiao** | 4 | 3 dias | 9.1-9.3 | D5.2 |
 | **E10 — Pagamentos + Dashboard + Polish** | 5 | 3-5 dias | 10.1-10.5 | D7, D8, D9 |
+| **E11 — Resiliencia do Agente WhatsApp** | 6 | 3-4 dias | 11.1-11.5 | D1 (rate limit) |
 
-**Total: 10 epics, 32 stories**
+**Total: 11 epics, 37 stories**
+
+> **E11** deriva de research (`/tech-research`, 2026-05-30): rate limiting em 3 camadas (Claude API / WhatsApp / cap interno). Ver `docs/research/2026-05-30-rate-limiting-agentes-whatsapp-claude-api-producao/`.
 
 ---
 
@@ -48,6 +51,10 @@ FASE 4 (1 semana)
 FASE 5 (3-5 dias)
   E10
   [Pagamentos + Dashboard + Polish + Go-Live]
+
+FASE 6 (3-4 dias) — pos-go-live / hardening
+  E11
+  [Resiliencia do Agente: caching, throttling, backoff, alertas, pacing]
 ```
 
 ---
@@ -108,6 +115,16 @@ FASE 5 (3-5 dias)
 | 10.3 | Checklist diaria (migration 017 + UI) | P1 | 0.5d |
 | 10.4 | RGPD: consentimento no primeiro contacto + opt-out | P1 | 0.5d |
 | 10.5 | Polish: PWA config, testes E2E, go-live checklist | P1 | 1d |
+
+### Fase 6 — Resiliencia do Agente WhatsApp
+
+| Story | Titulo | Prioridade | Estimativa |
+|-------|--------|------------|------------|
+| 11.1 | Caching do system prompt do agente (prompt caching Anthropic) | P0 | 0.5d |
+| 11.2 | Captura + log dos headers anthropic-ratelimit-* em ai_agent_logs | P0 | 1d |
+| 11.3 | Handler de 429 com ordem correcta (retry-after → backoff+jitter) | P0 | 1d |
+| 11.4 | Alerta de taxa de 429 > 1% nas ultimas 24h | P1 | 0.5d |
+| 11.5 | Pacing 3-8s entre mensagens WhatsApp (anti-bloqueio + quality rating) | P1 | 0.5d |
 
 ---
 

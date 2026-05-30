@@ -1,0 +1,149 @@
+schema_version: 1.1
+generator: tech-research/players_extractor.py
+research_slug: 2026-05-30-rate-limiting-agentes-whatsapp-claude-api-producao
+generated_at: 2026-05-30
+derived_from_research: true
+evidence_refs:
+  - 02-research-report.md
+confidence: medium
+limitations:
+  - qualitative comparison only — no weighted competitive score
+  - "player extraction based on ### N.N heading pattern; players without this structure are not captured"
+  - fit and role fields inferred from category heuristics when not explicitly declared in the report
+  - exclusion detection is keyword-based and may miss implicit exclusions
+tier_meaning:
+  1: Peças primárias para construir a solução agora.
+  2: Referências e padrões que informam a arquitetura, mas não são a peça central.
+  3: Contexto secundário, monitorar ou adiar.
+players:
+  - id: player-001
+    number: 2.1
+    name: Modelo de limites
+    tier: null
+    category: null
+    role: null
+    fit: null
+    action: null
+    what_it_does: null
+    what_it_does_not: null
+    insight: null
+    source_title: null
+    source_url: null
+    source_date: null
+    excluded: false
+    exclusion_reason: null
+    first_seen_in: 02-research-report.md
+    section: 2. Camada A — Claude API (Anthropic)
+  - id: player-002
+    number: 2.2
+    name: Caching reduz pressão de ITPM
+    tier: null
+    category: null
+    role: null
+    fit: null
+    action: null
+    what_it_does: null
+    what_it_does_not: null
+    insight: null
+    source_title: null
+    source_url: null
+    source_date: null
+    excluded: false
+    exclusion_reason: null
+    first_seen_in: 02-research-report.md
+    section: 2. Camada A — Claude API (Anthropic)
+  - id: player-003
+    number: 2.3
+    name: Tratamento de 429 — ordem correcta (3 níveis)
+    tier: null
+    category: null
+    role: null
+    fit: null
+    action: null
+    what_it_does: null
+    what_it_does_not: null
+    insight: null
+    source_title: null
+    source_url: null
+    source_date: null
+    excluded: false
+    exclusion_reason: null
+    first_seen_in: 02-research-report.md
+    section: 2. Camada A — Claude API (Anthropic)
+  - id: player-004
+    number: 2.4
+    name: Throttling proactivo (a chave para produção)
+    tier: null
+    category: null
+    role: null
+    fit: null
+    action: null
+    what_it_does: null
+    what_it_does_not: null
+    insight: null
+    source_title: null
+    source_url: null
+    source_date: null
+    excluded: false
+    exclusion_reason: null
+    first_seen_in: 02-research-report.md
+    section: 2. Camada A — Claude API (Anthropic)
+  - id: player-005
+    number: 4.1
+    name: Fila com global rate limiter
+    tier: null
+    category: null
+    role: null
+    fit: null
+    action: null
+    what_it_does: null
+    what_it_does_not: null
+    insight: null
+    source_title: null
+    source_url: null
+    source_date: null
+    excluded: false
+    exclusion_reason: null
+    first_seen_in: 02-research-report.md
+    section: 4. Camada C — Arquitectura de fila + resiliência
+  - id: player-006
+    number: 4.2
+    name: Stack de 3 camadas de resiliência
+    tier: null
+    category: null
+    role: null
+    fit: null
+    action: null
+    what_it_does: null
+    what_it_does_not: null
+    insight: null
+    source_title: null
+    source_url: null
+    source_date: null
+    excluded: false
+    exclusion_reason: null
+    first_seen_in: 02-research-report.md
+    section: 4. Camada C — Arquitectura de fila + resiliência
+  - id: player-007
+    number: 4.3
+    name: Multi-tenant (relevante para SIC multi-tenant)
+    tier: null
+    category: null
+    role: null
+    fit: null
+    action: null
+    what_it_does: null
+    what_it_does_not: null
+    insight: null
+    source_title: null
+    source_url: null
+    source_date: null
+    excluded: false
+    exclusion_reason: null
+    first_seen_in: 02-research-report.md
+    section: 4. Camada C — Arquitectura de fila + resiliência
+totals:
+  total: 7
+  by_tier: {}
+  by_category: {}
+  excluded: 0

@@ -1,0 +1,20 @@
+workflow_version: "2.0.0"
+runtime_contract: "tech-research-pipeline/7-molecules"
+coverage_score: 88
+integrity_score: 0.92
+coverage_gate: APPROVE
+citation_gate: APPROVE
+citation_verified: true
+verified_ratio: 0.92
+unsupported_count: 0
+stop_reason: "coverage_gate_approve_88_wave1"
+waves_executed: 1
+multi_llm_triggered: false
+quick_wins_count: 5
+sources_consulted: 11
+elapsed_minutes: null
+render_tier_hint: gold
+rubrics:
+  information_recall: { passed: 5, total: 6 }
+  analysis: { passed: 6, total: 6 }
+  presentation: { passed: 6, total: 6 }

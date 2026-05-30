@@ -1,0 +1,61 @@
+schema_version: 1.0
+generator: tech-research/comparison_matrix_extractor.py
+research_slug: 2026-05-30-rate-limiting-agentes-whatsapp-claude-api-producao
+generated_at: 2026-05-30
+derived_from_research: true
+evidence_refs:
+  - 02-research-report.md
+confidence: medium
+limitations:
+  - "captures only markdown tables directly under ## headings; inline tables in ### player blocks are intentionally excluded"
+  - table quality depends on consistent markdown formatting in the report
+  - no semantic weighting — all tables are treated as equal comparison matrices
+matrices:
+  - id: matrix-001
+    title: 1. Os 3 tectos de rate limit (não confundir)
+    section_number: 1
+    first_seen_in: 02-research-report.md
+    columns:
+      - Camada
+      - Quem impõe
+      - Sintoma
+      - Onde verificar
+    row_count: 3
+    cells:
+      - Camada: "**A. Claude API**"
+        Quem impõe: Anthropic
+        Sintoma: "HTTP 429 `rate_limit_error` + `retry-after`"
+        Onde verificar: "headers `anthropic-ratelimit-*`"
+      - Camada: "**B. WhatsApp**"
+        Quem impõe: Meta / uazapi
+        Sintoma: erro 130429 (throughput), 131056 (pair), bloqueio
+        Onde verificar: WhatsApp Manager, quality rating
+      - Camada: "**C. Cap interno**"
+        Quem impõe: A tua app
+        Sintoma: conversa pausada por limite diário
+        Onde verificar: "`ai_sales_agents.settings`"
+  - id: matrix-002
+    title: 5. Cost control (alavancas)
+    section_number: 5
+    first_seen_in: 02-research-report.md
+    columns:
+      - Alavanca
+      - Efeito
+      - Quando
+    row_count: 4
+    cells:
+      - Alavanca: "**Prompt caching**"
+        Efeito: "read = 10% input; paga-se após 1 leitura (5min)"
+        Quando: system prompt / few-shot ≥1024 tokens estáticos
+      - Alavanca: "**Batches API**"
+        Efeito: "-50% automático, ≤24h"
+        Quando: trabalho assíncrono (relatórios, enriquecimento)
+      - Alavanca: "**Model routing**"
+        Efeito: Haiku p/ triagem, Sonnet p/ resposta
+        Quando: qualificação BANT vs venda
+      - Alavanca: "**max_tokens calibrado**"
+        Efeito: melhora previsão OTPM
+        Quando: respostas curtas → max_tokens baixo
+totals:
+  total_matrices: 2
+  total_rows: 7

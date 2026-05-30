@@ -1,0 +1,58 @@
+schema_version: aiox-research-claims-v1
+research_slug: 2026-05-30-rate-limiting-agentes-whatsapp-claude-api-producao
+generated_at: '2026-05-30'
+derived_from_research: true
+claims:
+- id: CL-001
+  claim: '| Alavanca | Efeito | Quando | |---|---|---| | Prompt caching | read = 10% input; paga-se após 1 leitura (5min)
+    | system prompt / few-shot ≥1024 tokens estáticos | | Batches API | -50% automático, ≤24h | trabalho assínc…'
+  confidence: medium
+  evidence:
+  - 02-research-report.md
+  status: derived
+  implication: Usar como premissa verificável antes de executar a próxima ação.
+- id: CL-002
+  claim: Anthropic por último, e só com evidência (x-should-retry/headers).
+  confidence: medium
+  evidence:
+  - 03-recommendations.md
+  status: derived
+  implication: Usar como premissa verificável antes de executar a próxima ação.
+- id: CL-003
+  claim: Evita 429 (que é cobrado) e é mais barato que retry.
+  confidence: medium
+  evidence:
+  - 03-recommendations.md
+  status: derived
+  implication: Usar como premissa verificável antes de executar a próxima ação.
+- id: CL-004
+  claim: Distinguir 429 vs 529 vs x-should-retry:false.
+  confidence: medium
+  evidence:
+  - 03-recommendations.md
+  status: derived
+  implication: Usar como premissa verificável antes de executar a próxima ação.
+- id: CL-005
+  claim: O processador de mensagenswhatsapp deve ter um rate limiter global atado à quota Claude (re-enfileira em 429, não
+    falha) + circuit breaker para outages.
+  confidence: medium
+  evidence:
+  - 03-recommendations.md
+  status: derived
+  implication: Usar como premissa verificável antes de executar a próxima ação.
+- id: CL-006
+  claim: Detectar x-should-retry:false (não retry inútil).
+  confidence: medium
+  evidence:
+  - quick-wins.md
+  status: derived
+  implication: Usar como premissa verificável antes de executar a próxima ação.
+- id: CL-007
+  claim: 'Must avoid: (1) Anthropic API 429 / TPM / RPM limits, (2) WhatsApp provider (uazapi / Meta Cloud API) messaging
+    limits & quality-rating throttling, (3) self-imposed daily per-conversation caps.'
+  confidence: medium
+  evidence:
+  - 01-deep-research-prompt.md
+  status: derived
+  implication: Usar como premissa verificável antes de executar a próxima ação.
+open_evidence_gaps: []

@@ -1,0 +1,1762 @@
+{
+  "confidence": "medium",
+  "decision": {
+    "confidence": "high",
+    "selected_nodes": [
+      "decision-DEC-001"
+    ]
+  },
+  "derived_from_research": true,
+  "edge_count": 120,
+  "edges": [
+    {
+      "from": "root",
+      "relation": "contains",
+      "to": "00-query"
+    },
+    {
+      "from": "root",
+      "relation": "contains",
+      "to": "01-prompt"
+    },
+    {
+      "from": "root",
+      "relation": "contains",
+      "to": "02-report"
+    },
+    {
+      "from": "root",
+      "relation": "contains",
+      "to": "03-recommendations"
+    },
+    {
+      "from": "root",
+      "relation": "contains",
+      "to": "readme"
+    },
+    {
+      "from": "root",
+      "relation": "contains",
+      "to": "artifact-action-plan-yaml"
+    },
+    {
+      "from": "root",
+      "relation": "contains",
+      "to": "artifact-claims-yaml"
+    },
+    {
+      "from": "root",
+      "relation": "contains",
+      "to": "curiosity"
+    },
+    {
+      "from": "root",
+      "relation": "contains",
+      "to": "artifact-dashboard-manifest-yaml"
+    },
+    {
+      "from": "root",
+      "relation": "contains",
+      "to": "artifact-decision-ledger-yaml"
+    },
+    {
+      "from": "root",
+      "relation": "contains",
+      "to": "artifact-matrices-yaml"
+    },
+    {
+      "from": "root",
+      "relation": "contains",
+      "to": "metrics"
+    },
+    {
+      "from": "root",
+      "relation": "contains",
+      "to": "pipeline-state"
+    },
+    {
+      "from": "root",
+      "relation": "contains",
+      "to": "artifact-players-yaml"
+    },
+    {
+      "from": "root",
+      "relation": "contains",
+      "to": "quick-wins"
+    },
+    {
+      "from": "root",
+      "relation": "contains",
+      "to": "artifact-research-graph-json"
+    },
+    {
+      "from": "root",
+      "relation": "contains",
+      "to": "artifact-risk-register-yaml"
+    },
+    {
+      "from": "root",
+      "relation": "contains",
+      "to": "artifact-sources-yaml"
+    },
+    {
+      "from": "root",
+      "relation": "contains",
+      "to": "artifact-ux-patterns-yaml"
+    },
+    {
+      "from": "root",
+      "relation": "contains",
+      "to": "artifact-validation-report-yaml"
+    },
+    {
+      "from": "root",
+      "relation": "contains",
+      "to": "wave-1"
+    },
+    {
+      "from": "00-query",
+      "relation": "produces",
+      "to": "01-prompt"
+    },
+    {
+      "from": "01-prompt",
+      "relation": "produces",
+      "to": "02-report"
+    },
+    {
+      "from": "02-report",
+      "relation": "produces",
+      "to": "03-recommendations"
+    },
+    {
+      "from": "wave-1",
+      "relation": "checkpoint",
+      "to": "02-report"
+    },
+    {
+      "from": "metrics",
+      "relation": "derives",
+      "to": "02-report"
+    },
+    {
+      "from": "pipeline-state",
+      "relation": "describes",
+      "to": "root"
+    },
+    {
+      "from": "artifact-sources-yaml",
+      "relation": "indexes",
+      "to": "source-src-001"
+    },
+    {
+      "from": "source-src-001",
+      "relation": "cited_in",
+      "to": "02-report"
+    },
+    {
+      "from": "source-src-001",
+      "relation": "supports",
+      "to": "02-report"
+    },
+    {
+      "from": "artifact-sources-yaml",
+      "relation": "indexes",
+      "to": "source-src-002"
+    },
+    {
+      "from": "source-src-002",
+      "relation": "cited_in",
+      "to": "02-report"
+    },
+    {
+      "from": "source-src-002",
+      "relation": "supports",
+      "to": "02-report"
+    },
+    {
+      "from": "artifact-sources-yaml",
+      "relation": "indexes",
+      "to": "source-src-003"
+    },
+    {
+      "from": "source-src-003",
+      "relation": "cited_in",
+      "to": "02-report"
+    },
+    {
+      "from": "source-src-003",
+      "relation": "supports",
+      "to": "02-report"
+    },
+    {
+      "from": "artifact-sources-yaml",
+      "relation": "indexes",
+      "to": "source-src-004"
+    },
+    {
+      "from": "source-src-004",
+      "relation": "cited_in",
+      "to": "02-report"
+    },
+    {
+      "from": "source-src-004",
+      "relation": "supports",
+      "to": "02-report"
+    },
+    {
+      "from": "artifact-sources-yaml",
+      "relation": "indexes",
+      "to": "source-src-005"
+    },
+    {
+      "from": "source-src-005",
+      "relation": "cited_in",
+      "to": "02-report"
+    },
+    {
+      "from": "source-src-005",
+      "relation": "supports",
+      "to": "02-report"
+    },
+    {
+      "from": "artifact-sources-yaml",
+      "relation": "indexes",
+      "to": "source-src-006"
+    },
+    {
+      "from": "source-src-006",
+      "relation": "cited_in",
+      "to": "02-report"
+    },
+    {
+      "from": "source-src-006",
+      "relation": "supports",
+      "to": "02-report"
+    },
+    {
+      "from": "artifact-sources-yaml",
+      "relation": "indexes",
+      "to": "source-src-007"
+    },
+    {
+      "from": "source-src-007",
+      "relation": "cited_in",
+      "to": "02-report"
+    },
+    {
+      "from": "source-src-007",
+      "relation": "supports",
+      "to": "02-report"
+    },
+    {
+      "from": "artifact-sources-yaml",
+      "relation": "indexes",
+      "to": "source-src-008"
+    },
+    {
+      "from": "source-src-008",
+      "relation": "cited_in",
+      "to": "02-report"
+    },
+    {
+      "from": "source-src-008",
+      "relation": "supports",
+      "to": "02-report"
+    },
+    {
+      "from": "artifact-sources-yaml",
+      "relation": "indexes",
+      "to": "source-src-009"
+    },
+    {
+      "from": "source-src-009",
+      "relation": "cited_in",
+      "to": "02-report"
+    },
+    {
+      "from": "source-src-009",
+      "relation": "supports",
+      "to": "02-report"
+    },
+    {
+      "from": "artifact-sources-yaml",
+      "relation": "indexes",
+      "to": "source-src-010"
+    },
+    {
+      "from": "source-src-010",
+      "relation": "cited_in",
+      "to": "02-report"
+    },
+    {
+      "from": "source-src-010",
+      "relation": "supports",
+      "to": "02-report"
+    },
+    {
+      "from": "artifact-sources-yaml",
+      "relation": "indexes",
+      "to": "source-src-011"
+    },
+    {
+      "from": "source-src-011",
+      "relation": "cited_in",
+      "to": "02-report"
+    },
+    {
+      "from": "source-src-011",
+      "relation": "supports",
+      "to": "02-report"
+    },
+    {
+      "from": "artifact-players-yaml",
+      "relation": "indexes",
+      "to": "player-player-001"
+    },
+    {
+      "from": "player-player-001",
+      "relation": "analyzed_in",
+      "to": "02-report"
+    },
+    {
+      "from": "artifact-players-yaml",
+      "relation": "indexes",
+      "to": "player-player-002"
+    },
+    {
+      "from": "player-player-002",
+      "relation": "analyzed_in",
+      "to": "02-report"
+    },
+    {
+      "from": "artifact-players-yaml",
+      "relation": "indexes",
+      "to": "player-player-003"
+    },
+    {
+      "from": "player-player-003",
+      "relation": "analyzed_in",
+      "to": "02-report"
+    },
+    {
+      "from": "artifact-players-yaml",
+      "relation": "indexes",
+      "to": "player-player-004"
+    },
+    {
+      "from": "player-player-004",
+      "relation": "analyzed_in",
+      "to": "02-report"
+    },
+    {
+      "from": "artifact-players-yaml",
+      "relation": "indexes",
+      "to": "player-player-005"
+    },
+    {
+      "from": "player-player-005",
+      "relation": "analyzed_in",
+      "to": "02-report"
+    },
+    {
+      "from": "artifact-players-yaml",
+      "relation": "indexes",
+      "to": "player-player-006"
+    },
+    {
+      "from": "player-player-006",
+      "relation": "analyzed_in",
+      "to": "02-report"
+    },
+    {
+      "from": "artifact-players-yaml",
+      "relation": "indexes",
+      "to": "player-player-007"
+    },
+    {
+      "from": "player-player-007",
+      "relation": "analyzed_in",
+      "to": "02-report"
+    },
+    {
+      "from": "artifact-claims-yaml",
+      "relation": "indexes",
+      "to": "claim-CL-001"
+    },
+    {
+      "from": "claim-CL-001",
+      "relation": "informs",
+      "to": "03-recommendations"
+    },
+    {
+      "from": "02-report",
+      "relation": "supports",
+      "to": "claim-CL-001"
+    },
+    {
+      "from": "artifact-claims-yaml",
+      "relation": "indexes",
+      "to": "claim-CL-002"
+    },
+    {
+      "from": "claim-CL-002",
+      "relation": "informs",
+      "to": "03-recommendations"
+    },
+    {
+      "from": "03-recommendations",
+      "relation": "supports",
+      "to": "claim-CL-002"
+    },
+    {
+      "from": "artifact-claims-yaml",
+      "relation": "indexes",
+      "to": "claim-CL-003"
+    },
+    {
+      "from": "claim-CL-003",
+      "relation": "informs",
+      "to": "03-recommendations"
+    },
+    {
+      "from": "03-recommendations",
+      "relation": "supports",
+      "to": "claim-CL-003"
+    },
+    {
+      "from": "artifact-claims-yaml",
+      "relation": "indexes",
+      "to": "claim-CL-004"
+    },
+    {
+      "from": "claim-CL-004",
+      "relation": "informs",
+      "to": "03-recommendations"
+    },
+    {
+      "from": "03-recommendations",
+      "relation": "supports",
+      "to": "claim-CL-004"
+    },
+    {
+      "from": "artifact-claims-yaml",
+      "relation": "indexes",
+      "to": "claim-CL-005"
+    },
+    {
+      "from": "claim-CL-005",
+      "relation": "informs",
+      "to": "03-recommendations"
+    },
+    {
+      "from": "03-recommendations",
+      "relation": "supports",
+      "to": "claim-CL-005"
+    },
+    {
+      "from": "artifact-claims-yaml",
+      "relation": "indexes",
+      "to": "claim-CL-006"
+    },
+    {
+      "from": "claim-CL-006",
+      "relation": "informs",
+      "to": "03-recommendations"
+    },
+    {
+      "from": "quick-wins",
+      "relation": "supports",
+      "to": "claim-CL-006"
+    },
+    {
+      "from": "artifact-claims-yaml",
+      "relation": "indexes",
+      "to": "claim-CL-007"
+    },
+    {
+      "from": "claim-CL-007",
+      "relation": "informs",
+      "to": "03-recommendations"
+    },
+    {
+      "from": "01-prompt",
+      "relation": "supports",
+      "to": "claim-CL-007"
+    },
+    {
+      "from": "artifact-decision-ledger-yaml",
+      "relation": "indexes",
+      "to": "decision-DEC-001"
+    },
+    {
+      "from": "decision-DEC-001",
+      "relation": "drives",
+      "to": "03-recommendations"
+    },
+    {
+      "from": "02-report",
+      "relation": "supports",
+      "to": "decision-DEC-001"
+    },
+    {
+      "from": "artifact-action-plan-yaml",
+      "relation": "declares",
+      "to": "decision-action-plan-DEC-001"
+    },
+    {
+      "from": "decision-action-plan-DEC-001",
+      "relation": "drives",
+      "to": "03-recommendations"
+    },
+    {
+      "from": "02-report",
+      "relation": "supports",
+      "to": "decision-action-plan-DEC-001"
+    },
+    {
+      "from": "artifact-action-plan-yaml",
+      "relation": "indexes",
+      "to": "action-AP-1"
+    },
+    {
+      "from": "03-recommendations",
+      "relation": "recommends",
+      "to": "action-AP-1"
+    },
+    {
+      "from": "quick-wins",
+      "relation": "supports",
+      "to": "action-AP-1"
+    },
+    {
+      "from": "artifact-action-plan-yaml",
+      "relation": "indexes",
+      "to": "action-AP-2"
+    },
+    {
+      "from": "03-recommendations",
+      "relation": "recommends",
+      "to": "action-AP-2"
+    },
+    {
+      "from": "quick-wins",
+      "relation": "supports",
+      "to": "action-AP-2"
+    },
+    {
+      "from": "artifact-action-plan-yaml",
+      "relation": "indexes",
+      "to": "action-AP-3"
+    },
+    {
+      "from": "03-recommendations",
+      "relation": "recommends",
+      "to": "action-AP-3"
+    },
+    {
+      "from": "quick-wins",
+      "relation": "supports",
+      "to": "action-AP-3"
+    },
+    {
+      "from": "artifact-risk-register-yaml",
+      "relation": "indexes",
+      "to": "risk-R-001"
+    },
+    {
+      "from": "risk-R-001",
+      "relation": "constrains",
+      "to": "03-recommendations"
+    },
+    {
+      "from": "artifact-risk-register-yaml",
+      "relation": "indexes",
+      "to": "risk-R-002"
+    },
+    {
+      "from": "risk-R-002",
+      "relation": "constrains",
+      "to": "03-recommendations"
+    },
+    {
+      "from": "artifact-risk-register-yaml",
+      "relation": "indexes",
+      "to": "risk-R-003"
+    },
+    {
+      "from": "risk-R-003",
+      "relation": "constrains",
+      "to": "03-recommendations"
+    },
+    {
+      "from": "artifact-risk-register-yaml",
+      "relation": "indexes",
+      "to": "risk-R-004"
+    },
+    {
+      "from": "risk-R-004",
+      "relation": "constrains",
+      "to": "03-recommendations"
+    },
+    {
+      "from": "artifact-risk-register-yaml",
+      "relation": "indexes",
+      "to": "risk-R-005"
+    },
+    {
+      "from": "risk-R-005",
+      "relation": "constrains",
+      "to": "03-recommendations"
+    }
+  ],
+  "evidence_refs": [
+    "sources.yaml",
+    "players.yaml",
+    "claims.yaml",
+    "decision-ledger.yaml",
+    "action-plan.yaml",
+    "risk-register.yaml",
+    "curiosity_queue.yaml",
+    "00-query-original.md",
+    "01-deep-research-prompt.md",
+    "02-research-report.md",
+    "03-recommendations.md"
+  ],
+  "generator": "tech-research/research_graph.py",
+  "limitations": [
+    "graph topology derived from filesystem artifacts — nodes missing if extractor scripts were not run",
+    "edge relations are structural (contains/produces/supports); semantic weight not computed",
+    "player and source cross-links depend on players.yaml and sources.yaml being present and current"
+  ],
+  "links": [
+    {
+      "relation": "contains",
+      "source": "root",
+      "target": "00-query"
+    },
+    {
+      "relation": "contains",
+      "source": "root",
+      "target": "01-prompt"
+    },
+    {
+      "relation": "contains",
+      "source": "root",
+      "target": "02-report"
+    },
+    {
+      "relation": "contains",
+      "source": "root",
+      "target": "03-recommendations"
+    },
+    {
+      "relation": "contains",
+      "source": "root",
+      "target": "readme"
+    },
+    {
+      "relation": "contains",
+      "source": "root",
+      "target": "artifact-action-plan-yaml"
+    },
+    {
+      "relation": "contains",
+      "source": "root",
+      "target": "artifact-claims-yaml"
+    },
+    {
+      "relation": "contains",
+      "source": "root",
+      "target": "curiosity"
+    },
+    {
+      "relation": "contains",
+      "source": "root",
+      "target": "artifact-dashboard-manifest-yaml"
+    },
+    {
+      "relation": "contains",
+      "source": "root",
+      "target": "artifact-decision-ledger-yaml"
+    },
+    {
+      "relation": "contains",
+      "source": "root",
+      "target": "artifact-matrices-yaml"
+    },
+    {
+      "relation": "contains",
+      "source": "root",
+      "target": "metrics"
+    },
+    {
+      "relation": "contains",
+      "source": "root",
+      "target": "pipeline-state"
+    },
+    {
+      "relation": "contains",
+      "source": "root",
+      "target": "artifact-players-yaml"
+    },
+    {
+      "relation": "contains",
+      "source": "root",
+      "target": "quick-wins"
+    },
+    {
+      "relation": "contains",
+      "source": "root",
+      "target": "artifact-research-graph-json"
+    },
+    {
+      "relation": "contains",
+      "source": "root",
+      "target": "artifact-risk-register-yaml"
+    },
+    {
+      "relation": "contains",
+      "source": "root",
+      "target": "artifact-sources-yaml"
+    },
+    {
+      "relation": "contains",
+      "source": "root",
+      "target": "artifact-ux-patterns-yaml"
+    },
+    {
+      "relation": "contains",
+      "source": "root",
+      "target": "artifact-validation-report-yaml"
+    },
+    {
+      "relation": "contains",
+      "source": "root",
+      "target": "wave-1"
+    },
+    {
+      "relation": "produces",
+      "source": "00-query",
+      "target": "01-prompt"
+    },
+    {
+      "relation": "produces",
+      "source": "01-prompt",
+      "target": "02-report"
+    },
+    {
+      "relation": "produces",
+      "source": "02-report",
+      "target": "03-recommendations"
+    },
+    {
+      "relation": "checkpoint",
+      "source": "wave-1",
+      "target": "02-report"
+    },
+    {
+      "relation": "derives",
+      "source": "metrics",
+      "target": "02-report"
+    },
+    {
+      "relation": "describes",
+      "source": "pipeline-state",
+      "target": "root"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-sources-yaml",
+      "target": "source-src-001"
+    },
+    {
+      "relation": "cited_in",
+      "source": "source-src-001",
+      "target": "02-report"
+    },
+    {
+      "relation": "supports",
+      "source": "source-src-001",
+      "target": "02-report"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-sources-yaml",
+      "target": "source-src-002"
+    },
+    {
+      "relation": "cited_in",
+      "source": "source-src-002",
+      "target": "02-report"
+    },
+    {
+      "relation": "supports",
+      "source": "source-src-002",
+      "target": "02-report"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-sources-yaml",
+      "target": "source-src-003"
+    },
+    {
+      "relation": "cited_in",
+      "source": "source-src-003",
+      "target": "02-report"
+    },
+    {
+      "relation": "supports",
+      "source": "source-src-003",
+      "target": "02-report"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-sources-yaml",
+      "target": "source-src-004"
+    },
+    {
+      "relation": "cited_in",
+      "source": "source-src-004",
+      "target": "02-report"
+    },
+    {
+      "relation": "supports",
+      "source": "source-src-004",
+      "target": "02-report"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-sources-yaml",
+      "target": "source-src-005"
+    },
+    {
+      "relation": "cited_in",
+      "source": "source-src-005",
+      "target": "02-report"
+    },
+    {
+      "relation": "supports",
+      "source": "source-src-005",
+      "target": "02-report"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-sources-yaml",
+      "target": "source-src-006"
+    },
+    {
+      "relation": "cited_in",
+      "source": "source-src-006",
+      "target": "02-report"
+    },
+    {
+      "relation": "supports",
+      "source": "source-src-006",
+      "target": "02-report"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-sources-yaml",
+      "target": "source-src-007"
+    },
+    {
+      "relation": "cited_in",
+      "source": "source-src-007",
+      "target": "02-report"
+    },
+    {
+      "relation": "supports",
+      "source": "source-src-007",
+      "target": "02-report"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-sources-yaml",
+      "target": "source-src-008"
+    },
+    {
+      "relation": "cited_in",
+      "source": "source-src-008",
+      "target": "02-report"
+    },
+    {
+      "relation": "supports",
+      "source": "source-src-008",
+      "target": "02-report"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-sources-yaml",
+      "target": "source-src-009"
+    },
+    {
+      "relation": "cited_in",
+      "source": "source-src-009",
+      "target": "02-report"
+    },
+    {
+      "relation": "supports",
+      "source": "source-src-009",
+      "target": "02-report"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-sources-yaml",
+      "target": "source-src-010"
+    },
+    {
+      "relation": "cited_in",
+      "source": "source-src-010",
+      "target": "02-report"
+    },
+    {
+      "relation": "supports",
+      "source": "source-src-010",
+      "target": "02-report"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-sources-yaml",
+      "target": "source-src-011"
+    },
+    {
+      "relation": "cited_in",
+      "source": "source-src-011",
+      "target": "02-report"
+    },
+    {
+      "relation": "supports",
+      "source": "source-src-011",
+      "target": "02-report"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-players-yaml",
+      "target": "player-player-001"
+    },
+    {
+      "relation": "analyzed_in",
+      "source": "player-player-001",
+      "target": "02-report"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-players-yaml",
+      "target": "player-player-002"
+    },
+    {
+      "relation": "analyzed_in",
+      "source": "player-player-002",
+      "target": "02-report"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-players-yaml",
+      "target": "player-player-003"
+    },
+    {
+      "relation": "analyzed_in",
+      "source": "player-player-003",
+      "target": "02-report"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-players-yaml",
+      "target": "player-player-004"
+    },
+    {
+      "relation": "analyzed_in",
+      "source": "player-player-004",
+      "target": "02-report"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-players-yaml",
+      "target": "player-player-005"
+    },
+    {
+      "relation": "analyzed_in",
+      "source": "player-player-005",
+      "target": "02-report"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-players-yaml",
+      "target": "player-player-006"
+    },
+    {
+      "relation": "analyzed_in",
+      "source": "player-player-006",
+      "target": "02-report"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-players-yaml",
+      "target": "player-player-007"
+    },
+    {
+      "relation": "analyzed_in",
+      "source": "player-player-007",
+      "target": "02-report"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-claims-yaml",
+      "target": "claim-CL-001"
+    },
+    {
+      "relation": "informs",
+      "source": "claim-CL-001",
+      "target": "03-recommendations"
+    },
+    {
+      "relation": "supports",
+      "source": "02-report",
+      "target": "claim-CL-001"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-claims-yaml",
+      "target": "claim-CL-002"
+    },
+    {
+      "relation": "informs",
+      "source": "claim-CL-002",
+      "target": "03-recommendations"
+    },
+    {
+      "relation": "supports",
+      "source": "03-recommendations",
+      "target": "claim-CL-002"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-claims-yaml",
+      "target": "claim-CL-003"
+    },
+    {
+      "relation": "informs",
+      "source": "claim-CL-003",
+      "target": "03-recommendations"
+    },
+    {
+      "relation": "supports",
+      "source": "03-recommendations",
+      "target": "claim-CL-003"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-claims-yaml",
+      "target": "claim-CL-004"
+    },
+    {
+      "relation": "informs",
+      "source": "claim-CL-004",
+      "target": "03-recommendations"
+    },
+    {
+      "relation": "supports",
+      "source": "03-recommendations",
+      "target": "claim-CL-004"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-claims-yaml",
+      "target": "claim-CL-005"
+    },
+    {
+      "relation": "informs",
+      "source": "claim-CL-005",
+      "target": "03-recommendations"
+    },
+    {
+      "relation": "supports",
+      "source": "03-recommendations",
+      "target": "claim-CL-005"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-claims-yaml",
+      "target": "claim-CL-006"
+    },
+    {
+      "relation": "informs",
+      "source": "claim-CL-006",
+      "target": "03-recommendations"
+    },
+    {
+      "relation": "supports",
+      "source": "quick-wins",
+      "target": "claim-CL-006"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-claims-yaml",
+      "target": "claim-CL-007"
+    },
+    {
+      "relation": "informs",
+      "source": "claim-CL-007",
+      "target": "03-recommendations"
+    },
+    {
+      "relation": "supports",
+      "source": "01-prompt",
+      "target": "claim-CL-007"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-decision-ledger-yaml",
+      "target": "decision-DEC-001"
+    },
+    {
+      "relation": "drives",
+      "source": "decision-DEC-001",
+      "target": "03-recommendations"
+    },
+    {
+      "relation": "supports",
+      "source": "02-report",
+      "target": "decision-DEC-001"
+    },
+    {
+      "relation": "declares",
+      "source": "artifact-action-plan-yaml",
+      "target": "decision-action-plan-DEC-001"
+    },
+    {
+      "relation": "drives",
+      "source": "decision-action-plan-DEC-001",
+      "target": "03-recommendations"
+    },
+    {
+      "relation": "supports",
+      "source": "02-report",
+      "target": "decision-action-plan-DEC-001"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-action-plan-yaml",
+      "target": "action-AP-1"
+    },
+    {
+      "relation": "recommends",
+      "source": "03-recommendations",
+      "target": "action-AP-1"
+    },
+    {
+      "relation": "supports",
+      "source": "quick-wins",
+      "target": "action-AP-1"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-action-plan-yaml",
+      "target": "action-AP-2"
+    },
+    {
+      "relation": "recommends",
+      "source": "03-recommendations",
+      "target": "action-AP-2"
+    },
+    {
+      "relation": "supports",
+      "source": "quick-wins",
+      "target": "action-AP-2"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-action-plan-yaml",
+      "target": "action-AP-3"
+    },
+    {
+      "relation": "recommends",
+      "source": "03-recommendations",
+      "target": "action-AP-3"
+    },
+    {
+      "relation": "supports",
+      "source": "quick-wins",
+      "target": "action-AP-3"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-risk-register-yaml",
+      "target": "risk-R-001"
+    },
+    {
+      "relation": "constrains",
+      "source": "risk-R-001",
+      "target": "03-recommendations"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-risk-register-yaml",
+      "target": "risk-R-002"
+    },
+    {
+      "relation": "constrains",
+      "source": "risk-R-002",
+      "target": "03-recommendations"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-risk-register-yaml",
+      "target": "risk-R-003"
+    },
+    {
+      "relation": "constrains",
+      "source": "risk-R-003",
+      "target": "03-recommendations"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-risk-register-yaml",
+      "target": "risk-R-004"
+    },
+    {
+      "relation": "constrains",
+      "source": "risk-R-004",
+      "target": "03-recommendations"
+    },
+    {
+      "relation": "indexes",
+      "source": "artifact-risk-register-yaml",
+      "target": "risk-R-005"
+    },
+    {
+      "relation": "constrains",
+      "source": "risk-R-005",
+      "target": "03-recommendations"
+    }
+  ],
+  "node_count": 57,
+  "node_type_counts": {
+    "action": 3,
+    "artifact": 10,
+    "claim": 7,
+    "curiosity": 1,
+    "decision": 2,
+    "graph": 1,
+    "metrics": 1,
+    "pipeline_state": 1,
+    "player": 7,
+    "prompt": 1,
+    "query": 1,
+    "quick_wins": 1,
+    "readme": 1,
+    "recommendations": 1,
+    "report": 1,
+    "risk": 5,
+    "root": 1,
+    "source": 11,
+    "wave": 1
+  },
+  "nodes": [
+    {
+      "id": "root",
+      "label": "2026-05-30-rate-limiting-agentes-whatsapp-claude-api-producao",
+      "path": ".",
+      "slug": "2026-05-30-rate-limiting-agentes-whatsapp-claude-api-producao",
+      "type": "root"
+    },
+    {
+      "exists": true,
+      "file": "00-query-original.md",
+      "id": "00-query",
+      "label": "00-query-original.md",
+      "size_bytes": 798,
+      "type": "query"
+    },
+    {
+      "exists": true,
+      "file": "01-deep-research-prompt.md",
+      "id": "01-prompt",
+      "label": "01-deep-research-prompt.md",
+      "size_bytes": 2312,
+      "type": "prompt"
+    },
+    {
+      "exists": true,
+      "file": "02-research-report.md",
+      "id": "02-report",
+      "label": "02-research-report.md",
+      "size_bytes": 8951,
+      "type": "report"
+    },
+    {
+      "exists": true,
+      "file": "03-recommendations.md",
+      "id": "03-recommendations",
+      "label": "03-recommendations.md",
+      "size_bytes": 2287,
+      "type": "recommendations"
+    },
+    {
+      "exists": true,
+      "file": "README.md",
+      "id": "readme",
+      "label": "README.md",
+      "size_bytes": 2346,
+      "type": "readme"
+    },
+    {
+      "exists": true,
+      "file": "action-plan.yaml",
+      "id": "artifact-action-plan-yaml",
+      "label": "action-plan.yaml",
+      "size_bytes": 1696,
+      "type": "artifact"
+    },
+    {
+      "exists": true,
+      "file": "claims.yaml",
+      "id": "artifact-claims-yaml",
+      "label": "claims.yaml",
+      "size_bytes": 2301,
+      "type": "artifact"
+    },
+    {
+      "exists": true,
+      "file": "curiosity_queue.yaml",
+      "id": "curiosity",
+      "label": "curiosity_queue.yaml",
+      "size_bytes": 645,
+      "type": "curiosity"
+    },
+    {
+      "exists": true,
+      "file": "dashboard-manifest.yaml",
+      "id": "artifact-dashboard-manifest-yaml",
+      "label": "dashboard-manifest.yaml",
+      "size_bytes": 3001,
+      "type": "artifact"
+    },
+    {
+      "exists": true,
+      "file": "decision-ledger.yaml",
+      "id": "artifact-decision-ledger-yaml",
+      "label": "decision-ledger.yaml",
+      "size_bytes": 835,
+      "type": "artifact"
+    },
+    {
+      "exists": true,
+      "file": "matrices.yaml",
+      "id": "artifact-matrices-yaml",
+      "label": "matrices.yaml",
+      "size_bytes": 2226,
+      "type": "artifact"
+    },
+    {
+      "exists": true,
+      "file": "metrics.yaml",
+      "id": "metrics",
+      "label": "metrics.yaml",
+      "size_bytes": 543,
+      "type": "metrics"
+    },
+    {
+      "exists": true,
+      "file": "pipeline-state.yaml",
+      "id": "pipeline-state",
+      "label": "pipeline-state.yaml",
+      "size_bytes": 519,
+      "type": "pipeline_state"
+    },
+    {
+      "exists": true,
+      "file": "players.yaml",
+      "id": "artifact-players-yaml",
+      "label": "players.yaml",
+      "size_bytes": 3984,
+      "type": "artifact"
+    },
+    {
+      "exists": true,
+      "file": "quick-wins.md",
+      "id": "quick-wins",
+      "label": "quick-wins.md",
+      "size_bytes": 1714,
+      "type": "quick_wins"
+    },
+    {
+      "file": "research-graph.json",
+      "id": "artifact-research-graph-json",
+      "label": "research-graph.json",
+      "type": "graph"
+    },
+    {
+      "exists": true,
+      "file": "risk-register.yaml",
+      "id": "artifact-risk-register-yaml",
+      "label": "risk-register.yaml",
+      "size_bytes": 2064,
+      "type": "artifact"
+    },
+    {
+      "exists": true,
+      "file": "sources.yaml",
+      "id": "artifact-sources-yaml",
+      "label": "sources.yaml",
+      "size_bytes": 3734,
+      "type": "artifact"
+    },
+    {
+      "exists": true,
+      "file": "ux-patterns.yaml",
+      "id": "artifact-ux-patterns-yaml",
+      "label": "ux-patterns.yaml",
+      "size_bytes": 221,
+      "type": "artifact"
+    },
+    {
+      "exists": true,
+      "file": "validation-report.yaml",
+      "id": "artifact-validation-report-yaml",
+      "label": "validation-report.yaml",
+      "size_bytes": 3147,
+      "type": "artifact"
+    },
+    {
+      "exists": true,
+      "file": "wave-1-summary.md",
+      "id": "wave-1",
+      "label": "Wave 1",
+      "size_bytes": 3704,
+      "type": "wave",
+      "wave_number": 1
+    },
+    {
+      "credibility": "MEDIUM",
+      "date": 2026,
+      "evidence": "02-research-report.md",
+      "id": "source-src-001",
+      "label": "Rate limits — Claude API Docs",
+      "source_id": "src-001",
+      "type": "source",
+      "url": "https://platform.claude.com/docs/en/api/rate-limits"
+    },
+    {
+      "credibility": "MEDIUM",
+      "date": 2026,
+      "evidence": "02-research-report.md",
+      "id": "source-src-002",
+      "label": "Our approach to API rate limits — Claude Help Center",
+      "source_id": "src-002",
+      "type": "source",
+      "url": "https://support.anthropic.com/en/articles/8243635-our-approach-to-api-rate-limits"
+    },
+    {
+      "credibility": "MEDIUM",
+      "date": 2026,
+      "evidence": "02-research-report.md",
+      "id": "source-src-003",
+      "label": "Prompt caching — Claude API Docs",
+      "source_id": "src-003",
+      "type": "source",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-caching"
+    },
+    {
+      "credibility": "MEDIUM",
+      "date": 2026,
+      "evidence": "02-research-report.md",
+      "id": "source-src-004",
+      "label": "Pricing — Claude API Docs",
+      "source_id": "src-004",
+      "type": "source",
+      "url": "https://platform.claude.com/docs/en/about-claude/pricing"
+    },
+    {
+      "credibility": "MEDIUM",
+      "date": 2026,
+      "evidence": "02-research-report.md",
+      "id": "source-src-005",
+      "label": "Capacity, Quality Rating, and Messaging Limits — Meta",
+      "source_id": "src-005",
+      "type": "source",
+      "url": "https://developers.facebook.com/docs/whatsapp/messaging-limits/"
+    },
+    {
+      "credibility": "MEDIUM",
+      "date": 2026,
+      "evidence": "02-research-report.md",
+      "id": "source-src-006",
+      "label": "WhatsApp throughput — Meta Developer Platform",
+      "source_id": "src-006",
+      "type": "source",
+      "url": "https://developers.facebook.com/documentation/business-messaging/whatsapp/throughput/"
+    },
+    {
+      "credibility": "HIGH",
+      "date": 2026,
+      "evidence": "02-research-report.md",
+      "id": "source-src-007",
+      "label": "Rate limiting — BullMQ docs",
+      "source_id": "src-007",
+      "type": "source",
+      "url": "https://docs.bullmq.io/guide/rate-limiting"
+    },
+    {
+      "credibility": "MEDIUM",
+      "date": "date_unknown",
+      "evidence": "02-research-report.md",
+      "id": "source-src-008",
+      "label": "pg-boss — Concurrency management",
+      "source_id": "src-008",
+      "type": "source",
+      "url": "https://github.com/timgit/pg-boss/issues/659"
+    },
+    {
+      "credibility": "HIGH",
+      "date": "date_unknown",
+      "evidence": "02-research-report.md",
+      "id": "source-src-009",
+      "label": "uazapiGO — WhatsApp API docs",
+      "source_id": "src-009",
+      "type": "source",
+      "url": "https://docs.uazapi.com/"
+    },
+    {
+      "credibility": "MEDIUM",
+      "date": 2026,
+      "evidence": "02-research-report.md",
+      "id": "source-src-010",
+      "label": "LLM API Resilience in Production — TianPan.co",
+      "source_id": "src-010",
+      "type": "source",
+      "url": "https://tianpan.co/blog/2026-03-11-llm-api-resilience-production"
+    },
+    {
+      "credibility": "MEDIUM",
+      "date": 2026,
+      "evidence": "02-research-report.md",
+      "id": "source-src-011",
+      "label": "Anthropic API Rate Limits + 429/529 Handling Guide — Respan",
+      "source_id": "src-011",
+      "type": "source",
+      "url": "https://www.respan.ai/articles/anthropic-api-rate-limits"
+    },
+    {
+      "action": null,
+      "category": null,
+      "evidence": "02-research-report.md",
+      "fit": null,
+      "id": "player-player-001",
+      "label": "Modelo de limites",
+      "role": null,
+      "tier": null,
+      "type": "player"
+    },
+    {
+      "action": null,
+      "category": null,
+      "evidence": "02-research-report.md",
+      "fit": null,
+      "id": "player-player-002",
+      "label": "Caching reduz pressão de ITPM",
+      "role": null,
+      "tier": null,
+      "type": "player"
+    },
+    {
+      "action": null,
+      "category": null,
+      "evidence": "02-research-report.md",
+      "fit": null,
+      "id": "player-player-003",
+      "label": "Tratamento de 429 — ordem correcta (3 níveis)",
+      "role": null,
+      "tier": null,
+      "type": "player"
+    },
+    {
+      "action": null,
+      "category": null,
+      "evidence": "02-research-report.md",
+      "fit": null,
+      "id": "player-player-004",
+      "label": "Throttling proactivo (a chave para produção)",
+      "role": null,
+      "tier": null,
+      "type": "player"
+    },
+    {
+      "action": null,
+      "category": null,
+      "evidence": "02-research-report.md",
+      "fit": null,
+      "id": "player-player-005",
+      "label": "Fila com global rate limiter",
+      "role": null,
+      "tier": null,
+      "type": "player"
+    },
+    {
+      "action": null,
+      "category": null,
+      "evidence": "02-research-report.md",
+      "fit": null,
+      "id": "player-player-006",
+      "label": "Stack de 3 camadas de resiliência",
+      "role": null,
+      "tier": null,
+      "type": "player"
+    },
+    {
+      "action": null,
+      "category": null,
+      "evidence": "02-research-report.md",
+      "fit": null,
+      "id": "player-player-007",
+      "label": "Multi-tenant (relevante para SIC multi-tenant)",
+      "role": null,
+      "tier": null,
+      "type": "player"
+    },
+    {
+      "confidence": "medium",
+      "id": "claim-CL-001",
+      "label": "| Alavanca | Efeito | Quando | |---|---|---| | Prompt caching | read = 10% input; paga-se após…",
+      "summary": "Usar como premissa verificável antes de executar a próxima ação.",
+      "type": "claim"
+    },
+    {
+      "confidence": "medium",
+      "id": "claim-CL-002",
+      "label": "Anthropic por último, e só com evidência (x-should-retry/headers).",
+      "summary": "Usar como premissa verificável antes de executar a próxima ação.",
+      "type": "claim"
+    },
+    {
+      "confidence": "medium",
+      "id": "claim-CL-003",
+      "label": "Evita 429 (que é cobrado) e é mais barato que retry.",
+      "summary": "Usar como premissa verificável antes de executar a próxima ação.",
+      "type": "claim"
+    },
+    {
+      "confidence": "medium",
+      "id": "claim-CL-004",
+      "label": "Distinguir 429 vs 529 vs x-should-retry:false.",
+      "summary": "Usar como premissa verificável antes de executar a próxima ação.",
+      "type": "claim"
+    },
+    {
+      "confidence": "medium",
+      "id": "claim-CL-005",
+      "label": "O processador de mensagenswhatsapp deve ter um rate limiter global atado à quota Claude (re-enf…",
+      "summary": "Usar como premissa verificável antes de executar a próxima ação.",
+      "type": "claim"
+    },
+    {
+      "confidence": "medium",
+      "id": "claim-CL-006",
+      "label": "Detectar x-should-retry:false (não retry inútil).",
+      "summary": "Usar como premissa verificável antes de executar a próxima ação.",
+      "type": "claim"
+    },
+    {
+      "confidence": "medium",
+      "id": "claim-CL-007",
+      "label": "Must avoid: (1) Anthropic API 429 / TPM / RPM limits, (2) WhatsApp provider (uazapi / Meta Clou…",
+      "summary": "Usar como premissa verificável antes de executar a próxima ação.",
+      "type": "claim"
+    },
+    {
+      "confidence": "medium",
+      "id": "decision-DEC-001",
+      "label": "6. Caveats / Lacunas",
+      "status": "selected",
+      "summary": "⚠️ uazapi.dev limites exactos: docs e Postman não expuseram valores de delay/throughput nas buscas.",
+      "type": "decision"
+    },
+    {
+      "confidence": "medium",
+      "id": "decision-action-plan-DEC-001",
+      "label": "6. Caveats / Lacunas",
+      "status": "decide",
+      "summary": "⚠️ uazapi.dev limites exactos: docs e Postman não expuseram valores de delay/throughput nas buscas.",
+      "type": "decision"
+    },
+    {
+      "effort": "M",
+      "evidence": "quick-wins.md",
+      "id": "action-AP-1",
+      "label": "QW1+QW3 → candidatos a story imediata (@aiox-pm → epic \"Resiliência do agente WhatsApp\").",
+      "owner": "research-owner",
+      "priority": "P1",
+      "status": "proposed",
+      "type": "action"
+    },
+    {
+      "effort": "M",
+      "evidence": "quick-wins.md",
+      "id": "action-AP-2",
+      "label": "QW2+QW4 → base de observability (precede throttling proactivo full).",
+      "owner": "research-owner",
+      "priority": "P1",
+      "status": "proposed",
+      "type": "action"
+    },
+    {
+      "effort": "M",
+      "evidence": "quick-wins.md",
+      "id": "action-AP-3",
+      "label": "QW5 → ajuste de config, sem story formal.",
+      "owner": "research-owner",
+      "priority": "P1",
+      "status": "proposed",
+      "type": "action"
+    },
+    {
+      "id": "risk-R-001",
+      "label": "Mudança Out/2025: limites a nível de portfolio — todos os números partilham capacidade. confide…",
+      "owner": "research-owner",
+      "probability": "medium",
+      "severity": "high",
+      "summary": "Converter em acceptance criteria, owner e evidência antes de executar.",
+      "type": "risk"
+    },
+    {
+      "id": "risk-R-002",
+      "label": "Messaging tiers: 250 → 1.000/2.000 → 10k → 100k → ilimitado. Só conta business-initiated; dentr…",
+      "owner": "research-owner",
+      "probability": "medium",
+      "severity": "medium",
+      "summary": "Converter em acceptance criteria, owner e evidência antes de executar.",
+      "type": "risk"
+    },
+    {
+      "id": "risk-R-003",
+      "label": "Quality rating (Verde/Amarelo/Vermelho, 7 dias, ponderado por recência) governa o scaling. Upgr…",
+      "owner": "research-owner",
+      "probability": "medium",
+      "severity": "medium",
+      "summary": "Converter em acceptance criteria, owner e evidência antes de executar.",
+      "type": "risk"
+    },
+    {
+      "id": "risk-R-004",
+      "label": "Throughput: 80 MPS default, até 1.000 MPS. Distinto do limite diário — podes estar dentro do ti…",
+      "owner": "research-owner",
+      "probability": "medium",
+      "severity": "medium",
+      "summary": "Converter em acceptance criteria, owner e evidência antes de executar.",
+      "type": "risk"
+    },
+    {
+      "id": "risk-R-005",
+      "label": "uazapi (não-oficial): limites exactos não públicos. Delay normalmente configurável pelo cliente…",
+      "owner": "research-owner",
+      "probability": "medium",
+      "severity": "medium",
+      "summary": "Converter em acceptance criteria, owner e evidência antes de executar.",
+      "type": "risk"
+    }
+  ],
+  "root_id": "root",
+  "schema_version": "2.0",
+  "slug": "2026-05-30-rate-limiting-agentes-whatsapp-claude-api-producao"
+}

@@ -1,0 +1,53 @@
+schema_version: aiox-research-action-plan-v1
+research_slug: 2026-05-30-rate-limiting-agentes-whatsapp-claude-api-producao
+generated_at: '2026-05-30'
+derived_from_research: true
+decision:
+  id: DEC-001
+  title: 6. Caveats / Lacunas
+  recommendation: decide
+  summary: '⚠️ uazapi.dev limites exactos: docs e Postman não expuseram valores de delay/throughput nas buscas.'
+  confidence: medium
+  evidence:
+  - 02-research-report.md
+actions:
+- id: AP-1
+  title: QW1+QW3 → candidatos a story imediata (@aiox-pm → epic "Resiliência do agente WhatsApp").
+  owner_hint: research-owner
+  priority: P1
+  effort: M
+  status: proposed
+  rationale: QW1+QW3 → candidatos a story imediata (@aiox-pm → epic "Resiliência do agente WhatsApp").
+  evidence: quick-wins.md
+- id: AP-2
+  title: QW2+QW4 → base de observability (precede throttling proactivo full).
+  owner_hint: research-owner
+  priority: P1
+  effort: M
+  status: proposed
+  rationale: QW2+QW4 → base de observability (precede throttling proactivo full).
+  evidence: quick-wins.md
+- id: AP-3
+  title: QW5 → ajuste de config, sem story formal.
+  owner_hint: research-owner
+  priority: P1
+  effort: M
+  status: proposed
+  rationale: QW5 → ajuste de config, sem story formal.
+  evidence: quick-wins.md
+roadmap:
+- phase: Fase 1
+  title: QW1+QW3 → candidatos a story imediata (@aiox-pm → epic "Resiliência do agente WhatsApp").
+  priority: P1
+  effort: M
+  status: proposed
+- phase: Fase 2
+  title: QW2+QW4 → base de observability (precede throttling proactivo full).
+  priority: P1
+  effort: M
+  status: proposed
+- phase: Fase 3
+  title: QW5 → ajuste de config, sem story formal.
+  priority: P1
+  effort: M
+  status: proposed

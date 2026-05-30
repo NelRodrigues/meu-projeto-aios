@@ -1,0 +1,14 @@
+pipeline_id: "rate-limiting-agentes-whatsapp-claude-api-producao-20260530-164008"
+status: completed
+stop_reason: "coverage_gate_approve_88_wave1"
+phases:
+  p0_auto_clarify: completed
+  p1_strategic_brief: completed
+  p15_decompose: completed
+  p2_generate_prompt: completed
+  p3_execute_research: completed
+  p35_evaluate_coverage: completed  # COVERAGE_GATE=APPROVE (88)
+  p4_synthesize: completed
+  p45_verify_citations: completed   # CITATION_GATE=APPROVE (0.92)
+  p5_document: completed
+  p5b_finalize: in_progress

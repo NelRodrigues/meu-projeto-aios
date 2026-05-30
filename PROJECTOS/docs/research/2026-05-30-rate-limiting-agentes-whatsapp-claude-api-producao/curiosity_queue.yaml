@@ -1,0 +1,16 @@
+items:
+  - question: "Quais os limites exactos de delay/throughput da uazapi.dev (endpoint Enviar Mensagem)?"
+    status: open
+    owner: nelson
+  - question: "Em que tier Anthropic está actualmente a org da Marca Digital (Console)?"
+    status: open
+    owner: nelson
+  - question: "A fila do ai-sales-agent já tem rate limiter global ou processa sequencial?"
+    status: open
+    owner: dev
+  - question: "pg-boss vs BullMQ — qual usar dado o stack Supabase/Postgres já existente?"
+    status: open
+    owner: architect
+  - question: "Qual o hit rate actual de prompt caching nos agentes (se já existe)?"
+    status: open
+    owner: dev

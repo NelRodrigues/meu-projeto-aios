@@ -1,0 +1,16 @@
+schema_version: aiox-research-decision-ledger-v1
+research_slug: 2026-05-30-rate-limiting-agentes-whatsapp-claude-api-producao
+generated_at: '2026-05-30'
+derived_from_research: true
+decisions:
+- id: DEC-001
+  decision: 6. Caveats / Lacunas
+  status: selected
+  confidence: medium
+  alternatives_rejected:
+  - princ-pio-central-um-rate-limiter-global-atado-quota-do-provider-partilhado-por-toda-a-frota-de-workers-bullmq-worker-ratelimit-duration-lan-ar-ratelimiterror-re-enfileira-o-job-n-o-falha-pg-boss-alternativ
+  - separar-llm-workers-rate-limited-de-trabalho-cpu-bound-escalar-concorr-ncia-horizontalmente
+  - backpressure-obrigat-rio-filas-ilimitadas-s-adiam-o-colapso
+  evidence:
+  - 02-research-report.md
+  consequence: '⚠️ uazapi.dev limites exactos: docs e Postman não expuseram valores de delay/throughput nas buscas.'

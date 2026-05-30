@@ -1,0 +1,114 @@
+schema_version: aiox-research-dashboard-manifest-v1
+research_slug: 2026-05-30-rate-limiting-agentes-whatsapp-claude-api-producao
+generated_at: '2026-05-30'
+derived_from_research: true
+tabs:
+  map:
+    status: rich
+    primary_artifacts:
+    - README.md
+    - research-profile.yaml
+    - metrics.yaml
+    - pipeline-state.yaml
+    - research-graph.json
+    - matrices.yaml
+    present_artifacts:
+    - README.md
+    - metrics.yaml
+    - pipeline-state.yaml
+    - research-graph.json
+    - matrices.yaml
+    missing_artifacts:
+    - research-profile.yaml
+    expected_value: Decisão executiva, qualidade do run e prontidão visual.
+  recommendations:
+    status: complete
+    primary_artifacts:
+    - 03-recommendations.md
+    - action-plan.yaml
+    - quick-wins.md
+    - risk-register.yaml
+    - decision-ledger.yaml
+    present_artifacts:
+    - 03-recommendations.md
+    - action-plan.yaml
+    - quick-wins.md
+    - risk-register.yaml
+    - decision-ledger.yaml
+    missing_artifacts: []
+    expected_value: Plano de ação, roadmap, riscos e decisões.
+  evidence:
+    status: complete
+    primary_artifacts:
+    - sources.yaml
+    - research-graph.json
+    - claims.yaml
+    - validation-report.yaml
+    present_artifacts:
+    - sources.yaml
+    - research-graph.json
+    - claims.yaml
+    - validation-report.yaml
+    missing_artifacts: []
+    expected_value: Rastreabilidade de claims, fontes e validação.
+  waves:
+    status: missing
+    primary_artifacts:
+    - execution-log.jsonl
+    present_artifacts: []
+    missing_artifacts:
+    - execution-log.jsonl
+    expected_value: Evolução da conclusão por evento e wave.
+  sources:
+    status: complete
+    primary_artifacts:
+    - sources.yaml
+    present_artifacts:
+    - sources.yaml
+    missing_artifacts: []
+    expected_value: Fontes datadas, classificadas e auditáveis.
+  players:
+    status: partial
+    primary_artifacts:
+    - players.yaml
+    - decision-rubric.yaml
+    present_artifacts:
+    - players.yaml
+    missing_artifacts:
+    - decision-rubric.yaml
+    expected_value: Peças para usar agora vs padrões de referência, com Rubrica ponderada quando houver alternativas suficientes.
+  curiosity:
+    status: complete
+    primary_artifacts:
+    - curiosity_queue.yaml
+    present_artifacts:
+    - curiosity_queue.yaml
+    missing_artifacts: []
+    expected_value: Dúvidas que podem mudar a decisão.
+  document:
+    status: complete
+    primary_artifacts:
+    - README.md
+    present_artifacts:
+    - README.md
+    missing_artifacts: []
+    expected_value: Auditoria direta dos artefatos brutos.
+quality_bars:
+  coverage_score: 88
+  integrity_score: 92
+  artifact_completeness_score: 75
+  dashboard_readiness_score: 89
+gold_evidence:
+  sources: 11
+  graph_nodes: 57
+  graph_edges: 120
+  actions: 3
+  players: 7
+  claims: 7
+  rubric_players: 0
+  decision_rubric_status: missing
+  research_profile_type: missing
+  rubric_dimension_pack: missing
+  research_contract: missing
+  research_kind: missing
+  rubric_method: missing

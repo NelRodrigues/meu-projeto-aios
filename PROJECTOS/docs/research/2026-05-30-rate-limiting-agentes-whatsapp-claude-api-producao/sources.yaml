@@ -1,0 +1,126 @@
+schema_version: 1.0
+generator: tech-research/sources_extractor.py
+research_slug: 2026-05-30-rate-limiting-agentes-whatsapp-claude-api-producao
+generated_at: 2026-05-30
+sources:
+  - id: src-001
+    url: "https://platform.claude.com/docs/en/api/rate-limits"
+    title: Rate limits — Claude API Docs
+    date: 2026
+    credibility: MEDIUM
+    multiplier: 1.0
+    flags: []
+    first_seen_in: 02-research-report.md
+    first_seen_section: Fontes
+    kind: markdown_link
+  - id: src-002
+    url: "https://support.anthropic.com/en/articles/8243635-our-approach-to-api-rate-limits"
+    title: Our approach to API rate limits — Claude Help Center
+    date: 2026
+    credibility: MEDIUM
+    multiplier: 1.0
+    flags: []
+    first_seen_in: 02-research-report.md
+    first_seen_section: Fontes
+    kind: markdown_link
+  - id: src-003
+    url: "https://platform.claude.com/docs/en/build-with-claude/prompt-caching"
+    title: Prompt caching — Claude API Docs
+    date: 2026
+    credibility: MEDIUM
+    multiplier: 1.0
+    flags: []
+    first_seen_in: 02-research-report.md
+    first_seen_section: Fontes
+    kind: markdown_link
+  - id: src-004
+    url: "https://platform.claude.com/docs/en/about-claude/pricing"
+    title: Pricing — Claude API Docs
+    date: 2026
+    credibility: MEDIUM
+    multiplier: 1.0
+    flags: []
+    first_seen_in: 02-research-report.md
+    first_seen_section: Fontes
+    kind: markdown_link
+  - id: src-005
+    url: "https://developers.facebook.com/docs/whatsapp/messaging-limits/"
+    title: Capacity, Quality Rating, and Messaging Limits — Meta
+    date: 2026
+    credibility: MEDIUM
+    multiplier: 1.0
+    flags: []
+    first_seen_in: 02-research-report.md
+    first_seen_section: Fontes
+    kind: markdown_link
+  - id: src-006
+    url: "https://developers.facebook.com/documentation/business-messaging/whatsapp/throughput/"
+    title: WhatsApp throughput — Meta Developer Platform
+    date: 2026
+    credibility: MEDIUM
+    multiplier: 1.0
+    flags: []
+    first_seen_in: 02-research-report.md
+    first_seen_section: Fontes
+    kind: markdown_link
+  - id: src-007
+    url: "https://docs.bullmq.io/guide/rate-limiting"
+    title: Rate limiting — BullMQ docs
+    date: 2026
+    credibility: HIGH
+    multiplier: 1.3
+    flags: []
+    first_seen_in: 02-research-report.md
+    first_seen_section: Fontes
+    kind: markdown_link
+  - id: src-008
+    url: "https://github.com/timgit/pg-boss/issues/659"
+    title: pg-boss — Concurrency management
+    date: date_unknown
+    credibility: MEDIUM
+    multiplier: 0.9
+    flags:
+      - no_date
+    first_seen_in: 02-research-report.md
+    first_seen_section: Fontes
+    kind: markdown_link
+  - id: src-009
+    url: "https://docs.uazapi.com/"
+    title: uazapiGO — WhatsApp API docs
+    date: date_unknown
+    credibility: HIGH
+    multiplier: 1.2
+    flags:
+      - no_date
+    first_seen_in: 02-research-report.md
+    first_seen_section: Fontes
+    kind: markdown_link
+  - id: src-010
+    url: "https://tianpan.co/blog/2026-03-11-llm-api-resilience-production"
+    title: LLM API Resilience in Production — TianPan.co
+    date: 2026
+    credibility: MEDIUM
+    multiplier: 1.0
+    flags: []
+    first_seen_in: 02-research-report.md
+    first_seen_section: Fontes
+    kind: markdown_link
+  - id: src-011
+    url: "https://www.respan.ai/articles/anthropic-api-rate-limits"
+    title: Anthropic API Rate Limits + 429/529 Handling Guide — Respan
+    date: 2026
+    credibility: MEDIUM
+    multiplier: 1.0
+    flags: []
+    first_seen_in: 02-research-report.md
+    first_seen_section: Fontes
+    kind: markdown_link
+totals:
+  total: 11
+  by_credibility:
+    HIGH: 2
+    MEDIUM: 9
+    LOW: 0
+  with_date: 9
+  date_unknown: 2
+  date_coverage_ratio: 0.818

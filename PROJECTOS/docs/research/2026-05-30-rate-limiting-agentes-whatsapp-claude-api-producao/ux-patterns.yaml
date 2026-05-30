@@ -1,0 +1,8 @@
+schema_version: 1.0
+generator: tech-research/ux_patterns_extractor.py
+research_slug: 2026-05-30-rate-limiting-agentes-whatsapp-claude-api-producao
+generated_at: 2026-05-30
+patterns: []
+totals:
+  total: 0
+  by_section: {}

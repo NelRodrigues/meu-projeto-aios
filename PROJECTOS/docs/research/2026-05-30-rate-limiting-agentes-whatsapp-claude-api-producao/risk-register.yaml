@@ -1,0 +1,49 @@
+schema_version: aiox-research-risk-register-v1
+research_slug: 2026-05-30-rate-limiting-agentes-whatsapp-claude-api-producao
+generated_at: '2026-05-30'
+derived_from_research: true
+risks:
+- id: R-001
+  risk: 'Mudança Out/2025: limites a nível de portfolio — todos os números partilham capacidade. confidence: alta'
+  severity: high
+  probability: medium
+  mitigation: Converter em acceptance criteria, owner e evidência antes de executar.
+  owner_hint: research-owner
+  evidence:
+  - 02-research-report.md
+- id: R-002
+  risk: 'Messaging tiers: 250 → 1.000/2.000 → 10k → 100k → ilimitado. Só conta business-initiated; dentro da janela de 24h
+    (cliente iniciou) respondes à vontade. confid…'
+  severity: medium
+  probability: medium
+  mitigation: Converter em acceptance criteria, owner e evidência antes de executar.
+  owner_hint: research-owner
+  evidence:
+  - 02-research-report.md
+- id: R-003
+  risk: Quality rating (Verde/Amarelo/Vermelho, 7 dias, ponderado por recência) governa o scaling. Upgrade é algorítmico,
+    não pago. Vermelho pode reduzir o limite. con…
+  severity: medium
+  probability: medium
+  mitigation: Converter em acceptance criteria, owner e evidência antes de executar.
+  owner_hint: research-owner
+  evidence:
+  - 02-research-report.md
+- id: R-004
+  risk: 'Throughput: 80 MPS default, até 1.000 MPS. Distinto do limite diário — podes estar dentro do tier diário e ainda
+    falhar num burst. Pair rate limiting por desti…'
+  severity: medium
+  probability: medium
+  mitigation: Converter em acceptance criteria, owner e evidência antes de executar.
+  owner_hint: research-owner
+  evidence:
+  - 02-research-report.md
+- id: R-005
+  risk: 'uazapi (não-oficial): limites exactos não públicos. Delay normalmente configurável pelo cliente. Pacing recomendado
+    3-8s entre mensagens; pausa após lotes. con…'
+  severity: medium
+  probability: medium
+  mitigation: Converter em acceptance criteria, owner e evidência antes de executar.
+  owner_hint: research-owner
+  evidence:
+  - 02-research-report.md
