@@ -214,3 +214,4 @@ Como @dev, quero garantir um delay configuravel (3-8s) entre envios business-ini
 |------|-------|-----------|
 | 2026-05-30 | @aiox-pm (derivado de research) | Criação do Epic E11 + stories 11.1-11.5 a partir de quick-wins.md |
 | 2026-05-30 | @po (Pax) | Validado 8/10 [GO Condicional]. Epic E11 (standalone ISILDA). 5 stories irmãs analisadas. Code Reality Check: 4 ficheiros-alvo confirmados (todos EDIT, 0 violações IDS). Auto-fix: adicionado frontmatter AIOX (executor/quality_gate/accountable/deploy_type) às 5 stories; corrigido AC de 11.2 (data JSONB existente, sem migration); executor de 11.4 → @db-sage; secção CodeRabbit. Condições: 11.5 bloqueada parcialmente até confirmar delay uazapi; 11.4 depende de 11.2. |
+| 2026-06-04 | @dev | Base de conhecimento da agente da Delicias da Isi alinhada para Soraya, com prompt elegante, regras de contexto e horarios actualizados para 08h00-18h00. |
