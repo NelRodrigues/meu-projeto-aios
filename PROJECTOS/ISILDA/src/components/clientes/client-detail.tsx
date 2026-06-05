@@ -21,6 +21,7 @@ import { createClient } from '@/lib/supabase/client'
 import { OccasionsSection } from './occasions-section'
 import { LeadIntelligence } from './lead-intelligence'
 import { FinancialSection } from './financial-section'
+import { mapSharedContactStage } from '@/lib/backend/shared-mappers'
 
 interface ClientDetailProps {
   cliente: Cliente
@@ -59,6 +60,27 @@ function formatDate(date: string | null): string {
 const ESTAGIOS_STANDALONE: ClienteEstagio[] = ['novo', 'contactado', 'orcamento', 'activo', 'vip', 'inactivo']
 const ESTAGIOS_SHARED = ['lead', 'qualificada', 'sessao_agendada', 'em_programa', 'comunidade', 'alumni']
 
+// Rótulos PT para o pipeline_stage do backend partilhado.
+const SHARED_STAGE_LABELS: Record<string, string> = {
+  lead: 'Lead',
+  qualificada: 'Qualificado',
+  sessao_agendada: 'Reunião agendada',
+  em_programa: 'Cliente activo',
+  comunidade: 'Recorrente',
+  alumni: 'Antigo cliente',
+}
+
+// Mapeia o estágio mostrado no CRM (ClienteEstagio) de volta para o
+// pipeline_stage aceite por contacts no backend partilhado.
+const CRM_TO_PIPELINE: Record<string, string> = {
+  novo: 'lead',
+  contactado: 'qualificada',
+  orcamento: 'sessao_agendada',
+  activo: 'em_programa',
+  vip: 'comunidade',
+  inactivo: 'alumni',
+}
+
 export function ClientDetail({ cliente: initialCliente, mensagensRecentes, sharedMode = false, tenantId = null }: ClientDetailProps) {
   void mensagensRecentes // histórico migrou para o Inbox
   const [cliente, setCliente] = useState(initialCliente)
@@ -70,13 +92,19 @@ export function ClientDetail({ cliente: initialCliente, mensagensRecentes, share
   const [editandoPerfil, setEditandoPerfil] = useState(false)
   const [savingPerfil, setSavingPerfil] = useState(false)
   const [erroPerfil, setErroPerfil] = useState<string | null>(null)
+  // No shared mode o select usa valores de pipeline_stage; convertemos o
+  // estágio mostrado (ClienteEstagio) para o valor real do backend.
+  const estagioInicial = sharedMode
+    ? (CRM_TO_PIPELINE[String(cliente.estagio)] || 'lead')
+    : String(cliente.estagio || 'novo')
+
   const [form, setForm] = useState({
     nome: cliente.nome || '',
     telefone: cliente.telefone || '',
     email: cliente.email || '',
     morada: cliente.morada || '',
     data_aniversario: cliente.data_aniversario || '',
-    estagio: String(cliente.estagio || 'novo'),
+    estagio: estagioInicial,
   })
 
   const tabela = sharedMode ? 'contacts' : 'clientes'
@@ -105,7 +133,9 @@ export function ClientDetail({ cliente: initialCliente, mensagensRecentes, share
       email: cliente.email || '',
       morada: cliente.morada || '',
       data_aniversario: cliente.data_aniversario || '',
-      estagio: String(cliente.estagio || (sharedMode ? 'lead' : 'novo')),
+      estagio: sharedMode
+        ? (CRM_TO_PIPELINE[String(cliente.estagio)] || 'lead')
+        : String(cliente.estagio || 'novo'),
     })
     setErroPerfil(null)
     setEditandoPerfil(true)
@@ -147,7 +177,9 @@ export function ClientDetail({ cliente: initialCliente, mensagensRecentes, share
         email: (row.email as string | null) ?? null,
         morada: (row.morada as string | null) ?? null,
         data_aniversario: (row.data_aniversario as string | null) ?? null,
-        estagio: (row.estagio as ClienteEstagio) ?? (form.estagio as ClienteEstagio),
+        estagio: sharedMode
+          ? mapSharedContactStage(String(row.estagio ?? form.estagio))
+          : ((row.estagio as ClienteEstagio) ?? (form.estagio as ClienteEstagio)),
       })
 
       // Auto-criar/actualizar ocasião de aniversário para recompra automática.
@@ -314,7 +346,9 @@ export function ClientDetail({ cliente: initialCliente, mensagensRecentes, share
                   >
                     {(sharedMode ? ESTAGIOS_SHARED : ESTAGIOS_STANDALONE).map(s => (
                       <option key={s} value={s}>
-                        {ESTAGIO_CONFIG[s as ClienteEstagio]?.label || s}
+                        {sharedMode
+                          ? (SHARED_STAGE_LABELS[s] || s)
+                          : (ESTAGIO_CONFIG[s as ClienteEstagio]?.label || s)}
                       </option>
                     ))}
                   </select>
