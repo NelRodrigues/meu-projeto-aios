@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import {
   ArrowLeft,
   Phone,
+  Mail,
   CakeSlice,
   Edit,
   Save,
@@ -16,6 +17,7 @@ import {
 } from 'lucide-react'
 import type { Cliente, ClienteEstagio } from '@/types/database'
 import { createClient } from '@/lib/supabase/client'
+import { OccasionsSection } from './occasions-section'
 
 interface ClientDetailProps {
   cliente: Cliente
@@ -26,6 +28,7 @@ interface ClientDetailProps {
     conteudo: string
     direction: string
   }[]
+  sharedMode?: boolean
 }
 
 const ESTAGIO_CONFIG: Record<ClienteEstagio, { label: string; color: string }> = {
@@ -47,11 +50,29 @@ function formatDate(date: string | null): string {
   return new Date(date).toLocaleDateString('pt-AO', { day: '2-digit', month: 'long', year: 'numeric' })
 }
 
-export function ClientDetail({ cliente: initialCliente, mensagensRecentes }: ClientDetailProps) {
+// Estágios válidos consoante o backend. No shared (pipeline_stage) os valores
+// são diferentes; mapeamos os rótulos PT mas guardamos o valor aceite pela BD.
+const ESTAGIOS_STANDALONE: ClienteEstagio[] = ['novo', 'contactado', 'orcamento', 'activo', 'vip', 'inactivo']
+const ESTAGIOS_SHARED = ['lead', 'qualificada', 'sessao_agendada', 'em_programa', 'comunidade', 'alumni']
+
+export function ClientDetail({ cliente: initialCliente, mensagensRecentes, sharedMode = false }: ClientDetailProps) {
   const [cliente, setCliente] = useState(initialCliente)
   const [editando, setEditando] = useState(false)
   const [notas, setNotas] = useState(cliente.notas || '')
   const [saving, setSaving] = useState(false)
+
+  // Edição do perfil (Dados Pessoais).
+  const [editandoPerfil, setEditandoPerfil] = useState(false)
+  const [savingPerfil, setSavingPerfil] = useState(false)
+  const [erroPerfil, setErroPerfil] = useState<string | null>(null)
+  const [form, setForm] = useState({
+    nome: cliente.nome || '',
+    telefone: cliente.telefone || '',
+    email: cliente.email || '',
+    estagio: String(cliente.estagio || 'novo'),
+  })
+
+  const tabela = sharedMode ? 'contacts' : 'clientes'
 
   const estagioKey = cliente.estagio as ClienteEstagio
   const estagio = ESTAGIO_CONFIG[estagioKey] || ESTAGIO_CONFIG.novo
@@ -60,14 +81,63 @@ export function ClientDetail({ cliente: initialCliente, mensagensRecentes }: Cli
     setSaving(true)
     const supabase = createClient()
     const { data } = await supabase
-      .from('clientes')
+      .from(tabela)
       .update({ notas })
       .eq('id', cliente.id)
       .select()
       .single()
-    if (data) setCliente({ ...cliente, notas: data.notas })
+    if (data) setCliente({ ...cliente, notas: (data as { notas: string | null }).notas })
     setSaving(false)
     setEditando(false)
+  }
+
+  function abrirEdicaoPerfil() {
+    setForm({
+      nome: cliente.nome || '',
+      telefone: cliente.telefone || '',
+      email: cliente.email || '',
+      estagio: String(cliente.estagio || (sharedMode ? 'lead' : 'novo')),
+    })
+    setErroPerfil(null)
+    setEditandoPerfil(true)
+  }
+
+  async function handleSavePerfil() {
+    if (!form.nome.trim()) {
+      setErroPerfil('O nome é obrigatório.')
+      return
+    }
+    setSavingPerfil(true)
+    setErroPerfil(null)
+    const supabase = createClient()
+    const payload: Record<string, unknown> = {
+      nome: form.nome.trim(),
+      telefone: form.telefone.trim() || null,
+      email: form.email.trim() || null,
+      estagio: form.estagio,
+    }
+    const { data, error } = await supabase
+      .from(tabela)
+      .update(payload)
+      .eq('id', cliente.id)
+      .select()
+      .single()
+    setSavingPerfil(false)
+    if (error) {
+      setErroPerfil(`Falha ao guardar: ${error.message}`)
+      return
+    }
+    if (data) {
+      const row = data as Record<string, unknown>
+      setCliente({
+        ...cliente,
+        nome: String(row.nome ?? form.nome),
+        telefone: (row.telefone as string | null) ?? null,
+        email: (row.email as string | null) ?? null,
+        estagio: (row.estagio as ClienteEstagio) ?? (form.estagio as ClienteEstagio),
+      })
+    }
+    setEditandoPerfil(false)
   }
 
   return (
@@ -107,22 +177,108 @@ export function ClientDetail({ cliente: initialCliente, mensagensRecentes }: Cli
         <div className="lg:col-span-1 space-y-6">
           {/* Dados Pessoais */}
           <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
-            <h2 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-              <CakeSlice className="h-4 w-4 text-rose-400" />
-              Dados Pessoais
-            </h2>
-            {cliente.telefone && (
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Phone className="h-3.5 w-3.5 text-gray-400" />
-                {cliente.telefone}
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <CakeSlice className="h-4 w-4 text-rose-400" />
+                Dados Pessoais
+              </h2>
+              {editandoPerfil ? (
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={handleSavePerfil}
+                    disabled={savingPerfil}
+                    className="p-1 text-emerald-600 hover:bg-emerald-50 rounded disabled:opacity-50"
+                    title="Guardar"
+                  >
+                    <Save className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    onClick={() => { setEditandoPerfil(false); setErroPerfil(null) }}
+                    className="p-1 text-gray-400 hover:bg-gray-50 rounded"
+                    title="Cancelar"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={abrirEdicaoPerfil}
+                  className="p-1 text-gray-400 hover:bg-rose-50 hover:text-rose-500 rounded transition-colors"
+                  title="Editar perfil"
+                >
+                  <Edit className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+
+            {editandoPerfil ? (
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-[11px] font-medium text-gray-500 mb-1">Nome</label>
+                  <input
+                    value={form.nome}
+                    onChange={e => setForm({ ...form, nome: e.target.value })}
+                    className="w-full text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
+                    placeholder="Nome do cliente"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-gray-500 mb-1">Telefone</label>
+                  <input
+                    value={form.telefone}
+                    onChange={e => setForm({ ...form, telefone: e.target.value })}
+                    className="w-full text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
+                    placeholder="+244 9XX XXX XXX"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-gray-500 mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={form.email}
+                    onChange={e => setForm({ ...form, email: e.target.value })}
+                    className="w-full text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
+                    placeholder="email@exemplo.com"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-gray-500 mb-1">Estágio</label>
+                  <select
+                    value={form.estagio}
+                    onChange={e => setForm({ ...form, estagio: e.target.value })}
+                    className="w-full text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
+                  >
+                    {(sharedMode ? ESTAGIOS_SHARED : ESTAGIOS_STANDALONE).map(s => (
+                      <option key={s} value={s}>
+                        {ESTAGIO_CONFIG[s as ClienteEstagio]?.label || s}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {erroPerfil && <p className="text-xs text-red-500">{erroPerfil}</p>}
               </div>
+            ) : (
+              <>
+                {cliente.telefone && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Phone className="h-3.5 w-3.5 text-gray-400" />
+                    {cliente.telefone}
+                  </div>
+                )}
+                {cliente.email && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Mail className="h-3.5 w-3.5 text-gray-400" />
+                    {cliente.email}
+                  </div>
+                )}
+                <div className="text-xs text-gray-400">
+                  Cliente desde {formatDate(cliente.created_at)}
+                </div>
+                <div className="text-xs text-gray-400">
+                  Origem: {cliente.origem || 'WhatsApp'}
+                </div>
+              </>
             )}
-            <div className="text-xs text-gray-400">
-              Cliente desde {formatDate(cliente.created_at)}
-            </div>
-            <div className="text-xs text-gray-400">
-              Origem: {cliente.origem || 'WhatsApp'}
-            </div>
           </div>
 
           {/* Metricas */}
@@ -180,6 +336,10 @@ export function ClientDetail({ cliente: initialCliente, mensagensRecentes }: Cli
                 {cliente.notas || <span className="text-gray-400 italic">Sem notas</span>}
               </p>
             )}
+          </div>
+          {/* Ocasioes */}
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <OccasionsSection clienteId={cliente.id} />
           </div>
         </div>
 

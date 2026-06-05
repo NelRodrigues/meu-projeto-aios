@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { isSharedBackendMode } from '@/lib/backend/config'
+import { isSharedBackendMode, PUBLIC_SHARED_TENANT_ID } from '@/lib/backend/config'
 import {
   mapSharedContactToConversa,
   type SharedContactRow,
   type SharedDealRow,
 } from '@/lib/backend/shared-mappers'
-import type { ConversaActiva, ConversationStatus } from '@/types/database'
+import type { ConversaActiva, ConversationStatus, WhatsAppSenderType } from '@/types/database'
 
 type FiltroModo = 'todas' | 'bot' | 'humano' | 'pendentes'
 
@@ -86,8 +86,54 @@ export function useConversations() {
         }
       }
 
+      // Enriquecer com a última mensagem real de whatsapp_messages (preview + contadores).
+      const contactIds = contacts.map((c) => c.id)
+      const lastMsgByContact = new Map<
+        string,
+        { preview: string; at: string; sender: WhatsAppSenderType; enviadas: number }
+      >()
+      if (contactIds.length > 0) {
+        let wmQuery = supabase
+          .from('whatsapp_messages')
+          .select('contact_id,content,message,direction,sender_type,created_at')
+          .in('contact_id', contactIds)
+          .order('created_at', { ascending: false })
+          .limit(500)
+        if (PUBLIC_SHARED_TENANT_ID) wmQuery = wmQuery.eq('tenant_id', PUBLIC_SHARED_TENANT_ID)
+        const { data: wmRows } = await wmQuery
+        for (const row of (wmRows || []) as Array<Record<string, unknown>>) {
+          const cid = String(row.contact_id)
+          const existing = lastMsgByContact.get(cid)
+          const enviadas = (existing?.enviadas || 0) + (row.direction === 'outgoing' ? 1 : 0)
+          if (!existing) {
+            const sender: WhatsAppSenderType =
+              row.direction === 'outgoing'
+                ? (row.sender_type === 'humano' ? 'humano' : 'bot')
+                : 'cliente'
+            lastMsgByContact.set(cid, {
+              preview: String(row.content || row.message || ''),
+              at: String(row.created_at),
+              sender,
+              enviadas,
+            })
+          } else {
+            existing.enviadas = enviadas
+          }
+        }
+      }
+
       const mapped = contacts
-        .map((contact) => mapSharedContactToConversa(contact, latestDealByLead.get(contact.id) || null))
+        .map((contact) => {
+          const base = mapSharedContactToConversa(contact, latestDealByLead.get(contact.id) || null)
+          const wm = lastMsgByContact.get(contact.id)
+          if (wm) {
+            base.ultima_mensagem = wm.preview
+            base.ultima_mensagem_em = wm.at
+            base.ultimo_remetente = wm.sender
+            base.total_messages_sent = wm.enviadas
+          }
+          return base
+        })
         .filter((conv) => {
           if (currentFiltro === 'bot') return conv.modo === 'bot'
           if (currentFiltro === 'humano') return conv.modo === 'humano'
@@ -98,6 +144,11 @@ export function useConversations() {
           const q = currentSearch.trim().toLowerCase()
           if (!q) return true
           return conv.cliente_nome.toLowerCase().includes(q) || (conv.telefone || '').toLowerCase().includes(q)
+        })
+        .sort((a, b) => {
+          const ta = a.ultima_mensagem_em ? new Date(a.ultima_mensagem_em).getTime() : 0
+          const tb = b.ultima_mensagem_em ? new Date(b.ultima_mensagem_em).getTime() : 0
+          return tb - ta
         })
 
       setConversas(mapped)
@@ -158,7 +209,19 @@ export function useConversations() {
 
   // Realtime: actualizar lista quando conversas ou mensagens mudam
   useEffect(() => {
-    if (sharedMode) return
+    if (sharedMode) {
+      // Backend partilhado: ouvir whatsapp_messages e ai_agent_conversations.
+      const channel = supabase
+        .channel('inbox-realtime-shared')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'whatsapp_messages' }, () => {
+          void fetchConversas(0, filtro, search)
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'ai_agent_conversations' }, () => {
+          void fetchConversas(0, filtro, search)
+        })
+        .subscribe()
+      return () => { supabase.removeChannel(channel) }
+    }
 
     const channel = supabase
       .channel('inbox-realtime')
@@ -171,7 +234,7 @@ export function useConversations() {
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [supabase, fetchConversas, sharedMode])
+  }, [supabase, fetchConversas, sharedMode, filtro, search])
 
   const assumirConversa = useCallback(async (conversaId: string) => {
     const { error } = await supabase
