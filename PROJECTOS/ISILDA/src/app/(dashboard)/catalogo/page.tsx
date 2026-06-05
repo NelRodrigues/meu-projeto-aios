@@ -26,6 +26,7 @@ type SharedCatalogItem = {
   nivel_funil: string | null
   activo: boolean
   imagem: string
+  imagem_url: string | null
 }
 
 function toNumber(value: number | string | null | undefined): number {
@@ -49,7 +50,7 @@ export default function CatalogoPage() {
     if (sharedMode) {
       const { data, error } = await supabase
         .from('products')
-        .select('id,nome,descricao,valor,formato,duracao,capacidade_maxima,nivel_funil,activo,category')
+        .select('id,nome,descricao,valor,formato,duracao,capacidade_maxima,nivel_funil,activo,category,imagem_url')
         .eq('tenant_id', TENANT_ISI)
         .order('nome')
 
@@ -80,6 +81,7 @@ export default function CatalogoPage() {
             nivel_funil: string | null
             activo: boolean | null
             category: string | null
+            imagem_url: string | null
           }
           return {
             id: produto.id,
@@ -92,7 +94,8 @@ export default function CatalogoPage() {
             capacidade_maxima: produto.capacidade_maxima,
             nivel_funil: produto.nivel_funil,
             activo: Boolean(produto.activo),
-            imagem: imagens[index % imagens.length],
+            imagem: produto.imagem_url || imagens[index % imagens.length],
+            imagem_url: produto.imagem_url,
           }
         })
       )
@@ -197,6 +200,7 @@ export default function CatalogoPage() {
       duracao: item.duracao || '',
       category: item.category || 'outro',
       activo: item.activo,
+      imagem_url: item.imagem_url,
     })
     setShowSharedForm(true)
   }
@@ -212,6 +216,7 @@ export default function CatalogoPage() {
       category: data.category || null,
       activo: data.activo,
       is_active: data.activo,
+      imagem_url: data.imagem_url || null,
       tenant_id: TENANT_ISI,
     }
     if (data.id) {
