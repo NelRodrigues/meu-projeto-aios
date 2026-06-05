@@ -197,6 +197,45 @@ export function AgentConsole() {
   const [savingCfg, setSavingCfg] = useState(false)
   const [cfgMsg, setCfgMsg] = useState<{ tipo: 'ok' | 'erro'; texto: string } | null>(null)
 
+  // Teste de prompt (simulação sem gravar nem enviar).
+  const [testMsg, setTestMsg] = useState('Olá, queria saber o preço de um bolo de aniversário para 20 pessoas.')
+  const [testReply, setTestReply] = useState<string | null>(null)
+  const [testing, setTesting] = useState(false)
+  const [testErro, setTestErro] = useState<string | null>(null)
+
+  async function handleTestPrompt() {
+    setTesting(true)
+    setTestErro(null)
+    setTestReply(null)
+    try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+      const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      const sess = supabase ? (await supabase.auth.getSession()).data.session : null
+      const res = await fetch(`${supabaseUrl}/functions/v1/isilda-agent?action=test_prompt`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: anon,
+          Authorization: `Bearer ${sess?.access_token || anon}`,
+        },
+        body: JSON.stringify({
+          system_prompt: cfg.system_prompt,
+          model: cfg.model,
+          temperature: cfg.temperature,
+          max_tokens: cfg.max_tokens,
+          message: testMsg,
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok || json.error) throw new Error(json.error || 'Falha no teste')
+      setTestReply(json.response || '(resposta vazia)')
+    } catch (e) {
+      setTestErro(e instanceof Error ? e.message : 'Erro desconhecido')
+    } finally {
+      setTesting(false)
+    }
+  }
+
   useEffect(() => {
     const timer = window.setTimeout(() => {
       setMounted(true)
@@ -631,6 +670,47 @@ export function AgentConsole() {
                   <span className="font-medium">Agente activo</span> — quando desligado, a Soraya pára de responder automaticamente.
                 </span>
               </label>
+
+              {/* Testar prompt — simula a resposta com a config actual, sem gravar nem enviar */}
+              <div className="rounded-xl border border-rose-100 bg-rose-50/40 p-4">
+                <div className="flex items-center gap-2">
+                  <MessageSquareMore className="h-4 w-4 text-rose-500" />
+                  <h4 className="text-sm font-semibold text-slate-800">Testar prompt</h4>
+                  <span className="text-xs text-slate-400">(simulação — não grava nem envia)</span>
+                </div>
+                <p className="mt-1 text-xs text-slate-500">
+                  Escreve uma mensagem de cliente e vê como a Soraya responderia com a configuração actual deste formulário.
+                </p>
+                <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                  <input
+                    value={testMsg}
+                    onChange={(e) => setTestMsg(e.target.value)}
+                    placeholder="Mensagem de teste do cliente..."
+                    className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
+                    onKeyDown={(e) => { if (e.key === 'Enter' && !testing) handleTestPrompt() }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleTestPrompt}
+                    disabled={testing || !cfg.system_prompt.trim()}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 disabled:opacity-50"
+                  >
+                    {testing ? <Clock3 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                    Testar
+                  </button>
+                </div>
+
+                {testErro && <p className="mt-2 text-xs text-red-500">{testErro}</p>}
+
+                {testReply && (
+                  <div className="mt-3">
+                    <p className="mb-1.5 text-xs font-medium text-slate-500">Resposta simulada da Soraya:</p>
+                    <div className="rounded-2xl rounded-tl-sm border border-emerald-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
+                      <p className="whitespace-pre-wrap leading-relaxed">{testReply}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </section>
