@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { Wallet, Plus, Loader2, X, CheckCircle2, Clock } from 'lucide-react'
+import { Wallet, Plus, Loader2, X, CheckCircle2, Clock, AlertCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface Pagamento {
@@ -112,6 +112,26 @@ export function FinancialSection({ clienteId, tenantId = null }: FinancialSectio
     .filter(p => p.estado === 'pendente' || p.estado === 'sinal')
     .reduce((s, p) => s + Number(p.valor || 0), 0)
 
+  // Mapa preço-catálogo por nome de bolo (para calcular valor em falta).
+  const precoCatalogo = new Map<string, number>()
+  for (const prod of produtos) {
+    if (prod.valor) precoCatalogo.set(prod.nome, Number(prod.valor))
+  }
+
+  // Agrupar pagamentos por tipo de bolo para apurar quanto falta em cada um.
+  interface ResumoBolo { tipo: string; total: number; pago: number; falta: number }
+  const resumoPorBolo: ResumoBolo[] = []
+  const porBolo = new Map<string, number>()
+  for (const p of pagamentos) {
+    const tipo = p.tipo_bolo || 'Pagamento'
+    porBolo.set(tipo, (porBolo.get(tipo) || 0) + Number(p.valor || 0))
+  }
+  for (const [tipo, pago] of porBolo.entries()) {
+    const total = precoCatalogo.get(tipo) ?? pago // se não há preço no catálogo, assume que já está pago
+    resumoPorBolo.push({ tipo, total, pago, falta: Math.max(0, total - pago) })
+  }
+  const totalEmFalta = resumoPorBolo.reduce((s, r) => s + r.falta, 0)
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-5">
       <div className="flex items-center justify-between mb-4">
@@ -130,20 +150,41 @@ export function FinancialSection({ clienteId, tenantId = null }: FinancialSectio
       </div>
 
       {/* Totais */}
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-3 gap-2 mb-4">
         <div className="bg-emerald-50 rounded-lg p-3">
           <p className="text-sm font-bold text-emerald-700">{formatKz(totalConfirmado)}</p>
           <p className="text-[10px] text-emerald-500 font-medium flex items-center gap-1">
-            <CheckCircle2 className="h-3 w-3" /> Confirmado
+            <CheckCircle2 className="h-3 w-3" /> Recebido
           </p>
         </div>
         <div className="bg-amber-50 rounded-lg p-3">
           <p className="text-sm font-bold text-amber-700">{formatKz(totalPendente)}</p>
           <p className="text-[10px] text-amber-500 font-medium flex items-center gap-1">
-            <Clock className="h-3 w-3" /> Pendente / Sinal
+            <Clock className="h-3 w-3" /> Sinal/Pend.
+          </p>
+        </div>
+        <div className={`rounded-lg p-3 ${totalEmFalta > 0 ? 'bg-red-50' : 'bg-gray-50'}`}>
+          <p className={`text-sm font-bold ${totalEmFalta > 0 ? 'text-red-600' : 'text-gray-500'}`}>{formatKz(totalEmFalta)}</p>
+          <p className={`text-[10px] font-medium flex items-center gap-1 ${totalEmFalta > 0 ? 'text-red-400' : 'text-gray-400'}`}>
+            <AlertCircle className="h-3 w-3" /> Em falta
           </p>
         </div>
       </div>
+
+      {/* Resumo por bolo — quanto falta receber em cada encomenda */}
+      {resumoPorBolo.some(r => r.falta > 0) && (
+        <div className="mb-4 space-y-1.5">
+          {resumoPorBolo.filter(r => r.falta > 0).map((r, i) => (
+            <div key={i} className="flex items-center justify-between text-xs bg-red-50/60 border border-red-100 rounded-lg px-2.5 py-1.5">
+              <span className="text-gray-700 font-medium truncate pr-2">{r.tipo}</span>
+              <span className="text-red-600 font-semibold whitespace-nowrap">
+                Falta {formatKz(r.falta)}
+                <span className="text-gray-400 font-normal"> / {formatKz(r.total)}</span>
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Form */}
       {adicionando && (

@@ -149,6 +149,39 @@ export function ClientDetail({ cliente: initialCliente, mensagensRecentes, share
         data_aniversario: (row.data_aniversario as string | null) ?? null,
         estagio: (row.estagio as ClienteEstagio) ?? (form.estagio as ClienteEstagio),
       })
+
+      // Auto-criar/actualizar ocasião de aniversário para recompra automática.
+      if (form.data_aniversario) {
+        try {
+          const mmdd = form.data_aniversario.slice(5, 10) // 'YYYY-MM-DD' → 'MM-DD'
+          // Existe já uma ocasião automática de aniversário próprio?
+          const { data: existente } = await supabase
+            .from('ocasioes_cliente')
+            .select('id')
+            .eq('cliente_id', cliente.id)
+            .eq('tipo', 'aniversario_proprio')
+            .eq('origem', 'perfil_aniversario')
+            .maybeSingle()
+
+          const ocasiaoPayload: Record<string, unknown> = {
+            cliente_id: cliente.id,
+            tipo: 'aniversario_proprio',
+            nome_pessoa: form.nome.trim() || cliente.nome,
+            data_evento: mmdd,
+            origem: 'perfil_aniversario',
+            activo: true,
+          }
+          if (tenantId) ocasiaoPayload.tenant_id = tenantId
+
+          if (existente?.id) {
+            await supabase.from('ocasioes_cliente').update(ocasiaoPayload).eq('id', existente.id)
+          } else {
+            await supabase.from('ocasioes_cliente').insert(ocasiaoPayload)
+          }
+        } catch {
+          // não-bloqueante — a edição do perfil não falha por causa da ocasião
+        }
+      }
     }
     setEditandoPerfil(false)
   }
@@ -380,9 +413,9 @@ export function ClientDetail({ cliente: initialCliente, mensagensRecentes, share
               </p>
             )}
           </div>
-          {/* Ocasioes */}
+          {/* Ocasioes — key inclui o aniversário para recarregar após auto-criação */}
           <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <OccasionsSection clienteId={cliente.id} />
+            <OccasionsSection key={`oc-${cliente.data_aniversario || 'none'}`} clienteId={cliente.id} />
           </div>
         </div>
 
