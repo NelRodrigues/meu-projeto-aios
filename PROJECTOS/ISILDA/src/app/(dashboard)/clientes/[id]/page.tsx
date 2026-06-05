@@ -53,6 +53,7 @@ export default async function ClienteDetailPage({ params }: Props) {
         cliente={cliente as Cliente}
         mensagensRecentes={mensagensRecentes}
         sharedMode
+        tenantId={PUBLIC_SHARED_TENANT_ID}
       />
     )
   }

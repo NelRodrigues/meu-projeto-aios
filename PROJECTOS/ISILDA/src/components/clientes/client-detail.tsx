@@ -7,17 +7,20 @@ import {
   ArrowLeft,
   Phone,
   Mail,
+  MapPin,
+  Gift,
   CakeSlice,
   Edit,
   Save,
   X,
   MessageCircle,
   TrendingUp,
-  ShoppingBag,
 } from 'lucide-react'
 import type { Cliente, ClienteEstagio } from '@/types/database'
 import { createClient } from '@/lib/supabase/client'
 import { OccasionsSection } from './occasions-section'
+import { LeadIntelligence } from './lead-intelligence'
+import { FinancialSection } from './financial-section'
 
 interface ClientDetailProps {
   cliente: Cliente
@@ -29,6 +32,7 @@ interface ClientDetailProps {
     direction: string
   }[]
   sharedMode?: boolean
+  tenantId?: string | null
 }
 
 const ESTAGIO_CONFIG: Record<ClienteEstagio, { label: string; color: string }> = {
@@ -55,7 +59,8 @@ function formatDate(date: string | null): string {
 const ESTAGIOS_STANDALONE: ClienteEstagio[] = ['novo', 'contactado', 'orcamento', 'activo', 'vip', 'inactivo']
 const ESTAGIOS_SHARED = ['lead', 'qualificada', 'sessao_agendada', 'em_programa', 'comunidade', 'alumni']
 
-export function ClientDetail({ cliente: initialCliente, mensagensRecentes, sharedMode = false }: ClientDetailProps) {
+export function ClientDetail({ cliente: initialCliente, mensagensRecentes, sharedMode = false, tenantId = null }: ClientDetailProps) {
+  void mensagensRecentes // histórico migrou para o Inbox
   const [cliente, setCliente] = useState(initialCliente)
   const [editando, setEditando] = useState(false)
   const [notas, setNotas] = useState(cliente.notas || '')
@@ -69,6 +74,8 @@ export function ClientDetail({ cliente: initialCliente, mensagensRecentes, share
     nome: cliente.nome || '',
     telefone: cliente.telefone || '',
     email: cliente.email || '',
+    morada: cliente.morada || '',
+    data_aniversario: cliente.data_aniversario || '',
     estagio: String(cliente.estagio || 'novo'),
   })
 
@@ -96,6 +103,8 @@ export function ClientDetail({ cliente: initialCliente, mensagensRecentes, share
       nome: cliente.nome || '',
       telefone: cliente.telefone || '',
       email: cliente.email || '',
+      morada: cliente.morada || '',
+      data_aniversario: cliente.data_aniversario || '',
       estagio: String(cliente.estagio || (sharedMode ? 'lead' : 'novo')),
     })
     setErroPerfil(null)
@@ -114,6 +123,8 @@ export function ClientDetail({ cliente: initialCliente, mensagensRecentes, share
       nome: form.nome.trim(),
       telefone: form.telefone.trim() || null,
       email: form.email.trim() || null,
+      morada: form.morada.trim() || null,
+      data_aniversario: form.data_aniversario || null,
       estagio: form.estagio,
     }
     const { data, error } = await supabase
@@ -134,6 +145,8 @@ export function ClientDetail({ cliente: initialCliente, mensagensRecentes, share
         nome: String(row.nome ?? form.nome),
         telefone: (row.telefone as string | null) ?? null,
         email: (row.email as string | null) ?? null,
+        morada: (row.morada as string | null) ?? null,
+        data_aniversario: (row.data_aniversario as string | null) ?? null,
         estagio: (row.estagio as ClienteEstagio) ?? (form.estagio as ClienteEstagio),
       })
     }
@@ -242,6 +255,24 @@ export function ClientDetail({ cliente: initialCliente, mensagensRecentes, share
                   />
                 </div>
                 <div>
+                  <label className="block text-[11px] font-medium text-gray-500 mb-1">Morada</label>
+                  <input
+                    value={form.morada}
+                    onChange={e => setForm({ ...form, morada: e.target.value })}
+                    className="w-full text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
+                    placeholder="Bairro, rua, referência..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-gray-500 mb-1">Data de aniversário</label>
+                  <input
+                    type="date"
+                    value={form.data_aniversario}
+                    onChange={e => setForm({ ...form, data_aniversario: e.target.value })}
+                    className="w-full text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
+                  />
+                </div>
+                <div>
                   <label className="block text-[11px] font-medium text-gray-500 mb-1">Estágio</label>
                   <select
                     value={form.estagio}
@@ -269,6 +300,18 @@ export function ClientDetail({ cliente: initialCliente, mensagensRecentes, share
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Mail className="h-3.5 w-3.5 text-gray-400" />
                     {cliente.email}
+                  </div>
+                )}
+                {cliente.morada && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <MapPin className="h-3.5 w-3.5 text-gray-400" />
+                    {cliente.morada}
+                  </div>
+                )}
+                {cliente.data_aniversario && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Gift className="h-3.5 w-3.5 text-gray-400" />
+                    {formatDate(cliente.data_aniversario)}
                   </div>
                 )}
                 <div className="text-xs text-gray-400">
@@ -343,52 +386,14 @@ export function ClientDetail({ cliente: initialCliente, mensagensRecentes, share
           </div>
         </div>
 
-        {/* Coluna Direita — Historico de Mensagens */}
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <h2 className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-4">
-              <ShoppingBag className="h-4 w-4 text-rose-400" />
-              Historico de Mensagens Recentes
-            </h2>
-
-            {mensagensRecentes.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-8">Sem mensagens ainda</p>
-            ) : (
-              <div className="space-y-2">
-                {mensagensRecentes.map(m => (
-                  <div key={m.id} className={cn(
-                    'flex gap-2 text-sm',
-                    m.direction === 'incoming' ? 'flex-row' : 'flex-row-reverse'
-                  )}>
-                    <div className={cn(
-                      'max-w-[80%] px-3 py-2 rounded-xl text-xs',
-                      m.direction === 'incoming'
-                        ? 'bg-gray-100 text-gray-700'
-                        : m.sender_type === 'bot'
-                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                          : 'bg-rose-500 text-white'
-                    )}>
-                      <p className="whitespace-pre-wrap break-words">{m.conteudo}</p>
-                      <p className={cn(
-                        'text-[10px] mt-1',
-                        m.direction === 'incoming' ? 'text-gray-400' : m.sender_type === 'bot' ? 'text-emerald-500' : 'text-white/70'
-                      )}>
-                        {new Date(m.created_at).toLocaleString('pt-AO', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          timeZone: 'Africa/Luanda',
-                        })}
-                        {m.sender_type === 'bot' && ' • IA'}
-                        {m.sender_type === 'humano' && ' • Isi'}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+        {/* Coluna Direita — Inteligência IA + Financeiro */}
+        <div className="lg:col-span-2 space-y-6">
+          <LeadIntelligence
+            clienteId={cliente.id}
+            inicial={(cliente.lead_intelligence as Parameters<typeof LeadIntelligence>[0]['inicial']) ?? null}
+            geradoEm={cliente.lead_intelligence_at}
+          />
+          <FinancialSection clienteId={cliente.id} tenantId={tenantId} />
         </div>
       </div>
     </div>

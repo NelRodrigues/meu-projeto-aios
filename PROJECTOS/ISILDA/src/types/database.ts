@@ -43,6 +43,10 @@ export interface Cliente {
   estagio: ClienteEstagio
   origem: OrigemCanal | null
   notas: string | null
+  morada: string | null
+  data_aniversario: string | null
+  lead_intelligence: Record<string, unknown> | null
+  lead_intelligence_at: string | null
   total_pedidos: number
   total_gasto: number
   ticket_medio: number
@@ -158,4 +162,126 @@ export interface IntegrationKey {
   key_name: string
   key_value: string
   is_active: boolean
+}
+
+// ========================
+// WhatsApp Instances
+// ========================
+
+export type WhatsAppInstanceStatus = 'disconnected' | 'connecting' | 'connected' | 'error'
+
+export interface WhatsAppInstance {
+  id: string
+  created_at: string
+  updated_at: string
+  tenant_id: string | null
+  name: string
+  phone_number: string | null
+  teams: string[] | null
+  status: WhatsAppInstanceStatus
+  api_key: string | null
+  api_url: string | null
+  webhook_url: string | null
+  bypass_disconnect: boolean | null
+  purpose: string | null
+  metadata: Record<string, unknown> | null
+}
+
+// ========================
+// Catalogo
+// ========================
+
+export type ProdutoCategoria =
+  | 'chantilly'
+  | 'bento_cake'
+  | 'especiais'
+  | 'naked_vintage'
+  | 'doces'
+  | 'casamento'
+  | 'outro'
+
+export interface Produto {
+  id: string
+  created_at: string
+  updated_at: string
+  nome: string
+  descricao: string | null
+  categoria: ProdutoCategoria
+  tags: string[]
+  fotos: string[]
+  foto_principal: string | null
+  preco_base: number | null
+  precos_por_tamanho: Record<string, number>
+  sob_consulta: boolean
+  tempo_producao_horas: number
+  complexidade: number
+  activo: boolean
+}
+
+// ========================
+// Pedidos
+// ========================
+
+export type PedidoEstado =
+  | 'novo'
+  | 'orcamento'
+  | 'confirmado'
+  | 'pago'
+  | 'em_producao'
+  | 'pronto'
+  | 'entregue'
+  | 'cancelado'
+
+export type ModoEntrega = 'retirada' | 'entrega'
+
+export interface Pedido {
+  id: string
+  created_at: string
+  updated_at: string
+  cliente_id: string
+  produto_id: string | null
+  conversa_id: string | null
+  descricao: string | null
+  tema: string | null
+  tamanho: string | null
+  sabor_massa: string | null
+  sabor_recheio: string | null
+  decoracao: string | null
+  imagem_referencia: string | null
+  data_entrega: string
+  hora_entrega: string | null
+  modo_entrega: ModoEntrega
+  endereco_entrega: string | null
+  valor_orcamento: number | null
+  valor_final: number | null
+  estado: PedidoEstado
+  notas: string | null
+  confirmado_at: string | null
+  pago_at: string | null
+  producao_inicio_at: string | null
+  pronto_at: string | null
+  entregue_at: string | null
+  cancelado_at: string | null
+}
+
+export interface PedidoComCliente extends Pedido {
+  cliente_nome: string
+  cliente_telefone: string | null
+  produto_nome: string | null
+}
+
+// ========================
+// Calendario
+// ========================
+
+export type CalendarioStatus = 'disponivel' | 'quase_lotado' | 'lotado' | 'bloqueado' | 'passado'
+
+export interface CalendarioDia {
+  data: string
+  capacidade_maxima: number
+  notas: string | null
+  bloqueado: boolean
+  pedidos_agendados: number
+  vagas_disponiveis: number
+  status: CalendarioStatus
 }
