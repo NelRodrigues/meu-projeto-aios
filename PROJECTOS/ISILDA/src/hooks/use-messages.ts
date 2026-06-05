@@ -2,9 +2,58 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { isSharedBackendMode } from '@/lib/backend/config'
-import { buildSharedInboxMessages, type SharedContactRow, type SharedDealRow } from '@/lib/backend/shared-mappers'
-import type { MensagemWhatsApp } from '@/types/database'
+import { isSharedBackendMode, PUBLIC_SHARED_TENANT_ID } from '@/lib/backend/config'
+import type { MensagemWhatsApp, WhatsAppDirection, WhatsAppSenderType, WhatsAppMessageStatus } from '@/types/database'
+
+// Linha bruta de public.whatsapp_messages (backend partilhado SIC).
+interface SharedWhatsAppMessageRow {
+  id: string
+  created_at: string
+  contact_id: string | null
+  content: string | null
+  message: string | null
+  direction: string | null
+  sender_type: string | null
+  status: string | null
+  message_id: string | null
+  media_url: string | null
+  message_type: string | null
+}
+
+// Mapeia whatsapp_messages (shared) para o contrato MensagemWhatsApp do inbox.
+function mapSharedWhatsAppMessage(row: SharedWhatsAppMessageRow): MensagemWhatsApp {
+  const direction: WhatsAppDirection = row.direction === 'outgoing' ? 'outgoing' : 'incoming'
+  let sender: WhatsAppSenderType = direction === 'outgoing' ? 'bot' : 'cliente'
+  if (row.sender_type === 'humano' || row.sender_type === 'human') sender = 'humano'
+  else if (row.sender_type === 'sistema' || row.sender_type === 'system') sender = 'sistema'
+  else if (row.sender_type === 'bot') sender = 'bot'
+  else if (row.sender_type === 'cliente') sender = 'cliente'
+  const status: WhatsAppMessageStatus =
+    row.status === 'read' ? 'read'
+    : row.status === 'delivered' ? 'delivered'
+    : row.status === 'received' ? 'delivered'
+    : 'sent'
+  return {
+    id: row.id,
+    created_at: row.created_at,
+    cliente_id: row.contact_id || '',
+    sender_type: sender,
+    conteudo: row.content || row.message || '',
+    direction,
+    message_status: status,
+    whatsapp_message_id: row.message_id,
+    media_url: row.media_url,
+    media_type: row.message_type && row.message_type !== 'text' ? row.message_type : null,
+    intencao_classificada: null,
+    confianca_resposta: null,
+    modelo_llm: null,
+    tokens_input: null,
+    tokens_output: null,
+    latencia_ms: null,
+  }
+}
+
+const SHARED_WM_COLUMNS = 'id,created_at,contact_id,content,message,direction,sender_type,status,message_id,media_url,message_type'
 
 export function useMessages(clienteId: string | null) {
   const supabase = useMemo(() => createClient(), [])
@@ -27,33 +76,42 @@ export function useMessages(clienteId: string | null) {
         }
       }
 
-      Promise.all([
-        supabase
-          .from('contacts')
-          .select('id,created_at,updated_at,nome,telefone,email,estagio,origem,notas,valor_total_pago,whatsapp_id')
-          .eq('id', clienteId)
-          .maybeSingle(),
-        supabase
-          .from('deals')
-          .select('id,lead_id,title,status,total_paid,created_at,updated_at,expected_close_date,notes,payment_status,leads!lead_id(name,phone)')
-          .eq('lead_id', clienteId)
-          .order('updated_at', { ascending: false })
-          .limit(1)
-          .maybeSingle(),
-      ]).then(([contactResult, dealResult]) => {
+      let query = supabase
+        .from('whatsapp_messages')
+        .select(SHARED_WM_COLUMNS)
+        .eq('contact_id', clienteId)
+        .order('created_at', { ascending: true })
+      if (PUBLIC_SHARED_TENANT_ID) {
+        query = query.eq('tenant_id', PUBLIC_SHARED_TENANT_ID)
+      }
+
+      query.then(({ data, error }) => {
         if (!activo) return
-        if (contactResult.error) {
-          console.error('[use-messages] Erro shared contact:', contactResult.error.message)
+        if (error) {
+          console.error('[use-messages] Erro shared whatsapp_messages:', error.message)
           setMensagens([])
         } else {
-          const contact = contactResult.data as SharedContactRow | null
-          const deal = (dealResult.data as SharedDealRow | null) || null
-          setMensagens(contact ? buildSharedInboxMessages(contact, deal) : [])
+          setMensagens((data as SharedWhatsAppMessageRow[] | null)?.map(mapSharedWhatsAppMessage) || [])
         }
         setLoading(false)
       })
+
+      // Realtime: novas mensagens do backend partilhado.
+      const channel = supabase
+        .channel(`shared-wm-${clienteId}`)
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'whatsapp_messages', filter: `contact_id=eq.${clienteId}` },
+          (payload) => {
+            const novo = mapSharedWhatsAppMessage(payload.new as SharedWhatsAppMessageRow)
+            setMensagens((prev) => (prev.some((m) => m.id === novo.id) ? prev : [...prev, novo]))
+          }
+        )
+        .subscribe()
+
       return () => {
         activo = false
+        supabase.removeChannel(channel)
       }
     }
 
