@@ -11,10 +11,11 @@ interface ChatAreaProps {
   conversa: ConversaActiva
   mensagens: MensagemWhatsApp[]
   loading: boolean
-  onEnviar: (text: string) => void
+  onEnviar: (text: string) => Promise<void> | void
   onAssumir: () => void
   onDevolver: () => void
   onBack: () => void
+  readOnly?: boolean
 }
 
 function ModoBadge({ modo }: { modo: string }) {
@@ -31,9 +32,11 @@ function ModoBadge({ modo }: { modo: string }) {
   )
 }
 
-export function ChatArea({ conversa, mensagens, loading, onEnviar, onAssumir, onDevolver, onBack }: ChatAreaProps) {
+export function ChatArea({ conversa, mensagens, loading, onEnviar, onAssumir, onDevolver, onBack, readOnly = false }: ChatAreaProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const isBotMode = conversa.modo === 'bot'
+  const nomeCliente = conversa.cliente_nome || 'Cliente sem nome'
+  const avatar = nomeCliente.charAt(0).toUpperCase()
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -48,12 +51,12 @@ export function ChatArea({ conversa, mensagens, loading, onEnviar, onAssumir, on
         </button>
 
         <div className="w-9 h-9 rounded-full bg-rose-100 flex items-center justify-center text-sm font-semibold text-rose-700 flex-shrink-0">
-          {conversa.cliente_nome.charAt(0).toUpperCase()}
+          {avatar}
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold truncate">{conversa.cliente_nome}</span>
+            <span className="text-sm font-semibold truncate">{nomeCliente}</span>
             <ModoBadge modo={conversa.modo} />
           </div>
           {conversa.telefone && (
@@ -62,7 +65,11 @@ export function ChatArea({ conversa, mensagens, loading, onEnviar, onAssumir, on
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">
-          {isBotMode ? (
+          {readOnly ? (
+            <span className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700">
+              Modo leitura
+            </span>
+          ) : isBotMode ? (
             <button
               onClick={onAssumir}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors"
@@ -110,8 +117,8 @@ export function ChatArea({ conversa, mensagens, loading, onEnviar, onAssumir, on
 
       {/* Input */}
       <ChatInput
-        disabled={isBotMode}
-        placeholder={isBotMode ? 'Assume a conversa para enviar mensagens...' : 'Escreve uma mensagem...'}
+        disabled={readOnly}
+        placeholder={readOnly ? 'Modo leitura — envio ainda não ligado ao backend partilhado.' : 'Escreve uma mensagem e envia.'}
         onEnviar={onEnviar}
       />
     </div>

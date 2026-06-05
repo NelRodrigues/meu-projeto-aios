@@ -79,6 +79,7 @@ export default function InboxPage() {
               setSelected({ ...selected, modo: 'bot', estado: 'active' })
             }}
             onBack={handleBack}
+            readOnly={false}
           />
         ) : (
           <div className="flex-1 flex items-center justify-center">

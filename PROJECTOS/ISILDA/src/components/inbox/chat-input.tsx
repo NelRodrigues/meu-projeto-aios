@@ -3,31 +3,36 @@
 import { useState, useRef } from 'react'
 import { Send } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { TemplateSelector } from './template-selector'
 
 interface ChatInputProps {
   disabled?: boolean
   placeholder?: string
-  onEnviar: (text: string) => void
+  onEnviar: (text: string) => Promise<void> | void
 }
 
 export function ChatInput({ disabled = false, placeholder = 'Escreve uma mensagem...', onEnviar }: ChatInputProps) {
   const [texto, setTexto] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const handleEnviar = () => {
+  const handleEnviar = async () => {
     const trimmed = texto.trim()
     if (!trimmed || disabled) return
-    onEnviar(trimmed)
-    setTexto('')
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto'
+    try {
+      await Promise.resolve(onEnviar(trimmed))
+      setTexto('')
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto'
+      }
+    } catch (error) {
+      console.error('[chat-input] Falha ao enviar mensagem:', error)
     }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      handleEnviar()
+      await handleEnviar()
     }
   }
 
@@ -38,9 +43,21 @@ export function ChatInput({ disabled = false, placeholder = 'Escreve uma mensage
     ta.style.height = Math.min(ta.scrollHeight, 120) + 'px'
   }
 
+  // Injecta o conteudo de um template no campo e devolve o foco ao textarea.
+  const handleTemplate = (conteudo: string) => {
+    setTexto(conteudo)
+    const ta = textareaRef.current
+    if (ta) {
+      ta.focus()
+      ta.style.height = 'auto'
+      ta.style.height = Math.min(ta.scrollHeight, 120) + 'px'
+    }
+  }
+
   return (
     <div className="px-4 py-3 border-t border-rose-100 bg-white">
       <div className="flex items-end gap-2">
+        <TemplateSelector onSelect={handleTemplate} disabled={disabled} />
         <textarea
           ref={textareaRef}
           value={texto}
