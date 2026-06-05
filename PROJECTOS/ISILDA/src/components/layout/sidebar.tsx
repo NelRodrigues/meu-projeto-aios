@@ -2,10 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import {
   LayoutDashboard,
   MessageCircle,
   Users,
+  UsersRound,
   ShoppingBag,
   Calendar,
   Cake,
@@ -14,6 +16,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/client'
 
 interface NavItem {
   href: string
@@ -47,13 +50,46 @@ const navSections: NavSection[] = [
     title: 'Sistema',
     items: [
       { href: '/ai-agent', label: 'Agente IA', icon: Bot },
+      { href: '/equipa', label: 'Equipa', icon: UsersRound },
       { href: '/configuracoes', label: 'Configuracoes', icon: Settings },
     ],
   },
 ]
 
+function useChecklistPendentes() {
+  const [pendentes, setPendentes] = useState(0)
+  const [supabase, setSupabase] = useState<ReturnType<typeof createClient> | null>(null)
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setSupabase(createClient())
+    }, 0)
+
+    return () => window.clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    if (!supabase) return
+
+    const hoje = new Date().toISOString().split('T')[0]
+    Promise.all([
+      supabase.from('checklist_tasks').select('id', { count: 'exact', head: true }).eq('activo', true),
+      supabase.from('checklist_completions').select('task_id').eq('completado_em', hoje),
+    ])
+      .then(([{ count: total }, { data: completions }]) => {
+        const completedCount = completions?.length ?? 0
+        setPendentes(Math.max(0, (total ?? 0) - completedCount))
+      })
+      // Fallback gracioso: backend offline -> mantem 0, sem rebentar a UI.
+      .catch(() => setPendentes(0))
+  }, [supabase])
+
+  return pendentes
+}
+
 export function Sidebar() {
   const pathname = usePathname()
+  const checklistPendentes = useChecklistPendentes()
 
   return (
     <nav className="flex h-full flex-col bg-sidebar-bg text-sidebar-fg">
@@ -86,7 +122,12 @@ export function Sidebar() {
                       )}
                     >
                       <Icon className="h-4.5 w-4.5 shrink-0" />
-                      {item.label}
+                      <span className="flex-1">{item.label}</span>
+                      {item.href === '/dashboard' && checklistPendentes > 0 && (
+                        <span className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
+                          {checklistPendentes}
+                        </span>
+                      )}
                     </Link>
                   </li>
                 )
