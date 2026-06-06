@@ -87,6 +87,7 @@ function statusFor(value: string) {
 
 export function SettingsPanel() {
   const supabase = useMemo(() => createClient(), [])
+  const sharedTenantId = process.env.NEXT_PUBLIC_SHARED_TENANT_ID?.trim() || null
   const [activeTab, setActiveTab] = useState<SettingsTab>('geral')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -98,11 +99,17 @@ export function SettingsPanel() {
     let activo = true
 
     async function loadKeys() {
-      const { data, error: fetchError } = await supabase
+      let query = supabase
         .from('integration_keys')
         .select('service,key_name,key_value,is_active')
         .in('service', ['anthropic', 'openai', 'gemini', 'uazapi'])
         .in('key_name', ['api_key', 'base_url', 'token', 'webhook_token'])
+
+      if (sharedTenantId) {
+        query = query.eq('tenant_id', sharedTenantId)
+      }
+
+      const { data, error: fetchError } = await query
 
       if (!activo) return
 
@@ -125,7 +132,7 @@ export function SettingsPanel() {
     return () => {
       activo = false
     }
-  }, [supabase])
+  }, [sharedTenantId, supabase])
 
   const configuredCount = useMemo(
     () => API_FIELDS.filter((field) => Boolean(keys[`${field.service}:${field.key_name}`]?.trim())).length,
@@ -151,12 +158,22 @@ export function SettingsPanel() {
         is_active: Boolean(keys[`${field.service}:${field.key_name}`]?.trim()),
       })))
 
+      const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/configuracoes/integration-keys', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session?.access_token || ''}`,
+        },
         body: JSON.stringify({ rows: payload }),
       })
-      const data = await res.json().catch(() => ({}))
+      const raw = await res.text()
+      let data: { error?: string } = {}
+      try {
+        data = raw ? (JSON.parse(raw) as { error?: string }) : {}
+      } catch {
+        data = { error: raw }
+      }
 
       if (!res.ok) {
         throw new Error(data.error || 'Falha ao guardar chaves')

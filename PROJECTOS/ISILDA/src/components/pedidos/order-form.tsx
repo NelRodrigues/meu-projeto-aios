@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Search, Calendar, Clock, MapPin } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Cliente, Produto, ModoEntrega } from '@/types/database'
-import { isSharedBackendMode } from '@/lib/backend/config'
+import { isSharedBackendMode, PUBLIC_SHARED_TENANT_ID } from '@/lib/backend/config'
 
 export function OrderForm() {
   const router = useRouter()
@@ -128,12 +128,47 @@ export function OrderForm() {
     setError(null)
 
     try {
+      // No shared mode, deals.lead_id aponta para a tabela `leads` (não `contacts`).
+      // Garantimos/criamos o lead a partir do contacto seleccionado antes de criar o deal.
+      let sharedLeadId: string | null = null
+      if (sharedMode) {
+        const tenantId = PUBLIC_SHARED_TENANT_ID || '81bc8777-39f3-477a-8ad6-44f9dcf1eca8'
+        const telDigits = (clienteSelecionado.telefone || '').replace(/\D/g, '')
+        if (telDigits.length >= 8) {
+          const { data: leadExist } = await supabase
+            .from('leads')
+            .select('id')
+            .eq('tenant_id', tenantId)
+            .ilike('phone', `%${telDigits.slice(-9)}%`)
+            .limit(1)
+            .maybeSingle()
+          if (leadExist) sharedLeadId = (leadExist as { id: string }).id
+        }
+        if (!sharedLeadId) {
+          const { data: leadNew, error: leadErr } = await supabase
+            .from('leads')
+            .insert({
+              tenant_id: tenantId,
+              name: clienteSelecionado.nome,
+              phone: clienteSelecionado.telefone,
+              source: 'crm_manual',
+              metadata: { contact_id: clienteSelecionado.id },
+            })
+            .select('id')
+            .single()
+          if (leadErr) throw leadErr
+          sharedLeadId = (leadNew as { id: string }).id
+        }
+      }
+
       const payload = sharedMode
         ? {
-            lead_id: clienteSelecionado.id,
+            lead_id: sharedLeadId,
+            tenant_id: PUBLIC_SHARED_TENANT_ID || '81bc8777-39f3-477a-8ad6-44f9dcf1eca8',
             title: produtoTitulo.trim() || descricao.trim() || 'Pedido',
             status: 'proposal',
             total_paid: valorOrcamento ? parseFloat(valorOrcamento) : null,
+            negotiated_price: valorOrcamento ? parseFloat(valorOrcamento) : null,
             expected_close_date: dataEntrega,
             notes: [
               descricao.trim() || null,
@@ -145,6 +180,7 @@ export function OrderForm() {
               notas.trim() || null,
             ].filter(Boolean).join(' | ') || null,
             payment_status: valorOrcamento ? 'pending' : null,
+            metadata: { origem: 'crm_manual', contact_id: clienteSelecionado.id },
           }
         : {
             cliente_id: clienteSelecionado.id,

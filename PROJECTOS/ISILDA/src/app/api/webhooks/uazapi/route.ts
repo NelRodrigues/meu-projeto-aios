@@ -15,8 +15,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ status: 'ok' })
   }
 
-  // Forward to Edge Function (fire-and-forget)
-  fetch(`${supabaseUrl}/functions/v1/uazapi-webhook-receiver`, {
+  // Forward to Edge Function (fire-and-forget) — agente de produção da Isi
+  fetch(`${supabaseUrl}/functions/v1/isilda-agent`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
