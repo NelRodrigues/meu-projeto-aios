@@ -241,6 +241,10 @@ async function respondToContact(supabase, contactId, incomingText, senderName) {
       const r = await callClaude(agentic, fullPrompt, apiKey, agent.model || "claude-sonnet-4-5", agent.max_tokens || 1024, typeof agent.temperature === "number" ? agent.temperature : 0.7, AGENT_TOOLS);
       tIn += r.tokens_input; tOut += r.tokens_output;
       if (r.stop_reason === "tool_use") {
+        // Preserva qualquer texto que acompanhe o tool_use (Claude às vezes
+        // escreve a resposta ao cliente na mesma mensagem da tool).
+        const textoAcompanha = (r.content || "").trim();
+        if (textoAcompanha) finalText = textoAcompanha;
         const toolUses = (r.raw_content || []).filter((b) => b.type === "tool_use");
         const toolResults = [];
         for (const tu of toolUses) {
@@ -253,10 +257,22 @@ async function respondToContact(supabase, contactId, incomingText, senderName) {
         agentic.push({ role: "user", content: toolResults });
         continue;
       }
-      finalText = (r.content || "").trim() || fallback;
+      finalText = (r.content || "").trim() || finalText;
       break;
     }
-  } catch (e) { console.error("[isilda-agent] Claude/tool falhou:", e); finalText = fallback; }
+  } catch (e) { console.error("[isilda-agent] Claude/tool falhou:", e); }
+
+  // Se nenhuma iteração produziu texto mas uma tool correu, gera uma resposta
+  // de continuidade apropriada (em vez do fallback técnico genérico).
+  if ((!finalText || finalText === fallback)) {
+    if (notifInfo && !String(notifInfo).startsWith("ERRO")) {
+      finalText = "Já passei essa informação à Isilda. Ela vai falar contigo em breve! 😊";
+    } else if (pedidoInfo && !String(pedidoInfo).startsWith("ERRO")) {
+      finalText = "Encomenda registada! A Isilda confirma assim que receber o comprovativo. 🎂";
+    } else {
+      finalText = fallback;
+    }
+  }
 
   const parts = splitMessage(finalText, settings.message_split_max_length || 900);
   await sleep(randomBetween(settings.response_delay_min_ms || 1500, settings.response_delay_max_ms || 4000));
@@ -280,7 +296,7 @@ serve(async (req) => {
     const url = new URL(req.url);
     const payload = await req.json().catch(() => ({}));
     const action = url.searchParams.get("action") || payload.action || "webhook";
-    if (action === "ping") return new Response(JSON.stringify({ ok: true, tenant: TENANT_ID, agent: AGENT_NAME, version: 10 }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (action === "ping") return new Response(JSON.stringify({ ok: true, tenant: TENANT_ID, agent: AGENT_NAME, version: 11 }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     if (action === "test_prompt") {
       const apiKey = await getAnthropicKey(supabase);
       if (!apiKey) return new Response(JSON.stringify({ error: "ANTHROPIC_API_KEY nao configurada" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
