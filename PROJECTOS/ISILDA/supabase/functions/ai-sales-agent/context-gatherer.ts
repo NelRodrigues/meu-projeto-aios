@@ -1,6 +1,7 @@
 import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import type { AgentSettings } from "./types.ts";
 import { sanitizeForContext } from "./helpers.ts";
+import { isSharedBackendModeRuntime } from "../_shared/backend-mode.ts";
 
 export async function gatherContext(
   supabase: SupabaseClient,
@@ -8,10 +9,11 @@ export async function gatherContext(
   settings: AgentSettings
 ): Promise<string> {
   const parts: string[] = [];
+  const sharedMode = isSharedBackendModeRuntime();
 
   // Dados do cliente
   const { data: cliente } = await supabase
-    .from("clientes")
+    .from(sharedMode ? "contacts" : "clientes")
     .select("*")
     .eq("id", clienteId)
     .single();
@@ -29,14 +31,16 @@ export async function gatherContext(
   }
 
   // Historico de mensagens
-  const { data: messages } = await supabase
-    .from("mensagens_whatsapp")
-    .select("sender_type, conteudo, direction, created_at")
-    .eq("cliente_id", clienteId)
-    .neq("sender_type", "sistema")
-    .neq("direction", "internal")
-    .order("created_at", { ascending: false })
-    .limit(settings.context_messages_limit || 30);
+  const { data: messages } = sharedMode
+    ? { data: [] as Array<{ sender_type: string; conteudo: string; direction: string; created_at: string }> }
+    : await supabase
+        .from("mensagens_whatsapp")
+        .select("sender_type, conteudo, direction, created_at")
+        .eq("cliente_id", clienteId)
+        .neq("sender_type", "sistema")
+        .neq("direction", "internal")
+        .order("created_at", { ascending: false })
+        .limit(settings.context_messages_limit || 30);
 
   if (messages && messages.length > 0) {
     const history = messages.reverse().map((m: { direction: string; created_at: string; conteudo: string; sender_type: string }) => {

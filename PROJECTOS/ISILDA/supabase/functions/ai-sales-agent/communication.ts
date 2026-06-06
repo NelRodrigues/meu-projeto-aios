@@ -1,14 +1,35 @@
 import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getIntegrationKeyWithClient, normalizeUazapiUrl, normalizeAngolaPhone } from "../_shared/get-integration-key.ts";
+import { isSharedBackendModeRuntime } from "../_shared/backend-mode.ts";
 import type { AgentSettings } from "./types.ts";
 import { sleep, randomBetween, splitMessage } from "./helpers.ts";
+
+async function appendSharedContactNote(
+  supabase: SupabaseClient,
+  contactId: string,
+  line: string
+): Promise<void> {
+  const { data: contact } = await supabase
+    .from("contacts")
+    .select("notas")
+    .eq("id", contactId)
+    .maybeSingle();
+
+  const previous = String(contact?.notas || "").trim();
+  const next = previous ? `${previous}\n\n${line}` : line;
+  const trimmed = next.slice(-4000);
+
+  await supabase.from("contacts").update({ notas: trimmed }).eq("id", contactId);
+}
 
 export async function getUazapiConfig(
   supabase: SupabaseClient,
   clienteId: string
 ): Promise<{ baseUrl: string; token: string; phone: string } | null> {
+  const sharedMode = isSharedBackendModeRuntime();
+  const table = sharedMode ? "contacts" : "clientes";
   const { data: cliente } = await supabase
-    .from("clientes")
+    .from(table)
     .select("telefone, whatsapp_id")
     .eq("id", clienteId)
     .single();
@@ -65,14 +86,28 @@ export async function sendWhatsAppMessage(
   const result = await res.json();
   const messageId = result?.key?.id || result?.messageId || null;
 
-  await supabase.from("mensagens_whatsapp").insert({
-    cliente_id: clienteId,
-    sender_type: "bot",
-    conteudo: text,
-    whatsapp_message_id: messageId,
-    direction: "outgoing",
-    message_status: "sent",
-  });
+  if (isSharedBackendModeRuntime()) {
+    await appendSharedContactNote(supabase, clienteId, `Soraya: ${text}`);
+    await supabase.from("ai_agent_logs").insert({
+      contact_id: clienteId,
+      log_type: "message_sent",
+      data: {
+        response: text.substring(0, 500),
+        whatsapp_message_id: messageId,
+      },
+      tokens_input: 0,
+      tokens_output: 0,
+    });
+  } else {
+    await supabase.from("mensagens_whatsapp").insert({
+      cliente_id: clienteId,
+      sender_type: "bot",
+      conteudo: text,
+      whatsapp_message_id: messageId,
+      direction: "outgoing",
+      message_status: "sent",
+    });
+  }
 
   return messageId;
 }
@@ -101,6 +136,54 @@ export async function sendHumanizedResponse(
   }
 }
 
+export async function sendMediaMessage(
+  phone: string,
+  mediaUrl: string,
+  caption: string,
+  mediaType: "image" | "video" | "audio" | "document",
+  config: { baseUrl: string; token: string },
+  supabase: SupabaseClient,
+  clienteId: string
+): Promise<void> {
+  try {
+    const endpointMap: Record<string, string> = {
+      image: "/send/image",
+      video: "/send/video",
+      audio: "/send/audio",
+      document: "/send/document",
+    };
+
+    const endpoint = endpointMap[mediaType] || "/send/image";
+
+    const res = await fetch(`${config.baseUrl}${endpoint}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", token: config.token },
+      body: JSON.stringify({ number: phone, url: mediaUrl, caption }),
+    });
+
+    if (!res.ok) {
+      console.warn(`[comm] Media send failed: ${res.status}`);
+      return;
+    }
+
+    const result = await res.json();
+    const messageId = result?.key?.id || result?.messageId || null;
+
+    await supabase.from("mensagens_whatsapp").insert({
+      cliente_id: clienteId,
+      sender_type: "bot",
+      conteudo: caption || `[${mediaType} enviado]`,
+      whatsapp_message_id: messageId,
+      direction: "outgoing",
+      message_status: "sent",
+      media_url: mediaUrl,
+      media_type: mediaType,
+    });
+  } catch (e) {
+    console.error("[comm] Media send error:", e);
+  }
+}
+
 export async function atomicRateLimit(
   supabase: SupabaseClient,
   clienteId: string,
@@ -108,6 +191,7 @@ export async function atomicRateLimit(
   maxPerDay: number
 ): Promise<boolean> {
   // Simple rate limit via ai_agent_send_counts
+  const sharedMode = isSharedBackendModeRuntime();
   const now = new Date();
   const hourStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours()).toISOString();
   const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
@@ -116,14 +200,14 @@ export async function atomicRateLimit(
     supabase
       .from("ai_agent_send_counts")
       .select("message_count")
-      .eq("cliente_id", clienteId)
+      .eq(sharedMode ? "contact_id" : "cliente_id", clienteId)
       .eq("window_type", "hour")
       .eq("window_start", hourStart)
       .maybeSingle(),
     supabase
       .from("ai_agent_send_counts")
       .select("message_count")
-      .eq("cliente_id", clienteId)
+      .eq(sharedMode ? "contact_id" : "cliente_id", clienteId)
       .eq("window_type", "day")
       .eq("window_start", dayStart)
       .maybeSingle(),
@@ -137,12 +221,16 @@ export async function atomicRateLimit(
   // Increment counters
   await Promise.all([
     supabase.from("ai_agent_send_counts").upsert(
-      { cliente_id: clienteId, window_type: "hour", window_start: hourStart, message_count: hourCount + 1 },
-      { onConflict: "cliente_id,window_start,window_type" }
+      sharedMode
+        ? { contact_id: clienteId, window_type: "hour", window_start: hourStart, message_count: hourCount + 1 }
+        : { cliente_id: clienteId, window_type: "hour", window_start: hourStart, message_count: hourCount + 1 },
+      { onConflict: sharedMode ? "contact_id,window_start,window_type" : "cliente_id,window_start,window_type" }
     ),
     supabase.from("ai_agent_send_counts").upsert(
-      { cliente_id: clienteId, window_type: "day", window_start: dayStart, message_count: dayCount + 1 },
-      { onConflict: "cliente_id,window_start,window_type" }
+      sharedMode
+        ? { contact_id: clienteId, window_type: "day", window_start: dayStart, message_count: dayCount + 1 }
+        : { cliente_id: clienteId, window_type: "day", window_start: dayStart, message_count: dayCount + 1 },
+      { onConflict: sharedMode ? "contact_id,window_start,window_type" : "cliente_id,window_start,window_type" }
     ),
   ]);
 
@@ -155,13 +243,24 @@ export async function insertSystemMessage(
   message: string
 ): Promise<void> {
   try {
-    await supabase.from("mensagens_whatsapp").insert({
-      cliente_id: clienteId,
-      sender_type: "sistema",
-      conteudo: message,
-      direction: "internal",
-      message_status: "delivered",
-    });
+    if (isSharedBackendModeRuntime()) {
+      await appendSharedContactNote(supabase, clienteId, `Sistema: ${message}`);
+      await supabase.from("ai_agent_logs").insert({
+        contact_id: clienteId,
+        log_type: "system_message",
+        data: { message },
+        tokens_input: 0,
+        tokens_output: 0,
+      });
+    } else {
+      await supabase.from("mensagens_whatsapp").insert({
+        cliente_id: clienteId,
+        sender_type: "sistema",
+        conteudo: message,
+        direction: "internal",
+        message_status: "delivered",
+      });
+    }
   } catch (e) {
     console.error("[comm] Failed to insert system message:", e);
   }

@@ -40,6 +40,8 @@ export function ConversationItem({ conversa, isSelected, onClick }: Conversation
   const modoKey = conversa.modo as keyof typeof MODO_CONFIG
   const modo = MODO_CONFIG[modoKey] || MODO_CONFIG.bot
   const ModoIcon = modo.icon
+  const nomeCliente = conversa.cliente_nome || 'Cliente sem nome'
+  const avatar = nomeCliente.charAt(0).toUpperCase()
 
   return (
     <button
@@ -56,14 +58,14 @@ export function ConversationItem({ conversa, isSelected, onClick }: Conversation
         'w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm shadow-sm flex-shrink-0',
         isSelected ? 'bg-rose-500 text-white' : 'bg-rose-100 text-rose-700'
       )}>
-        {conversa.cliente_nome.charAt(0).toUpperCase()}
+        {avatar}
       </div>
 
       {/* Conteudo */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between">
           <span className={cn('text-sm font-medium truncate', isSelected ? 'text-foreground' : 'text-gray-700')}>
-            {conversa.cliente_nome}
+            {nomeCliente}
           </span>
           <span className="text-[10px] text-gray-400 flex-shrink-0 ml-2">
             {tempoRelativo(conversa.ultima_mensagem_em)}

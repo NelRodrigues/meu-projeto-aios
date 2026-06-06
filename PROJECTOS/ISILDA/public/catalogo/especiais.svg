@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f5f3ff"/>
+      <stop offset="100%" stop-color="#ede9fe"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="900" rx="56" fill="url(#bg)"/>
+  <circle cx="210" cy="150" r="86" fill="#8b5cf6" opacity="0.16"/>
+  <rect x="300" y="340" width="600" height="260" rx="46" fill="#ffffff" stroke="#c4b5fd" stroke-width="6"/>
+  <rect x="360" y="430" width="480" height="90" rx="24" fill="#ede9fe"/>
+  <path d="M430 320 C450 260, 500 260, 520 320 C540 380, 600 380, 620 320" fill="none" stroke="#8b5cf6" stroke-width="18" stroke-linecap="round"/>
+  <path d="M640 320 C660 260, 710 260, 730 320 C750 380, 810 380, 830 320" fill="none" stroke="#ec4899" stroke-width="18" stroke-linecap="round"/>
+  <text x="600" y="250" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="54" font-weight="700" fill="#6d28d9">Especiais</text>
+  <text x="600" y="730" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="30" fill="#7c3aed">Delicias da Isi</text>
+</svg>

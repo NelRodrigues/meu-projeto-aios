@@ -4,8 +4,10 @@ import Link from 'next/link'
 import { ArrowLeft, FileDown } from 'lucide-react'
 import { CsvImporter } from '@/components/clientes/csv-importer'
 import { useRouter } from 'next/navigation'
+import { isSharedBackendMode } from '@/lib/backend/config'
 
 export default function ImportarClientesPage() {
+  const sharedMode = isSharedBackendMode()
   const router = useRouter()
 
   function handleConcluido(importados: number) {
@@ -51,7 +53,7 @@ export default function ImportarClientesPage() {
       </div>
 
       {/* Importador */}
-      <CsvImporter onConcluido={handleConcluido} />
+      <CsvImporter onConcluido={handleConcluido} sharedMode={sharedMode} />
     </div>
   )
 }

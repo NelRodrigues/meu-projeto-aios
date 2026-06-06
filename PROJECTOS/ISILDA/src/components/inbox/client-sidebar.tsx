@@ -1,8 +1,10 @@
 'use client'
 
+import { useRef } from 'react'
 import { cn } from '@/lib/utils'
-import { Phone, Target, TrendingUp, ArrowUpRight, MessageSquare, ExternalLink, CakeSlice } from 'lucide-react'
+import { Phone, Target, ArrowUpRight, MessageSquare, ExternalLink, CakeSlice, ShoppingBag, CalendarPlus } from 'lucide-react'
 import type { ConversaActiva, ClienteEstagio } from '@/types/database'
+import { OccasionsSection, type OccasionsSectionHandle } from '@/components/clientes/occasions-section'
 
 interface ClientSidebarProps {
   conversa: ConversaActiva
@@ -37,15 +39,18 @@ function StatItem({ icon: Icon, label, value, color }: {
 export function ClientSidebar({ conversa }: ClientSidebarProps) {
   const estagioKey = conversa.estagio as ClienteEstagio
   const estagio = ESTAGIO_CONFIG[estagioKey] || ESTAGIO_CONFIG.novo
+  const ocasioesRef = useRef<OccasionsSectionHandle>(null)
+  const nomeCliente = conversa.cliente_nome || 'Cliente sem nome'
+  const avatar = nomeCliente.charAt(0).toUpperCase()
 
   return (
     <div className="flex flex-col h-full overflow-y-auto">
       {/* Header */}
       <div className="p-5 border-b border-rose-100 text-center">
         <div className="w-16 h-16 rounded-full bg-rose-100 flex items-center justify-center text-2xl font-bold text-rose-700 mx-auto shadow-sm">
-          {conversa.cliente_nome.charAt(0).toUpperCase()}
+          {avatar}
         </div>
-        <h3 className="mt-3 text-sm font-semibold text-gray-900 truncate">{conversa.cliente_nome}</h3>
+        <h3 className="mt-3 text-sm font-semibold text-gray-900 truncate">{nomeCliente}</h3>
         <span className={cn('inline-block mt-2 text-[10px] font-medium px-2.5 py-1 rounded-full', estagio.color)}>
           {estagio.label}
         </span>
@@ -89,8 +94,28 @@ export function ClientSidebar({ conversa }: ClientSidebarProps) {
         />
       </div>
 
-      {/* Link para perfil */}
-      <div className="px-5 py-4">
+      {/* Ocasioes */}
+      <div className="px-5 py-4 border-b border-rose-100">
+        <OccasionsSection ref={ocasioesRef} clienteId={conversa.cliente_id} compact />
+      </div>
+
+      {/* Accoes rapidas */}
+      <div className="px-5 py-4 space-y-2">
+        <a
+          href={`/pedidos/novo?cliente=${conversa.cliente_id}`}
+          className="flex items-center justify-center gap-2 w-full py-2.5 px-4 text-xs font-medium text-white bg-rose-500 hover:bg-rose-600 rounded-lg shadow-sm transition-colors"
+        >
+          <ShoppingBag className="h-3.5 w-3.5" />
+          Criar Pedido
+        </a>
+        <button
+          type="button"
+          onClick={() => ocasioesRef.current?.abrirForm()}
+          className="flex items-center justify-center gap-2 w-full py-2.5 px-4 text-xs font-medium text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-lg border border-rose-200 transition-colors"
+        >
+          <CalendarPlus className="h-3.5 w-3.5" />
+          Registar Ocasião
+        </button>
         <a
           href={`/clientes/${conversa.cliente_id}`}
           className="flex items-center justify-center gap-2 w-full py-2.5 px-4 text-xs font-medium text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-lg border border-rose-200 transition-colors"

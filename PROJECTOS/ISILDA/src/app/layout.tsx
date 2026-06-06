@@ -1,18 +1,7 @@
 import type { Metadata, Viewport } from 'next'
-import { Playfair_Display, Montserrat } from 'next/font/google'
 import './globals.css'
-
-const playfairDisplay = Playfair_Display({
-  variable: '--font-heading',
-  subsets: ['latin'],
-  display: 'swap',
-})
-
-const montserrat = Montserrat({
-  variable: '--font-body',
-  subsets: ['latin'],
-  display: 'swap',
-})
+import { ServiceWorkerRegistrar } from '@/components/service-worker-registrar'
+import { Analytics } from '@vercel/analytics/react'
 
 export const metadata: Metadata = {
   title: 'Delicias da Isi — CRM',
@@ -39,10 +28,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-AO">
-      <body
-        className={`${playfairDisplay.variable} ${montserrat.variable} font-body antialiased`}
-      >
+      <body className="font-body antialiased">
         {children}
+        <ServiceWorkerRegistrar />
+        <Analytics />
       </body>
     </html>
   )

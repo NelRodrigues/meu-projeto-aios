@@ -84,4 +84,96 @@ export function sanitizeForContext(text: string): string {
   return sanitized;
 }
 
+function removeZeroWidth(text: string): string {
+  return text.replace(/[\u200B-\u200D\u2060\uFEFF\u00AD]/g, "");
+}
+
+function normalizeText(text: string): string {
+  return text.normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+}
+
+export function detectJailbreakAttempt(userMessage: string): boolean {
+  const cleaned = removeZeroWidth(userMessage);
+  const normalized = normalizeText(cleaned).toLowerCase();
+  const jailbreakPatterns = [
+    /ignore\s+(all\s+)?(previous|above|prior)\s+(instructions?|rules?|prompts?)/i,
+    /you\s+are\s+now\s+(?:a|an)\s+/i,
+    /pretend\s+(?:you\s+are|to\s+be|you're)/i,
+    /act\s+as\s+(?:if|a|an)/i,
+    /forget\s+(?:all|everything|your)\s+(?:rules?|instructions?|training)/i,
+    /what\s+(?:is|are)\s+your\s+(?:system|initial)\s+(?:prompt|instructions?)/i,
+    /reveal\s+(?:your|the)\s+(?:system|initial)\s+(?:prompt|instructions?)/i,
+    /show\s+me\s+(?:your|the)\s+(?:system|initial)\s+(?:prompt|instructions?)/i,
+    /repeat\s+(?:your|the)\s+(?:system|initial|first)\s+(?:prompt|instructions?|message)/i,
+    /(mostra|mostre|revela|revele)\s*-?\s*me\s+.*prompt/i,
+    /(mostra|mostre|revela|revele)\s*-?\s*me\s+.*instruc/i,
+    /\bDAN\s+mode\b/i,
+    /\bjailbreak\b/i,
+    /bypass\s+(?:your|the)\s+(?:rules?|filter|safety)/i,
+    /ignore\s+tudo|ignore\s+acima|esque(c|ç)a\s+(?:tudo|suas?\s+regras)/i,
+    /finja\s+(?:que\s+(?:voce|vc)\s+(?:e|eh|é))|finja\s+ser/i,
+    /revele\s+(?:o|seu|suas?)\s+(?:prompt|instruc)/i,
+    /mostre\s+(?:o|seu|suas?)\s+(?:prompt|instruc)/i,
+    /qual\s+(?:e|eh|é)\s+(?:o\s+)?seu\s+(?:system\s+)?prompt/i,
+  ];
+  return jailbreakPatterns.some((pattern) => pattern.test(normalized));
+}
+
+export function stripInternalThinking(message: string): string {
+  if (!message) return message;
+
+  let cleaned = removeZeroWidth(message);
+  const normalized = normalizeText(cleaned);
+  const lowerMsg = normalized.toLowerCase();
+
+  const INTERNAL_KEYWORDS = [
+    "o lead ",
+    "do lead ",
+    "ao lead ",
+    "pro lead",
+    "desqualificacao",
+    "desqualificar",
+    "qualificacao do",
+    "fluxo de ",
+    "faturamento abaixo",
+    "abaixo do minimo",
+    "internal",
+    "nao fale isso",
+    "preciso aplicar",
+    "preciso seguir o",
+    "vou aplicar o fluxo",
+    "vou seguir o fluxo",
+    "regra de negocio",
+    "pipeline_stage",
+    "tool_call",
+    "function_call",
+    "qualify_lead",
+    "check_availability",
+    "sales_rep",
+    "lead_id",
+    "system prompt",
+    "system_prompt",
+    "instrucoes internas",
+    "ignore previous",
+    "ignore acima",
+    "ignore tudo",
+    "reveal prompt",
+    "revele o prompt",
+    "mostre o prompt",
+  ];
+
+  if (INTERNAL_KEYWORDS.some((kw) => lowerMsg.includes(kw))) {
+    return "";
+  }
+
+  cleaned = cleaned.replace(
+    /^(Analisand[oa]|Vou |Preciso |Pensand[oa]|Considerand[oa]|Avaliand[oa]|Observand[oa]|Verificand[oa]|Notei que|Percebi que|Olhando|Com base|Baseado|Entendi que|O lead )[^\n]*(\n[^\n]*)*?\n\n/i,
+    ""
+  );
+  cleaned = cleaned.replace(/^\[(?!ai_media|MEDIA)[^\]]{10,}\]\s*\n*/g, "").trim();
+  cleaned = cleaned.replace(/^(Resposta|Mensagem|Texto|Reply|Message)\s*:\s*/i, "").trim();
+
+  return cleaned;
+}
+
 export const VALID_STAGES = ["novo", "contactado", "orcamento", "activo", "vip", "inactivo"];

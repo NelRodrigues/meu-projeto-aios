@@ -1,5 +1,14 @@
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+function getSharedTenantId(): string | undefined {
+  return (
+    Deno.env.get("NEXT_PUBLIC_SHARED_TENANT_ID")?.trim() ||
+    Deno.env.get("SHARED_TENANT_ID")?.trim() ||
+    Deno.env.get("SUPABASE_SHARED_TENANT_ID")?.trim() ||
+    undefined
+  );
+}
+
 export async function getIntegrationKey(
   service: string,
   keyName: string,
@@ -14,14 +23,20 @@ export async function getIntegrationKey(
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
+    const tenantId = getSharedTenantId();
 
-    const { data } = await supabase
+    let query = supabase
       .from("integration_keys")
       .select("key_value")
       .eq("service", service)
       .eq("key_name", keyName)
-      .eq("is_active", true)
-      .maybeSingle();
+      .eq("is_active", true);
+
+    if (tenantId) {
+      query = query.eq("tenant_id", tenantId);
+    }
+
+    const { data } = await query.maybeSingle();
 
     if (data?.key_value) {
       return data.key_value;
@@ -40,13 +55,20 @@ export async function getIntegrationKeyWithClient(
   envFallback?: string
 ): Promise<string | undefined> {
   try {
-    const { data } = await supabase
+    const tenantId = getSharedTenantId();
+
+    let query = supabase
       .from("integration_keys")
       .select("key_value")
       .eq("service", service)
       .eq("key_name", keyName)
-      .eq("is_active", true)
-      .maybeSingle();
+      .eq("is_active", true);
+
+    if (tenantId) {
+      query = query.eq("tenant_id", tenantId);
+    }
+
+    const { data } = await query.maybeSingle();
 
     if (data?.key_value) {
       return data.key_value;

@@ -8,9 +8,10 @@ import { createClient } from '@/lib/supabase/client'
 
 interface CsvImporterProps {
   onConcluido?: (importados: number) => void
+  sharedMode?: boolean
 }
 
-export function CsvImporter({ onConcluido }: CsvImporterProps) {
+export function CsvImporter({ onConcluido, sharedMode = false }: CsvImporterProps) {
   const [parsed, setParsed] = useState<CsvCliente[]>([])
   const [parseErrors, setParseErrors] = useState<string[]>([])
   const [importing, setImporting] = useState(false)
@@ -44,7 +45,7 @@ export function CsvImporter({ onConcluido }: CsvImporterProps) {
     for (const c of parsed) {
       // Verificar duplicado por telefone
       const { data: existing } = await supabase
-        .from('clientes')
+        .from(sharedMode ? 'contacts' : 'clientes')
         .select('id')
         .eq('telefone', c.telefone)
         .maybeSingle()
@@ -54,14 +55,27 @@ export function CsvImporter({ onConcluido }: CsvImporterProps) {
         continue
       }
 
-      const { error } = await supabase.from('clientes').insert({
-        nome: c.nome,
-        telefone: c.telefone,
-        email: c.email || null,
-        notas: c.notas || null,
-        estagio: 'novo',
-        origem: 'whatsapp',
-      })
+      const { error } = await supabase.from(sharedMode ? 'contacts' : 'clientes').insert(
+        sharedMode
+          ? {
+              nome: c.nome,
+              telefone: c.telefone,
+              email: c.email || null,
+              notas: c.notas || null,
+              estagio: 'novo',
+              origem: 'whatsapp',
+              valor_total_pago: null,
+              whatsapp_id: null,
+            }
+          : {
+              nome: c.nome,
+              telefone: c.telefone,
+              email: c.email || null,
+              notas: c.notas || null,
+              estagio: 'novo',
+              origem: 'whatsapp',
+            }
+      )
 
       if (error) {
         erros++

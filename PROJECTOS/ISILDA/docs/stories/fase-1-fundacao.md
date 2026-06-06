@@ -293,7 +293,7 @@ Como Isi, quero ver o historico de mensagens com bolhas coloridas e poder enviar
 - [x] Cada bolha mostra: conteudo, timestamp, status de entrega (icone: sent/delivered/read)
 - [x] Imagens recebidas como thumbnails clicaveis (expandir em modal)
 - [x] Input de texto com botao enviar
-- [ ] Selector de templates rapidos (dropdown com categorias)
+- [x] Selector de templates rapidos (dropdown com categorias)
 - [x] Envio chama Edge Function `uazapi-send-message` e insere em `mensagens_whatsapp`
 - [x] Scroll automatico para nova mensagem
 - [x] Supabase Realtime: nova mensagem aparece instantaneamente
@@ -331,8 +331,8 @@ Como Isi, quero ver os dados do cliente no sidebar e poder assumir/devolver conv
 - [x] Botao "Devolver ao Bot" (humano -> bot):
   - Muda status para `active`
   - Badge muda de azul para verde
-- [ ] Botao "Criar Pedido" (abre modal/pagina de criacao)
-- [ ] Botao "Registar Ocasiao" (abre modal simples)
+- [x] Botao "Criar Pedido" (abre modal/pagina de criacao)
+- [x] Botao "Registar Ocasiao" (abre modal simples)
 - [x] Quando Isi envia mensagem manual, modo muda automaticamente para humano
 - [ ] Notificacao criada quando bot escala para humano (tipo takeover)
 - [x] Sistema de notificacoes:

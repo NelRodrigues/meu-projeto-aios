@@ -23,6 +23,19 @@ interface GuardrailResult {
   violations: string[];
 }
 
+// Bloco de conteudo de uma mensagem Anthropic (texto, imagem, tool_use, etc.)
+type ContentBlock = {
+  type: string;
+  text?: string;
+  [key: string]: unknown;
+};
+
+// Conteudo de uma mensagem: string simples ou lista de blocos.
+type MessageContent = string | ContentBlock[];
+
+// Definicao de uma tool no formato esperado pela API Anthropic.
+type ToolDefinition = Record<string, unknown>;
+
 const INTENTS_CONFEITARIA = [
   "saudacao",
   "pedir_orcamento",
@@ -48,8 +61,6 @@ export async function callClassification(
   apiKey: string,
   model = "claude-haiku-4-5"
 ): Promise<ClassificationResult> {
-  const startTime = Date.now();
-
   const classifySystem = `${systemPrompt}
 
 Classifica a intencao da ultima mensagem do cliente.
@@ -95,7 +106,7 @@ Responde APENAS com JSON valido:
 }
 
 export async function callResponse(
-  messages: Array<{ role: "user" | "assistant"; content: string }>,
+  messages: Array<{ role: "user" | "assistant"; content: MessageContent }>,
   systemPrompt: string,
   apiKey: string,
   model = "claude-sonnet-4-5"
@@ -134,6 +145,162 @@ export async function callResponse(
     tokens_output: data.usage?.output_tokens || 0,
     latency_ms,
   };
+}
+
+interface GenerationResultWithTools extends GenerationResult {
+  stop_reason: string;
+  raw_content: ContentBlock[];
+}
+
+export async function callResponseWithTools(
+  messages: Array<{ role: "user" | "assistant"; content: MessageContent }>,
+  systemPrompt: string,
+  apiKey: string,
+  model = "claude-sonnet-4-5",
+  tools: ToolDefinition[] = []
+): Promise<GenerationResultWithTools> {
+  const startTime = Date.now();
+
+  const body: Record<string, unknown> = {
+    model,
+    max_tokens: 1024,
+    temperature: 0.7,
+    system: systemPrompt,
+    messages,
+  };
+
+  if (tools.length > 0) {
+    body.tools = tools;
+  }
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Generation failed: ${res.status} - ${err}`);
+  }
+
+  const data = await res.json();
+  const textBlock = (data.content as ContentBlock[] | undefined)?.find(
+    (b) => b.type === "text"
+  );
+  const content = textBlock?.text || "";
+  const latency_ms = Date.now() - startTime;
+
+  return {
+    content,
+    model,
+    tokens_input: data.usage?.input_tokens || 0,
+    tokens_output: data.usage?.output_tokens || 0,
+    latency_ms,
+    stop_reason: data.stop_reason || "end_turn",
+    raw_content: data.content || [],
+  };
+}
+
+// ============================================================
+// Vision + Embeddings
+// ============================================================
+
+interface VisionResult {
+  content: string;
+  model: string;
+  tokens_input: number;
+  tokens_output: number;
+  latency_ms: number;
+}
+
+export async function callVision(
+  imageBase64: string,
+  mediaType: "image/jpeg" | "image/png" | "image/webp" | "image/gif",
+  prompt: string,
+  apiKey: string,
+  model = "claude-sonnet-4-5"
+): Promise<VisionResult> {
+  const startTime = Date.now();
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: 1024,
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "image",
+              source: {
+                type: "base64",
+                media_type: mediaType,
+                data: imageBase64,
+              },
+            },
+            {
+              type: "text",
+              text: prompt,
+            },
+          ],
+        },
+      ],
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Vision failed: ${res.status} - ${err}`);
+  }
+
+  const data = await res.json();
+  const content = data.content?.[0]?.text || "";
+  const latency_ms = Date.now() - startTime;
+
+  return {
+    content,
+    model,
+    tokens_input: data.usage?.input_tokens || 0,
+    tokens_output: data.usage?.output_tokens || 0,
+    latency_ms,
+  };
+}
+
+export async function generateEmbedding(
+  text: string,
+  supabaseUrl: string,
+  supabaseKey: string
+): Promise<number[]> {
+  try {
+    const res = await fetch(`${supabaseUrl}/functions/v1/embed`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${supabaseKey}`,
+      },
+      body: JSON.stringify({ input: text }),
+    });
+
+    if (!res.ok) throw new Error(`Embedding failed: ${res.status}`);
+
+    const data = await res.json();
+    return data.embedding || [];
+  } catch (err) {
+    console.error("[llm-client] Embedding generation failed:", err);
+    // Return zero vector as fallback — embedding will be generated later
+    return new Array(384).fill(0);
+  }
 }
 
 export function checkGuardrails(

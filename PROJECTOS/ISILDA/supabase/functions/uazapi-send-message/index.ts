@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getIntegrationKeyWithClient, normalizeUazapiUrl, normalizeAngolaPhone } from "../_shared/get-integration-key.ts";
+import { isSharedBackendModeRuntime } from "../_shared/backend-mode.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 
 serve(async (req) => {
@@ -25,6 +26,7 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
+    const sharedMode = isSharedBackendModeRuntime();
 
     // Verificar token do utilizador
     const token = authHeader.replace("Bearer ", "");
@@ -36,7 +38,7 @@ serve(async (req) => {
 
     // Obter telefone do cliente
     const { data: cliente } = await supabase
-      .from("clientes")
+      .from(sharedMode ? "contacts" : "clientes")
       .select("telefone, whatsapp_id, nome")
       .eq("id", cliente_id)
       .single();
@@ -124,23 +126,49 @@ serve(async (req) => {
       sendData?.message?.key?.id;
 
     // Guardar mensagem na base de dados
-    const { data: savedMessage, error: saveError } = await supabase
-      .from("mensagens_whatsapp")
-      .insert({
-        cliente_id,
-        sender_type: "humano",
-        conteudo: message,
-        whatsapp_message_id: whatsappMessageId,
-        direction: "outgoing",
-        message_status: "sent",
-        media_url: media_url || null,
-        media_type: media_type || null,
-      })
-      .select()
-      .single();
+    let savedMessage: { id?: string } | null = null;
+    if (sharedMode) {
+      await supabase.from("ai_agent_logs").insert({
+        contact_id: cliente_id,
+        log_type: "manual_message_sent",
+        data: {
+          message,
+          whatsapp_message_id: whatsappMessageId,
+          media_url: media_url || null,
+          media_type: media_type || null,
+        },
+        tokens_input: 0,
+        tokens_output: 0,
+      });
+      savedMessage = { id: whatsappMessageId || undefined };
+      const { data: contact } = await supabase
+        .from("contacts")
+        .select("notas")
+        .eq("id", cliente_id)
+        .maybeSingle();
+      const previous = String(contact?.notas || "").trim();
+      const next = previous ? `${previous}\n\nIsi: ${message}` : `Isi: ${message}`;
+      await supabase.from("contacts").update({ notas: next.slice(-4000) }).eq("id", cliente_id);
+    } else {
+      const { data: insertedMessage, error: saveError } = await supabase
+        .from("mensagens_whatsapp")
+        .insert({
+          cliente_id,
+          sender_type: "humano",
+          conteudo: message,
+          whatsapp_message_id: whatsappMessageId,
+          direction: "outgoing",
+          message_status: "sent",
+          media_url: media_url || null,
+          media_type: media_type || null,
+        })
+        .select()
+        .single();
 
-    if (saveError) {
-      console.error("[uazapi-send-message] Erro ao guardar mensagem:", saveError);
+      if (saveError) {
+        console.error("[uazapi-send-message] Erro ao guardar mensagem:", saveError);
+      }
+      savedMessage = insertedMessage || null;
     }
 
     // Pausar agente IA (humano assumiu a conversa)
@@ -151,7 +179,7 @@ serve(async (req) => {
         paused_at: new Date().toISOString(),
         pause_reason: "Isi enviou mensagem manual",
       })
-      .eq("cliente_id", cliente_id)
+      .eq(sharedMode ? "contact_id" : "cliente_id", cliente_id)
       .eq("status", "active");
 
     return new Response(

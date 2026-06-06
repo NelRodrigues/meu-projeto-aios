@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { Check, CheckCheck, Clock, XCircle, Image, Video, Music, FileText, MapPin, User, ExternalLink } from 'lucide-react'
+import { Check, CheckCheck, Clock, XCircle, Image as ImageIcon, Video, Music, FileText, MapPin, User, ExternalLink } from 'lucide-react'
 import type { MensagemWhatsApp } from '@/types/database'
 
 function MediaContent({ mediaType, mediaUrl, isIncoming }: {
@@ -15,13 +15,16 @@ function MediaContent({ mediaType, mediaUrl, isIncoming }: {
     if (mediaUrl) {
       return (
         <div className="relative">
-          <img src={mediaUrl} alt="Imagem" className="max-w-full rounded-t-2xl object-cover max-h-64" />
+          {/* URL dinamica de Supabase Storage com dominio ainda nao configurado em next.config;
+              next/image exigiria remotePatterns que so saberemos no go-live. Mantemos <img>. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={mediaUrl} alt="Imagem enviada na conversa" className="max-w-full rounded-t-2xl object-cover max-h-64" />
         </div>
       )
     }
     return (
       <div className={cn('flex items-center gap-2 px-4 py-4', iconColor)}>
-        <Image className="h-5 w-5" />
+        <ImageIcon className="h-5 w-5" />
         <span className="text-sm">Imagem</span>
       </div>
     )
@@ -114,7 +117,6 @@ export function MessageBubble({ message }: { message: MensagemWhatsApp }) {
   const isIncoming = message.direction === 'incoming'
   const isSystem = message.direction === 'internal' || message.sender_type === 'sistema'
   const isBot = message.sender_type === 'bot'
-  const isHumano = message.sender_type === 'humano'
 
   const hasMedia = !!message.media_type
   const displayText = message.conteudo
