@@ -1,0 +1,4 @@
+# Supabase CLI cache — contém project-ref e connection strings (NÃO commitar)
+.temp/
+.branches/
+.env
