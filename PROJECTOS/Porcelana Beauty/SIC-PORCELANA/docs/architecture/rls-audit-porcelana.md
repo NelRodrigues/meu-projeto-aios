@@ -89,3 +89,33 @@ Padrão de policies (14 tabelas — 8 canónicas + 6 estética):
 Um cliente não consegue ver dados de outro. Escrita restrita a service_role (padrão de produção confirmado). RLS activa em todas as tabelas. Seguro para receber dados reais **após** registar o tenant e associar utilizadores (passos 2-4).
 
 *Auditoria por DB Sage 🗄️ — Marca Digital · 9 de Junho de 2026*
+
+---
+
+## 7. Auditoria PÓS-DEPLOY em produção (Story 1.3 · 10 Jun 2026)
+
+Re-corrida contra a BD **real** do SIC GERAL (`achtvzbcczmcbvjkdjry`) após o schema ser aplicado (Story 1.2). Os passos 2-3 das recomendações §5 estão cumpridos (tenant registado: Story 1.1; admin associado). O passo 4 (JWT) foi reclassificado — ver nota abaixo.
+
+| # | Teste | Esperado | Real | Resultado |
+|---|---|---|---|---|
+| T1 | RLS ENABLED nas tabelas | 14 | 14 | ✅ PASS |
+| T2 | Total de policies | 28 | 28 | ✅ PASS |
+| T3 | Policies para `anon` | 0 | 0 | ✅ PASS |
+| T4 | Policies `auth_*` | 14 | 14 | ✅ PASS |
+| T5 | Policies `svc_*` | 14 | 14 | ✅ PASS |
+| T6 | Policies auth com `USING(true)` | 0 | 0 | ✅ PASS |
+| T7 | Tabelas sem RLS | 0 | 0 | ✅ PASS |
+| T8 | **Isolamento positivo** (membro porcelana vê) | true | true | ✅ PASS |
+| T9 | **Isolamento negativo** (outro tenant não vê) | false | false | ✅ PASS |
+
+**Verificação adicional:** as 14 policies `auth_*` usam mesmo `porcelana.is_member()` (confirmado em `agent_runs`, `appointments`, `contacts`...). Não há `USING(true)` em leitura autenticada.
+
+### Nota sobre o passo 4 (JWT) — reclassificado
+
+A recomendação §5.4 (JWT `app_metadata.tenant_id`) **não é pré-requisito da leitura RLS**. Descoberta confirmada em produção: `porcelana.is_member()` verifica a **associação real** (`tenant_users JOIN tenants WHERE db_schema='porcelana'`), NÃO o JWT. O admin Nelson passa `is_member()` mesmo com o JWT a apontar para a isilda. O JWT só afecta `get_tenant_id()` (usado por Edge Functions) — tratado como refinamento na Story 1.6 (P2).
+
+### Veredicto pós-deploy
+
+**✅ PASS — 9/9 testes em produção.** O isolamento cross-tenant está confirmado contra a BD real. **Seguro para carregar os 398 contactos (Story 1.4).**
+
+*Auditoria pós-deploy por DB Sage 🗄️ — 10 de Junho de 2026*

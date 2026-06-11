@@ -69,6 +69,7 @@ Como @data-engineer, quero aplicar as 3 migrações já validadas ao SIC GERAL, 
 **Prioridade:** P0 | **Estimativa:** 0.25 dia
 **Agente sugerido:** @data-engineer / @qa
 **Arq refs:** `rls-audit-porcelana.md`
+**Estado:** ✅ **Done** (10 Jun 2026) · 9/9 testes PASS em PROD (T1 RLS 14/14, T2 28 policies, T3 anon 0, T6 USING(true) 0, T8 positivo true, T9 negativo false). @qa GATE PASS 90/100. Ver `STORY-1.3-reauditar-rls.md`.
 
 ### Descrição
 Como @qa, quero re-correr os 9 testes de isolamento RLS contra a instância real, para confirmar que o isolamento cross-tenant funciona em produção antes de carregar dados reais.
@@ -147,12 +148,12 @@ Como @devops, quero conectar a instância WhatsApp Business da Porcelana via uaz
 |---|---|---|---|---|
 | 1.1 | Provisionar tenant | 0.5d | — | ✅ Done (tenant_id d7be8f8e…) |
 | 1.2 | Aplicar migrações | 0.5d | depende 1.1 | ✅ Done (14 tabelas, RLS 14/14, anon=0) |
-| 1.3 | Re-auditar RLS | 0.25d | depende 1.2 | 🟢 Desbloqueada |
-| 1.4 | Importar 398 contactos | 2d | 🔴 cliente (CSVs) | ⏳ Pendente |
+| 1.3 | Re-auditar RLS | 0.25d | depende 1.2 | ✅ Done (9/9 PASS prod · @qa 90/100) |
+| 1.4 | Importar 398 contactos | 2d | 🔴 cliente (CSVs) | ⏳ Pendente — **próxima** (desbloqueada por 1.3) |
 | 1.5 | Conectar WhatsApp | 0.5d | depende 1.1 | ✅ Done (instância disconnected; falta nº cliente) |
 | 1.6 | Auth/JWT tenant (refinamento) | 0.5d | depende 1.1/1.2 | 🟡 P2 — `is_member()` já resolve a leitura |
 
-**Sequência:** 1.1 ✅ → 1.2 ✅ → 1.3 → (1.4 ∥ 1.5 ✅)
-**Progresso:** 3/6 stories Done (1.1, 1.2, 1.5).
+**Sequência:** 1.1 ✅ → 1.2 ✅ → 1.3 ✅ → (1.4 ∥ 1.5 ✅)
+**Progresso:** 4/6 stories Done (1.1, 1.2, 1.3, 1.5). Resta 1.4 (bloqueada cliente) + 1.6 (P2 refinamento).
 
 > **Descoberta (10 Jun):** `is_member()` verifica `tenant_users` (associação real), NÃO o JWT — a leitura autenticada já funciona mesmo com o JWT do admin a apontar para outro tenant. Story de Auth (1.6) reclassificada P0→P2.

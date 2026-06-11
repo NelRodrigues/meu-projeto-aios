@@ -14,7 +14,7 @@
 
 | Epic | Ficheiro | Stories | Estimativa | Estado |
 |---|---|---|---|---|
-| **E1 — Fundação** | `epic-1-fundacao.md` | 1.1–1.5 | ~3.75d | 🚧 Em curso — 1.1 ✅ · 1.2 ✅ (schema aplicado: 14 tab, RLS 14/14, anon=0) |
+| **E1 — Fundação** | `epic-1-fundacao.md` | 1.1–1.5 | ~3.75d | 🚧 Em curso — 1.1 ✅ · 1.2 ✅ (schema: 14 tab, RLS 14/14, anon=0) · 1.3 ✅ (RLS re-auditado em prod, 9/9 PASS) · 1.5 ✅. **Próxima: 1.4** (bloqueada CSVs cliente) |
 | **E2 — Agente** | `epic-2-agente-atendimento.md` | 2.1–2.7 | ~7d | ✅ Ready |
 | **E3 — Agendamento** | `epic-3-agendamento.md` | 3.1–3.6 | ~7d | ✅ Ready |
 
@@ -53,10 +53,10 @@
 ## Sequência de execução (cadeia crítica)
 
 ```
-E1.1 Provisionar tenant
-  → E1.2 Migrações → E1.3 Re-auditar RLS
-        ├→ E1.4 Importar 398 (🔴 cliente)
-        └→ E1.5 WhatsApp
+E1.1 ✅ Provisionar tenant
+  → E1.2 ✅ Migrações → E1.3 ✅ Re-auditar RLS (9/9 PASS prod)
+        ├→ E1.4 Importar 398 (🔴 cliente · PRÓXIMA)
+        └→ E1.5 ✅ WhatsApp
               → E2.1 system_prompt → E2.2 funil → E2.3 tools → E2.5 escalação
                     → (E2.4 vision ∥ E2.6 inteligência) → E2.7 testes internos
                           → E3.1 serviços → E3.2 salas → E3.3 tools agenda
