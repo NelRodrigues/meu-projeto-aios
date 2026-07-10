@@ -13,7 +13,7 @@
 | **Entrega** | 29 de Julho de 2026 (30 dias) + 30 dias de suporte |
 | **Marco imediato** | ★ Sessão de validação — **14 de Julho, 14h00** |
 | **Estado à data (09/07)** | Semana 2 (construção interna). Fluxo de atendimento validado pelo cliente com anotações (03/07). NDA prometido pela MD — **pendente**. |
-| **Versão do brief** | 1.0 · 09/07/2026 · Confidencial |
+| **Versão do brief** | 1.1 · 10/07/2026 · Confidencial (v1.1 integra o Módulo Marketing & Campanhas — §7.1) |
 
 ---
 
@@ -23,7 +23,7 @@ A Global Minds é uma consultoria de educação internacional com 13 anos de mer
 
 O SIC Global Minds entrega um agente de IA no WhatsApp (24/7, multilingue PT/EN, formal-caloroso), um CRM à medida do negócio de consultoria educacional (parceiros → destinos → cursos, ficha de estudante, pipeline de candidatura em 8 passos, matriz RFV, tracking financeiro com comissões em moeda forte), automação de follow-up e um módulo de prospecção/campanhas em massa — tudo sob regras de compliance internacional (retenção máx. 2 anos para inactivos, base privada propriedade do cliente).
 
-**Decisão técnica deste brief:** construir sobre o **codebase da geração 2 do SIC (base ISILDA — Next.js 16 + Supabase + uazapi)**, herdando o esquema comercial do SIC-MD (BANT/score/pipeline/comissões) e os padrões de agente do CRM-Agêntico da Salus (prompt em camadas, escalação determinística, humanização anti-ban, configuração editável na UI). Projecto Supabase **dedicado** (não o SIC Geral partilhado), por imposição de compliance.
+**Decisão técnica deste brief:** construir sobre o **codebase da geração 2 do SIC (base ISILDA — Next.js 16 + Supabase + uazapi)**, herdando o esquema comercial do SIC-MD (BANT/score/pipeline/comissões) e os padrões de agente do CRM-Agêntico da Salus (prompt em camadas, escalação determinística, humanização anti-ban, configuração editável na UI). Projecto Supabase **dedicado** (não o SIC Geral partilhado), por imposição de compliance. Os módulos M3/M5 assentam no **Módulo Marketing & Campanhas** (pacote pronto — §7.1): editor visual de email, automações arrastar-e-soltar, tracking de aberturas/cliques e campanhas WhatsApp em dois canais (Meta Cloud API oficial + uazapi).
 
 ---
 
@@ -84,6 +84,7 @@ Assistente "Global Minds" 24/7: responde à FAQ (12 perguntas validadas com resp
 
 ### M3 — Automação de Follow-up
 - Lead sem decisão: **sequência de 21 dias com 7 abordagens distintas**; reactivação a 90 dias; cadência editável na UI (templates fixos da equipa, não gerados por IA).
+- **Automações visuais arrastar-e-soltar (React Flow)** do módulo Marketing (§7.1): triggers `lead_created`/mudança de fase → nós `wait`, `sendEmail`, `sendWhatsapp`, `updateField`, `addTag`, `branch` — o Rinaldo/Ana desenham o fluxo sem código; execução por cron `email-automation-tick` (1 min).
 - Cliente em processo: **ponto de situação proactivo** (o maior valor identificado nas conversas reais) — lembretes de documentos, confirmações de pagamento, avanços de fase.
 - Agendamento automático (calendário + email do cliente), lembretes de consulta 24h antes + no dia, alertas de "cliente esquecido" e risco de perda.
 - Dashboard de métricas: origem de leads/UTM, conversão por fase, tempo de resposta, análise 80/20 de destinos mais rentáveis.
@@ -92,7 +93,14 @@ Assistente "Global Minds" 24/7: responde à FAQ (12 perguntas validadas com resp
 Formação do Rinaldo e da Ana, manual de operações personalizado, sessão de alinhamento 30 dias depois, 30 dias de suporte (<24h via WhatsApp).
 
 ### M5 — Prospecção + Campanhas em Massa (+100.000 Kz) ⭐
-Captação activa de encarregados de educação e empresas por WhatsApp/email; gestão de campanhas em massa; ligação aos 2 perfis de Instagram e Google Meu Negócio; abordagem "problema → solução". **Disparo = workflow determinístico com templates fixos (sem IA na mensagem), anti-ban, lotes e dry-run por defeito** (padrão Salus).
+Captação activa de encarregados de educação e empresas por WhatsApp/email; gestão de campanhas em massa; ligação aos 2 perfis de Instagram e Google Meu Negócio; abordagem "problema → solução". **Disparo = workflow determinístico com templates fixos (sem IA na mensagem), anti-ban, lotes e dry-run por defeito.**
+
+Implementado sobre o **Módulo Marketing & Campanhas** (§7.1), que entrega de série:
+- **Campanhas WhatsApp em 2 canais:** **Meta Cloud API (oficial)** — templates aprovados pela Meta, sem risco de ban, para contacto frio/reactivação; **uazapi (não oficial)** — texto livre com variações round-robin, para janela aberta e follow-up. Wizard de 7 passos (identidade → canal → audiência → mensagem → atribuição → envio → revisão).
+- **Anti-block por instância** (uazapi): delays 45–90s, 40/hora e 500/dia por instância, warm-up de 5 dias, cooldown automático quando detecta bloqueio (`campaign_instance_stats`).
+- **Email marketing:** editor visual **Maily** (arrastar blocos), campanhas via **Resend**, tracking de aberturas/cliques/bounces por webhook, lista de supressão + link de descadastro.
+- **Templates Meta criados pela UI** (submissão para aprovação + sincronização de estado PENDING/APPROVED) e **dashboard unificado** de KPIs com log paginado de todos os envios.
+- Audiência por filtros (fase do pipeline, score, BANT, cidade) ou selecção manual de leads, com exclusões.
 
 ### Fora de âmbito (Fase 2 / SIC Completo — registar, não construir)
 Acompanhamento automático da candidatura (etapa 10 do fluxo) · recuperação de no-show · pós-partida (review Google + indicações) · gestão de redes sociais (proposta separada Proposta_GestaRedes) · assistente no website · relatórios com ideias de melhoria gerados por IA. O cliente já sinalizou apetite — é o caminho de recorrência.
@@ -111,6 +119,7 @@ A Global Minds tem certificação internacional (única em Angola com credenciam
 | Confidencialidade | **NDA a formalizar pela MD — pendente desde 02/07 (acção prioritária)** |
 | Standards internacionais | Aplicar o acordo de compliance do cliente a todas as integrações |
 | Segurança operacional | Não contactar números desactualizados (lição de caso real da reunião); consentimentos registados (padrão `consentimentos`, ISILDA 020); opt-out "SAIR" processado antes do agente |
+| Email marketing | Lista de supressão `email_subscribers` (unsubscribed/bounced/complained nunca recebem de novo) + link de descadastro em todos os emails + rodapé com morada da empresa; `email_sends`/`email_events` incluídos na rotina de apagamento de 2 anos e na exportação |
 
 ---
 
@@ -140,7 +149,7 @@ Foram analisados os três sistemas em produção da Marca Digital. Síntese comp
 - **System prompt em camadas:** Voice of Brand (editável na BD) + contexto do lead + overlay por etapa do funil + HUMANIZATION_GUARD + BREVITY_GUARD + COMPLIANCE_GUARD.
 - **Escalação determinística antes do LLM** (hard: keyword/pedido de humano/valores; soft: N mensagens sem progresso de fase — contadas desde o último avanço, não o total).
 - **Humanização anti-ban:** resposta em 1–3 balões ≤160 chars, delay de digitação proporcional (typing indicator uazapi), remoção de travessões (assinatura de IA).
-- **Disparo em massa = workflow determinístico:** 40s entre mensagens, lotes de 5, dry-run por defeito, bloqueio se a lista violar compliance — é exactamente o M5.
+- **Disparo em massa = workflow determinístico:** templates fixos sem IA, dry-run por defeito, bloqueio se a lista violar compliance — princípio que o M5 mantém (a implementação concreta vem do módulo §7.1, com anti-block mais completo).
 - **Tudo configurável na UI sem redeploy:** chaves API, prompt, janela de contexto, cadência de follow-up, keyword de opt-out, instâncias WhatsApp com QR.
 - Compliance com regeneração (retry a indicar termos violados) em vez de bloqueio seco; fallback "tool sem texto → regenera sem tools".
 - Lição negativa a NÃO repetir: RLS "authenticated full access" e ausência de testes.
@@ -168,14 +177,52 @@ Foram analisados os três sistemas em produção da Marca Digital. Síntese comp
 | Base de dados | **Supabase dedicado** (Postgres + RLS + Realtime + Storage + pg_cron + pgvector) | Compliance exige base privada propriedade da GM, exportável; RLS desde a migração 002 |
 | Agente IA | **Edge functions Deno** (`gm-agent`, `uazapi-webhook-receiver`, `uazapi-send-message`, `gm-lead-intelligence`, crons) + `_shared/` (llm-client, backend-mode) | 8 funções focadas em vez de monólito; padrão ISILDA |
 | Modelos | **Claude Haiku 4.5** (classificação de intenção/score) + **Claude Sonnet 4.5** (resposta ao cliente, PT/EN) | Combinação em produção na ISILDA; custo/qualidade equilibrado; multilingue nativo |
-| WhatsApp | **uazapi** — instância dedicada `SIC-GlobalMinds` | Padrão de todos os SIC; QR code gerido na UI; typing indicator |
-| Email | Email institucional GM (infogeral@) via integração SMTP/API para sequências M3/M5 | Requisito do plano (follow-up email) |
+| WhatsApp (atendimento) | **uazapi** — instância dedicada `SIC-GlobalMinds` | Padrão de todos os SIC; QR code gerido na UI; typing indicator |
+| WhatsApp (campanhas) | **uazapi** (janela aberta/follow-up) + **Meta Cloud API oficial** (templates aprovados, contacto frio sem risco de ban) | Módulo Marketing §7.1 — multi-provider com branch por `campaigns.provider` |
+| Email marketing | **Resend** (envio + webhook Svix de tracking) + editor visual **Maily** (`@maily-to/core`) + domínio verificado da GM (`from` em @globalmindsconsultoria.com) | Módulo Marketing §7.1 — substitui a integração SMTP genérica prevista no plano |
+| Automações visuais | **React Flow** (`@xyflow/react`) — fluxos arrastar-e-soltar guardados em `flow_json`, executados por cron | Módulo Marketing §7.1 — M3/M5 desenháveis pela equipa GM |
 | Agendamento | Google Calendar (FreeBusy + criação de evento) | Padrão Salus/SIC-MD; consulta de orientação com o Rinaldo |
 | Hosting | **Vercel** em subdomínio da GM (ex.: `sic.globalmindsconsultoria.com`) | Decisão da acta (alojamento em subdomínio); security headers do SIC-MD |
 | Testes | node:test nativo — suites safety + go-live-readiness + production-smoke | Padrão ISILDA; smoke test de 4 passos obrigatório antes da entrega |
 | Automação | pg_cron (follow-up 21 dias, reactivação 90 dias, lembretes de factura, **rotina de apagamento 2 anos**) | Sem n8n — menos peças, menos falhas |
 
 **Decisão de tenancy:** projecto Supabase **dedicado e single-tenant** (não o "SIC Geral" partilhado). Fundamentos: (1) a acta garante base privada e propriedade da GM com migração futura; (2) o acordo de compliance internacional aplica-se a toda a infra-estrutura; (3) lição Ketson/Natacha — tenants sobrescritos em backend partilhado são um risco que aqui é inaceitável.
+
+### 7.1 Módulo Marketing & Campanhas — pacote pronto a integrar 📦
+
+**Fonte:** `marketing-campanhas.zip` → extraído para `marketing-module-package/` na raiz do projecto (132 ficheiros: 8 migrações SQL, 9 edge functions Deno, ~40 componentes/páginas React, 4 hooks, guias de setup, troubleshooting e smoke test). É um módulo drop-in para CRMs **single-tenant React + Supabase** — exactamente o nosso caso.
+
+**O que entrega (mapeamento para os módulos do projecto):**
+
+| Capacidade do pacote | Módulo do SIC GM |
+|---|---|
+| Editor visual de email (Maily/TipTap) + galeria de templates | M5 (campanhas) e M3 (sequências) |
+| Campanhas de email via Resend com tracking completo (sent/delivered/opened/clicked/bounced) e supressão/descadastro | M5 + compliance §5 |
+| Automações visuais arrastar-e-soltar (React Flow) com triggers de lead/fase e nós wait/email/WhatsApp/branch | M3 |
+| Campanhas WhatsApp multi-provider (Meta Cloud API oficial + uazapi) com wizard de 7 passos | M5 |
+| Criação de templates Meta pela UI + sincronização de aprovação | M5 |
+| Anti-block por instância (delays 45–90s, 40/h, 500/dia, warm-up 5 dias, cooldown) | M5 — substitui e melhora o padrão anti-ban da Salus |
+| Dashboard de KPIs + log paginado de envios + histórico de email na timeline do lead (com preview do HTML real enviado) | M2/M3 (dashboard e ficha 360º) |
+
+**Plano de integração (ordem do próprio pacote — `INSTRUCTIONS_FOR_CLAUDE.md`):**
+1. **Auditoria** do CRM destino (checklist do pacote: confirmar single-tenant, `leads`, `team_members`, `whatsapp_instances` — a base ISILDA cumpre; mapear `clientes`→`leads` onde os nomes divergirem, com find/replace antes de aplicar).
+2. **Base de dados:** aplicar as 8 migrações em ordem (001–008) no Supabase dedicado da GM.
+3. **Edge functions:** deploy das 9 funções **com `--no-verify-jwt`** (webhooks Resend/Meta autenticam por assinatura Svix/hub challenge, não por JWT — lição documentada: deploy sem a flag bloqueou webhooks por horas).
+4. **Frontend:** instalar `@maily-to/core@^0.3.7`, `@maily-to/render@^0.2.3`, `@xyflow/react@^12.10.2`; portar páginas/componentes.
+5. **Setup:** Resend (domínio GM verificado + API key + webhook secret no singleton `email_config`), WABA/Meta Cloud API (opcional na 1ª vaga), crons `email-automation-tick` (1 min) e `campaign-scheduler` (2 min) via pg_cron.
+6. **Smoke test ponta a ponta** (guia 04 do pacote) antes de declarar pronto — regra do pacote: vasculhar as 5 camadas (front → hook → RPC → edge → relatório); caso real documentado: RPC `populate_campaign_leads` ignorava `lead_ids[]` e populou 21 mil leads.
+
+**⚠️ Adaptações necessárias (desvios entre o pacote e a nossa base):**
+
+| Desvio | Impacto | Decisão |
+|---|---|---|
+| Pacote assume **React 18 + Vite + react-router**; a nossa base é **Next.js 16 App Router + React 19** | As ~13 páginas usam rotas react-router e imports Vite | Portar páginas para `app/(app)/marketing/*` como client components; trocar `useNavigate`/`useParams` por `next/navigation`; validar `@maily-to` e `@xyflow/react` com React 19; o fix Vite de `optimizeDeps` não se aplica (Next resolve o `react-dom/server.browser` de outra forma — testar preview de template cedo) |
+| Tailwind: pacote prevê conflito com v3 | Nenhum | A nossa base já é Tailwind v4 — CSS do Maily carrega sem workaround |
+| RLS do pacote é aberta (`authenticated USING (true)`) | Aceitável em single-tenant, mas abaixo do nosso padrão ISILDA | Manter single-tenant SEM `tenant_id` (regra zero do pacote), mas endurecer: guard `requireAdmin` nas rotas com service_role e RLS por papel onde fizer sentido |
+| FK `created_by` → `team_members.id` (não `auth.users`) | Bug conhecido nº 4 do pacote | Garantir tabela `team_members` na base GM antes da migração 003 |
+| Email também é dado pessoal | Compliance §5 | Incluir `email_sends`/`email_subscribers`/`email_events` na rotina de apagamento de 2 anos e na exportação |
+
+**Esforço estimado:** backend (migrações + edges + crons + Resend) pluga quase directo — 1–2 dias; port do frontend para Next.js — 2–3 dias. Encaixa na Semana 2–3 sem mexer no marco de 14/07 (a validação de 14/07 foca agente + CRM; o módulo M5 valida-se na Semana 3 com a campanha de teste).
 
 ---
 
@@ -201,7 +248,18 @@ WhatsApp (nº GM) ⇄ uazapi (instância SIC-GlobalMinds)
                        │
               pg_cron: follow-up 21d/7 abordagens · reactivação 90d · lembretes factura/consulta
                        · compliance: apagamento de inactivos > 2 anos
-              M5 Disparo: workflow determinístico (templates fixos, 40s/msg, lotes 5, dry-run)
+                       · email-automation-tick (1 min) · campaign-scheduler (2 min)
+                       │
+              MÓDULO MARKETING & CAMPANHAS (§7.1)
+              ├─ Email: send-email-campaign ──► Resend ──webhook Svix──► process-email-event
+              │         (tracking opened/clicked/bounced → email_sends + timeline do lead)
+              │         unsubscribe (lista de supressão email_subscribers)
+              ├─ WhatsApp campanhas: campaign-processor
+              │         ├─ provider uazapi: anti-block 45–90s, 40/h, 500/dia, warm-up, cooldown
+              │         └─ provider cloud_api: send-whatsapp-cloud ──► Meta Graph API
+              │                                (templates aprovados; create/sync-whatsapp-templates)
+              └─ Automações: trigger PG (lead_created) ──► email-automation-trigger
+                             ──► email_automation_runs ──► tick executa flow_json (React Flow)
 ```
 
 ### Modelo de dados nuclear (específico GM sobre a base ISILDA + comercial SIC-MD)
@@ -212,7 +270,7 @@ WhatsApp (nº GM) ⇄ uazapi (instância SIC-GlobalMinds)
   - `fichas_estudante` (dados pessoais, encarregado, percurso académico, nível linguístico, orçamento, destino pretendido, documentos checklist, `processo_em_curso`)
   - `candidaturas` (pipeline 8 fases, tempos por fase, instituição, programa, estado documental)
   - `financeiro`: `honorarios`/`deals`, `comissoes` (moeda EUR/USD/GBP + contravalor AOA + % + estado), `facturas` (vencimento + lembrete D-5)
-  - `campanhas` + `campanha_envios` (M5 — estado por destinatário, anti-ban, opt-out)
+  - **Marketing (módulo §7.1, migrações 001–008 do pacote):** `email_config` (singleton Resend), `email_templates` (+`design_json` Maily), `email_lists`, `email_campaigns`, `email_campaign_leads`, `email_sends` (1 linha = 1 email, com snapshot HTML), `email_events` (auditoria idempotente do webhook), `email_subscribers` (supressão/descadastro), `email_automations` (+`flow_json` React Flow), `email_automation_runs`, `campaigns` (WhatsApp multi-provider + config anti-block), `campaign_leads`, `campaign_instance_stats` (health/limites por instância), `whatsapp_cloud_templates` (+tags)
   - Qualificação no lead: `stage`, `temperature` (QUENTE ≥9 / MORNO 5–8 / FRIO ≤4), `bant_*`, `sales_score`, `score_confidence`, `fit_score`, `destino`, `nivel`, `orcamento`, `followup_count`
 - **Regra de disciplina (auditoria 2026-07-05):** enums e FKs definidos por escrito ANTES de criar tabelas — erros repetidos por `novo≠new` e FK ausente custaram retrabalho.
 
@@ -234,7 +292,8 @@ WhatsApp (nº GM) ⇄ uazapi (instância SIC-GlobalMinds)
 | 1 | **NDA/contrato de confidencialidade** (prometido a 02/07; cliente formalizou exigência) | Marca Digital (Inês) | 🔴 Antes da validação de 14/07 |
 | 2 | Incorporar as anotações do Rinaldo no fluxo do agente (documento devolvido 03/07) | Belmiro/Nelson | 🔴 Esta semana |
 | 3 | Subdomínio + acesso ao domínio | Global Minds | 🔴 Semana em curso |
-| 4 | Tipo de conta WhatsApp ("não sei o que é isso" na ficha) — confirmar e definir caminho uazapi | Belmiro (@devops) | 🔴 Antes da ligação do número |
+| 4 | Tipo de conta WhatsApp ("não sei o que é isso" na ficha) — confirmar; atendimento vai por uazapi; para o canal oficial de campanhas (§7.1) é preciso **Meta Business Manager + WABA** da GM | Belmiro (@devops) + Rinaldo | 🔴 Antes da ligação do número |
+| 8 | **Domínio verificado no Resend** (SPF/DKIM em globalmindsconsultoria.com) para o email marketing | Belmiro + Global Minds (DNS) | 🟡 Semana 3 (antes da 1ª campanha de email) |
 | 5 | Acordo de compliance internacional do cliente (base para as políticas de dados) | Global Minds | 🟡 Semana 3 |
 | 6 | Frases obrigatórias da marca (D3 da ficha — "a fazer com a Ana") | Ana → MD | 🟡 Antes do go-live |
 | 7 | Link da sessão de validação de 14/07 | Marca Digital | 🔴 Imediato |
@@ -249,7 +308,10 @@ WhatsApp (nº GM) ⇄ uazapi (instância SIC-GlobalMinds)
 | Compliance mal aplicado | Alto — risco legal para cliente certificado | Secção 5 deste brief; rotina de apagamento testada em staging; NDA assinado antes de dados reais em produção |
 | Agente falar de valores/pagamentos | Alto — quebra de confiança (D5) | Escalação determinística pré-LLM + regra de faixas + guard de compliance pós-geração com regeneração |
 | Comissões em moeda forte mal modeladas | Médio | Validar regras com o Rinaldo na sessão de 14/07; testar na Semana 3 (tarefa 3.5) |
-| Banimento do número WhatsApp (M5) | Alto — canal único do negócio | Padrão anti-ban Salus (40s/msg, lotes 5, dry-run por defeito, opt-out obrigatório); campanhas só a contactos com consentimento |
+| Banimento do número WhatsApp (M5) | Alto — canal único do negócio | Anti-block do módulo §7.1 (45–90s/msg, 40/h e 500/dia por instância, warm-up 5 dias, cooldown automático); **contacto frio preferencialmente pelo canal oficial Meta (templates aprovados, risco de ban zero)**; instância de campanhas separada da de atendimento; campanhas só a contactos com consentimento |
+| Aprovação de templates Meta demora (minutos a 24h+) ou é rejeitada | Médio — atrasa campanhas do canal oficial | Submeter templates na Semana 2 (criação pela UI do módulo); fallback: 1ª vaga só com uazapi em contactos com relação existente |
+| Port do frontend do módulo (Vite/react-router → Next.js 16/React 19) | Médio — ~13 páginas a adaptar | Backend pluga directo (migrações + edges); port faseado com preview do editor Maily testado cedo; esforço estimado 2–3 dias (§7.1) |
+| Entregabilidade de email (domínio novo no Resend) | Médio | Verificar SPF/DKIM cedo (pendência 8); aquecer com volumes pequenos; lista de supressão activa desde o 1º envio |
 | Multilingue (EN) com qualidade inferior ao PT | Médio | FAQ já existe em PT+EN; suite de testes de conversas EN na Semana 3 |
 | Scope creep (redes sociais, site, relatórios IA) | Médio | Registado como Fase 2/SIC Completo — fora dos 30 dias; é o funil de recorrência |
 | Atraso em acessos (subdomínio, conta WA) | Alto — empurra go-live | Pendências 3–4 com dono e prazo; regra da acta: cada semana de atraso empurra a entrega na mesma medida |
@@ -274,7 +336,7 @@ WhatsApp (nº GM) ⇄ uazapi (instância SIC-GlobalMinds)
 2. Fluxo ponta a ponta testado: lead novo → qualificado (BANT/temperatura) → ficha de estudante criada → consulta agendada no calendário do Rinaldo → lembrete 24h.
 3. CRM com catálogo (parceiros enviados a 30/06 carregados), pipeline de 8 fases, Excels importados, RFV e financeiro (comissões em moeda forte) operacionais.
 4. Follow-up 21 dias/7 abordagens e reactivação 90 dias activos; lembretes de factura D-5.
-5. M5: campanha de teste executada em dry-run + campanha real pequena com anti-ban e opt-out.
+5. M5 (módulo §7.1): campanha WhatsApp de teste em dry-run + campanha real pequena com anti-block e opt-out; campanha de email de teste com tracking de abertura/clique visível no dashboard e na timeline do lead; link de descadastro funcional; 1 automação visual (React Flow) activa ponta a ponta; smoke test do pacote (guia 04) aprovado.
 6. Compliance: rotina de apagamento 2 anos activa e demonstrada; consentimentos registados; NDA assinado; export de dados demonstrado ao cliente.
 7. Suites de teste (safety + go-live-readiness + smoke) a passar; smoke test de 4 passos executado.
 8. Manual entregue, equipa formada, sistema no subdomínio da GM, acta de entrega assinada — arranque dos 30 dias de suporte.
@@ -288,6 +350,9 @@ WhatsApp (nº GM) ⇄ uazapi (instância SIC-GlobalMinds)
 - `docs/analise/fluxo-atendimento-agente-global-minds.md` (v1.0, validado 03/07 com anotações do cliente)
 - `Proposta_SIC_Express_Global_Minds_Jun2026.pdf` · `AnáliseDigital_GlobalMinds_Junho2026.pdf` · `Relatorio_Diagnostico_GlobalMinds.docx` · CSV de levantamento (18/06)
 - `RE_ Envio do Fluxo de Atendimento... .pdf` (thread de 12 emails, 29/06–03/07) · Ficha de Descoberta + 3 chats WhatsApp (pasta `RE_ Global Minds - Exemplar de conversas...`)
+
+**Módulo Marketing & Campanhas (pacote a integrar — §7.1):**
+- `marketing-module-package/` (extraído de `marketing-campanhas.zip`) — começar por `INSTRUCTIONS_FOR_CLAUDE.md` e `ARCHITECTURE.md`; migrações em `01-database/migrations/`, edges em `02-backend/`, frontend em `03-frontend/`, setup Resend/Meta em `05-setup-guide/`, bugs conhecidos em `07-troubleshooting/common-bugs.md`
 
 **Sistemas de referência (código a estudar antes de construir):**
 - ISILDA (base do codebase): `/Users/admin/PROJECTOS/ISILDA` — `supabase/functions/isilda-agent/index.ts`, `_shared/llm-client.ts`, migrações 008/009/020/031, `tests/`
