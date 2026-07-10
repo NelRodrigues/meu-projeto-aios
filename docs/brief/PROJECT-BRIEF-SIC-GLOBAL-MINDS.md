@@ -12,8 +12,8 @@
 | **Kick-off** | 29 de Junho de 2026 · acta aprovada |
 | **Entrega** | 29 de Julho de 2026 (30 dias) + 30 dias de suporte |
 | **Marco imediato** | ★ Sessão de validação — **14 de Julho, 14h00** |
-| **Estado à data (09/07)** | Semana 2 (construção interna). Fluxo de atendimento validado pelo cliente com anotações (03/07). NDA prometido pela MD — **pendente**. |
-| **Versão do brief** | 1.1 · 10/07/2026 · Confidencial (v1.1 integra o Módulo Marketing & Campanhas — §7.1) |
+| **Estado à data (10/07)** | Semana 2 (construção interna). Fluxo de atendimento validado pelo cliente com anotações (03/07). NDA prometido pela MD — **pendente**. |
+| **Versão do brief** | 1.2 · 10/07/2026 · Confidencial (v1.1 integra o Módulo Marketing §7.1 · v1.2 aplica achados da análise: custos de operação §7.2, riscos R1–R3, questões para 14/07) |
 
 ---
 
@@ -79,11 +79,11 @@ Assistente "Global Minds" 24/7: responde à FAQ (12 perguntas validadas com resp
 - **Pipeline de candidatura** decalcado do processo real em 8 passos: Lead → Qualificado → Consulta agendada → Proposta enviada → Formalização/Pagamento → Candidatura submetida → Em curso → Concluído. Tempos por fase (1º contacto 1–3 dias; ficha 5–10 dias; consulta até 15 dias; proposta 2–7 dias; resposta institucional 2–12 semanas).
 - **Ficha de estudante** estruturada (preenchida em conversa ou formulário/link) + checklist documental (passaporte, certificados, comprovativos financeiros, etc.).
 - **Matriz RFV** (Recência, Frequência, Valor) sobre a carteira de 13 anos.
-- **Tracking financeiro:** honorários + comissões de parceiros em **moeda forte (EUR/USD/GBP)** com contravalor AOA, percentagens por parceiro, lembretes de vencimento de facturas (ex.: 5 dias antes).
+- **Tracking financeiro:** honorários + comissões de parceiros em **moeda forte** com contravalor AOA, percentagens por parceiro, lembretes de vencimento de facturas (ex.: 5 dias antes). Campo de moeda **livre (ISO 4217)** — as tabelas do cliente usam EUR, USD, GBP, ZAR, AED, CAD e AUD, não apenas 3 moedas.
 - Importação dos Excels existentes (leads + acompanhamento de estudantes + planilha GEA).
 
 ### M3 — Automação de Follow-up
-- Lead sem decisão: **sequência de 21 dias com 7 abordagens distintas**; reactivação a 90 dias; cadência editável na UI (templates fixos da equipa, não gerados por IA).
+- Lead sem decisão: **sequência de 21 dias com 7 abordagens distintas**; reactivação a 90 dias; cadência editável na UI (templates fixos da equipa, não gerados por IA). ⚠️ *A validar a 14/07:* a Ficha C1 indica que o padrão actual da GM é **1×/semana até decidir** — confirmar com o Rinaldo qual cadência representa a marca (a de 21 dias/7 toques vem do padrão SIC-MD).
 - **Automações visuais arrastar-e-soltar (React Flow)** do módulo Marketing (§7.1): triggers `lead_created`/mudança de fase → nós `wait`, `sendEmail`, `sendWhatsapp`, `updateField`, `addTag`, `branch` — o Rinaldo/Ana desenham o fluxo sem código; execução por cron `email-automation-tick` (1 min).
 - Cliente em processo: **ponto de situação proactivo** (o maior valor identificado nas conversas reais) — lembretes de documentos, confirmações de pagamento, avanços de fase.
 - Agendamento automático (calendário + email do cliente), lembretes de consulta 24h antes + no dia, alertas de "cliente esquecido" e risco de perda.
@@ -101,6 +101,8 @@ Implementado sobre o **Módulo Marketing & Campanhas** (§7.1), que entrega de s
 - **Email marketing:** editor visual **Maily** (arrastar blocos), campanhas via **Resend**, tracking de aberturas/cliques/bounces por webhook, lista de supressão + link de descadastro.
 - **Templates Meta criados pela UI** (submissão para aprovação + sincronização de estado PENDING/APPROVED) e **dashboard unificado** de KPIs com log paginado de todos os envios.
 - Audiência por filtros (fase do pipeline, score, BANT, cidade) ou selecção manual de leads, com exclusões.
+
+> **Regra de coerência anti-ban:** os limites de envio em vigor são **exclusivamente os do módulo §7.1** (`campaigns` + `campaign_instance_stats`: 45–90s, 40/h, 500/dia, warm-up, cooldown). O padrão Salus (40s/lotes de 5) fica como referência histórica — não configurar duas tabelas de limites.
 
 ### Fora de âmbito (Fase 2 / SIC Completo — registar, não construir)
 Acompanhamento automático da candidatura (etapa 10 do fluxo) · recuperação de no-show · pós-partida (review Google + indicações) · gestão de redes sociais (proposta separada Proposta_GestaRedes) · assistente no website · relatórios com ideias de melhoria gerados por IA. O cliente já sinalizou apetite — é o caminho de recorrência.
@@ -224,6 +226,24 @@ Foram analisados os três sistemas em produção da Marca Digital. Síntese comp
 
 **Esforço estimado:** backend (migrações + edges + crons + Resend) pluga quase directo — 1–2 dias; port do frontend para Next.js — 2–3 dias. Encaixa na Semana 2–3 sem mexer no marco de 14/07 (a validação de 14/07 foca agente + CRM; o módulo M5 valida-se na Semana 3 com a campanha de teste).
 
+### 7.2 Custos de operação recorrentes 💰
+
+> O cliente declarou no levantamento um orçamento mensal de **75.000–150.000 Kz**. Estimativas abaixo em USD com contravalor indicativo (1 USD ≈ 900 Kz — actualizar ao câmbio da data). Valores a confirmar no arranque; o único custo **variável por envio** é a Meta Cloud API.
+
+| Componente | Cenário base (~100 leads/mês) | Cenário alto (~500 leads/mês) | Nota |
+|---|---|---|---|
+| Claude API (Haiku 4.5 + Sonnet 4.5) | ~$10–30 | ~$50–120 | Limitado pelos rate limits do agente (60 msgs/conversa, 50/h, 60/dia) |
+| uazapi (instância dedicada) | ~$20–40 fixo | idem (2ª instância p/ campanhas duplica) | Mensalidade do provider |
+| Resend (email) | $0 (free tier: 3.000 emails/mês) | ~$20 (até 50.000/mês) | Tracking incluído |
+| Meta Cloud API (campanhas oficiais) | ~$0 (sem campanhas frias) | ~$30–60 por 1.000 msgs de marketing | $0.005–0.06/msg conforme categoria — orçamentar por campanha |
+| Vercel | $0 (Hobby) | ~$20 (Pro) | Pro recomendado em produção |
+| Supabase dedicado | ~$25 (Pro) | ~$25 | Pro necessário: pg_cron, backups, sem pausa por inactividade |
+| **Total mensal estimado** | **~$55–95 (≈ 50k–86k Kz)** | **~$145–245 (≈ 130k–220k Kz)** | Cenário base cabe no orçamento declarado; o alto exige revisão |
+
+**Decisão comercial em aberto (resolver antes do go-live):**
+1. **Titularidade das contas** — recomendação: contas (Supabase, Vercel, Resend, Meta, uazapi) em nome da Global Minds desde o dia 1, coerente com a propriedade dos dados (§5); a MD opera-as durante a implementação e o suporte.
+2. **Quem paga após os 30 dias de suporte** — os custos acima correm a partir do go-live; sem contrato de recorrência, transitam para o cliente no fim do suporte. É a porta natural para o **SIC Pro** (manutenção + evolução), já sinalizado pelo interesse do cliente em continuidade.
+
 ---
 
 ## 8. Arquitectura de alto nível
@@ -269,7 +289,7 @@ WhatsApp (nº GM) ⇄ uazapi (instância SIC-GlobalMinds)
   - `parceiros` (instituição, país, tipo, % comissão, links, brochuras) → `destinos` → `programas` (tipo: summer/línguas/foundation/licenciatura/mestrado/voluntariado · faixa de custo · moeda)
   - `fichas_estudante` (dados pessoais, encarregado, percurso académico, nível linguístico, orçamento, destino pretendido, documentos checklist, `processo_em_curso`)
   - `candidaturas` (pipeline 8 fases, tempos por fase, instituição, programa, estado documental)
-  - `financeiro`: `honorarios`/`deals`, `comissoes` (moeda EUR/USD/GBP + contravalor AOA + % + estado), `facturas` (vencimento + lembrete D-5)
+  - `financeiro`: `honorarios`/`deals`, `comissoes` (campo `currency` ISO 4217 — EUR/USD/GBP/ZAR/AED/CAD/AUD/… + contravalor AOA + % + estado), `facturas` (vencimento + lembrete D-5)
   - **Marketing (módulo §7.1, migrações 001–008 do pacote):** `email_config` (singleton Resend), `email_templates` (+`design_json` Maily), `email_lists`, `email_campaigns`, `email_campaign_leads`, `email_sends` (1 linha = 1 email, com snapshot HTML), `email_events` (auditoria idempotente do webhook), `email_subscribers` (supressão/descadastro), `email_automations` (+`flow_json` React Flow), `email_automation_runs`, `campaigns` (WhatsApp multi-provider + config anti-block), `campaign_leads`, `campaign_instance_stats` (health/limites por instância), `whatsapp_cloud_templates` (+tags)
   - Qualificação no lead: `stage`, `temperature` (QUENTE ≥9 / MORNO 5–8 / FRIO ≤4), `bant_*`, `sales_score`, `score_confidence`, `fit_score`, `destino`, `nivel`, `orcamento`, `followup_count`
 - **Regra de disciplina (auditoria 2026-07-05):** enums e FKs definidos por escrito ANTES de criar tabelas — erros repetidos por `novo≠new` e FK ausente custaram retrabalho.
@@ -294,6 +314,17 @@ WhatsApp (nº GM) ⇄ uazapi (instância SIC-GlobalMinds)
 | 3 | Subdomínio + acesso ao domínio | Global Minds | 🔴 Semana em curso |
 | 4 | Tipo de conta WhatsApp ("não sei o que é isso" na ficha) — confirmar; atendimento vai por uazapi; para o canal oficial de campanhas (§7.1) é preciso **Meta Business Manager + WABA** da GM | Belmiro (@devops) + Rinaldo | 🔴 Antes da ligação do número |
 | 8 | **Domínio verificado no Resend** (SPF/DKIM em globalmindsconsultoria.com) para o email marketing | Belmiro + Global Minds (DNS) | 🟡 Semana 3 (antes da 1ª campanha de email) |
+
+### Questões abertas para a sessão de validação de 14/07 ⭐
+
+1. **Volume actual de leads/mês** (e conversão actual) — baseline nunca recolhida (item 13 da lista de acessos); sem ela, as metas "2×" e "+30–50%" não são verificáveis. Alternativa: medir as 2 primeiras semanas de produção como baseline.
+2. **Definição por escrito de "cliente inactivo"** para a regra dos 2 anos — 2 anos desde a última mensagem? Último pagamento? Fim do curso? É decisão do cliente com implicação legal; ancorar ao acordo de compliance (pendência 5).
+3. **Cadência de follow-up** — 1×/semana (padrão actual da GM, Ficha C1) ou 7 toques/21 dias (padrão SIC-MD)?
+4. **Janelas de agenda do Rinaldo** para a Consulta de Orientação automática (dias/horas fixas, buffer, fuso quando viaja).
+5. **Método de captação Instagram aceitável** dentro do compliance da GM (risco novo em §10).
+6. **Segundo número WhatsApp** para campanhas, separado do atendimento — sim/não?
+7. **Métricas que o Rinaldo quer no dashboard** (item 16 da lista de acessos — nunca respondido).
+8. **Titularidade das contas e custos pós-suporte** (§7.2) — apresentar a estimativa e fechar a decisão comercial.
 | 5 | Acordo de compliance internacional do cliente (base para as políticas de dados) | Global Minds | 🟡 Semana 3 |
 | 6 | Frases obrigatórias da marca (D3 da ficha — "a fazer com a Ana") | Ana → MD | 🟡 Antes do go-live |
 | 7 | Link da sessão de validação de 14/07 | Marca Digital | 🔴 Imediato |
@@ -315,6 +346,9 @@ WhatsApp (nº GM) ⇄ uazapi (instância SIC-GlobalMinds)
 | Multilingue (EN) com qualidade inferior ao PT | Médio | FAQ já existe em PT+EN; suite de testes de conversas EN na Semana 3 |
 | Scope creep (redes sociais, site, relatórios IA) | Médio | Registado como Fase 2/SIC Completo — fora dos 30 dias; é o funil de recorrência |
 | Atraso em acessos (subdomínio, conta WA) | Alto — empurra go-live | Pendências 3–4 com dono e prazo; regra da acta: cada semana de atraso empurra a entrega na mesma medida |
+| **Captação de seguidores IG (M5) em choque com o compliance do cliente** | Alto — scraping de seguidores é incompatível com a certificação internacional da GM | Definir método aprovado ANTES de prometer: interacções orgânicas/DM, lead ads oficiais Meta ou link-in-bio com formulário; nunca extracção em massa de perfis |
+| Adopção pela equipa de 2 pessoas (editor de email, automações, campanhas parados) | Médio — ferramenta sem uso = valor zero | Formação M4 hands-on: construir 1 campanha real e 1 automação COM a Ana (não só demonstrar); templates prontos de série |
+| Agenda do Rinaldo (viagens, fuso EUA) vs agendamento automático | Médio — consultas marcadas que ele não pode dar recriam a dor original | FreeBusy do Google Calendar + janelas fixas de consulta acordadas + buffer; fuso explícito no prompt do agente |
 
 ---
 
