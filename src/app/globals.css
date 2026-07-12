@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+:root {
+  --background: #FFF8F5;
+  --foreground: #1a1a1a;
+  --brand-50: #FFF1EC;
+  --brand-100: #FFE0D4;
+  --brand-200: #FFC5AA;
+  --brand-300: #FFA07A;
+  --brand-400: #E8845A;
+  --brand-500: #D4704A;
+  --brand-600: #B85A38;
+  --brand-700: #8A4429;
+  --brand-800: #5C2E1C;
+  --brand-900: #3D1E12;
+  --rose-50: #FFF0F3;
+  --rose-100: #FFD9E1;
+  --rose-200: #FFB3C4;
+  --rose-300: #FF8DA7;
+  --rose-400: #E8667F;
+  --rose-500: #D4506A;
+  --gold-50: #FFF9EB;
+  --gold-100: #FFF0C7;
+  --gold-200: #FFE08F;
+  --gold-300: #FFD057;
+  --gold-400: #E8B83E;
+  --gold-500: #C49A2E;
+  --cream: #FFF8F5;
+  --sidebar-bg: #2C1810;
+  --sidebar-fg: #FFF1EC;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-200: var(--brand-200);
+  --color-brand-300: var(--brand-300);
+  --color-brand-400: var(--brand-400);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+  --color-rose-50: var(--rose-50);
+  --color-rose-100: var(--rose-100);
+  --color-rose-200: var(--rose-200);
+  --color-rose-300: var(--rose-300);
+  --color-rose-400: var(--rose-400);
+  --color-rose-500: var(--rose-500);
+  --color-gold-50: var(--gold-50);
+  --color-gold-100: var(--gold-100);
+  --color-gold-200: var(--gold-200);
+  --color-gold-300: var(--gold-300);
+  --color-gold-400: var(--gold-400);
+  --color-gold-500: var(--gold-500);
+  --color-cream: var(--cream);
+  --color-sidebar-bg: var(--sidebar-bg);
+  --color-sidebar-fg: var(--sidebar-fg);
+  --font-heading: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  --font-body: Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+}
