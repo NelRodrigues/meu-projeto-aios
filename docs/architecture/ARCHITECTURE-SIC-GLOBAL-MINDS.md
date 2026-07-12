@@ -235,6 +235,25 @@ CREATE INDEX idx_candidaturas_fase ON candidaturas(fase);
 -- mudancas_estagio (herdada) passa a registar mudanças de fase de candidatura:
 -- reutiliza a tabela com lead_id + estagio_anterior/novo = valores de pipeline_fase.
 
+-- ── Consultas de Orientação (decisão PO C3/D5 — po-validation-backlog-v1) ─
+-- Tabela leve exigida pelo PRD (story 3.5 AC2); fonte consultável para o
+-- dashboard 4.6 ("consultas agendadas"), o lembrete D-1 e o reagendamento.
+CREATE TABLE consultations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  lead_id UUID NOT NULL REFERENCES leads(id) ON DELETE CASCADE,
+  candidatura_id UUID REFERENCES candidaturas(id) ON DELETE SET NULL,   -- opcional
+  google_event_id TEXT,                 -- para reagendamento (actualizar, não duplicar)
+  scheduled_at TIMESTAMPTZ NOT NULL,
+  timezone TEXT NOT NULL DEFAULT 'Africa/Luanda',
+  estado TEXT NOT NULL DEFAULT 'agendada'
+     CHECK (estado IN ('agendada','confirmada','realizada','no_show','cancelada')),
+  lembrete_24h_enviado BOOLEAN NOT NULL DEFAULT false,   -- controlo do cron lembretes-tick (D-1)
+  created_at TIMESTAMPTZ DEFAULT now(), updated_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX idx_consultations_lead ON consultations(lead_id);
+CREATE INDEX idx_consultations_scheduled ON consultations(scheduled_at)
+  WHERE estado IN ('agendada','confirmada');
+
 -- ── Financeiro ──────────────────────────────────────────────────────────
 CREATE TABLE financeiro (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -367,6 +386,7 @@ Duas séries: a **série da base GM** (`0xx`) e a **série do módulo marketing*
 | 015 | `015_seed_agent.sql` | Seed do agente "Assistente Global Minds" (prompt em camadas, settings, tools `qualify_lead`/`check_availability`/`schedule_consultation`/`criar_ficha_estudante`/`notificar_humano`) | `DELETE FROM ai_sales_agents` |
 | 016 | `016_seed_catalogo.sql` | Seed dos parceiros enviados (Kaplan, INTO, MPW, Inspired, IH Cape Town, SAMIAD, U.Europeia/IADE/IPAM, GEA, Xior, EDU4WORD) + destinos top-6 | `DELETE` |
 | 017 | `017_crons_base.sql` | Crons: `process-ai-agent-queue` (1min), `recover-stuck-queue` (3min), `followup-tick` (diário), `lembretes-tick` (diário), `compliance-2anos` (mensal), `refresh-rfv` (diário) | `cron.unschedule` |
+| 018 | `018_consultations.sql` | `consultations` (Consulta de Orientação, story 3.5 — decisão PO C3/D5, ver §2.5) + índices + RLS | `DROP TABLE consultations` |
 
 ### Série módulo marketing (aplicada após a base — story 5.1)
 
@@ -382,7 +402,7 @@ Duas séries: a **série da base GM** (`0xx`) e a **série do módulo marketing*
 | M_mkt_007 | pacote `007_populate_campaign_leads_specific.sql` | RPC `populate_campaign_leads` respeita `lead_ids[]` |
 | M_mkt_008 | pacote `008_whatsapp_cloud_templates.sql` | `whatsapp_cloud_templates` |
 
-**Total: 17 migrações base + 9 do módulo (1 nova + 8 do pacote) = 26 migrações.**
+**Total: 18 migrações base + 9 do módulo (1 nova + 8 do pacote) = 27 migrações.** (018 acrescentada pela correcção C3 da validação PO, 10/07/2026.)
 
 > Todos os `net.http_post` do pacote têm `YOUR_SUPABASE_PROJECT_REF` — **find/replace pelo ref real da GM** antes de aplicar. Idem `email_config.app_url`.
 
@@ -770,3 +790,4 @@ SIC-Global-Minds/
 
 *Marca Digital · Consultoria AI First · Luanda, Angola*
 *Arquitectura SIC Global Minds v1.0 — 10/07/2026 · Aria (@architect) · Confidencial*
+*v1.1 — 10/07/2026: tabela `consultations` (§2.5) + migração 018 (§3), correcção C3 da validação PO (po-validation-backlog-v1) · River (@sm)*
