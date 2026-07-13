@@ -133,6 +133,48 @@ export interface Programa {
 }
 
 // ========================
+// Candidaturas: pipeline 8 fases (story 2.3)
+// ========================
+
+// As 8 fases reais do enum `pipeline_fase` (§2.1). Rótulos/ordem em lib/pipeline-fases.ts.
+export type PipelineFase =
+  | 'lead'
+  | 'qualificado'
+  | 'consulta_agendada'
+  | 'proposta_enviada'
+  | 'formalizacao_pagamento'
+  | 'candidatura_submetida'
+  | 'em_curso'
+  | 'concluido'
+
+// Espelha a tabela `candidaturas` (migração 009). `fase_desde`/`prazo_fase_dias`
+// alimentam o "tempo em fase" e a sinalização de atraso; o trigger 017 mantém
+// `fase_desde`, a auditoria e o espelhamento em `leads.pipeline_fase`.
+export interface Candidatura {
+  id: string
+  created_at: string
+  updated_at: string
+  lead_id: string
+  ficha_id: string | null
+  programa_id: string | null
+  parceiro_id: string | null
+  fase: PipelineFase
+  fase_desde: string | null
+  prazo_fase_dias: number | null
+  estado_documental: string | null
+  notas: string | null
+}
+
+// Cartão do kanban — candidatura enriquecida com o essencial para decisão
+// (nome do lead, programa/destino via catálogo, temperature do lead).
+export interface CandidaturaCartao extends Candidatura {
+  lead_nome: string
+  lead_temperature: 'quente' | 'morno' | 'frio' | null
+  programa_nome: string | null
+  destino_pais: string | null
+}
+
+// ========================
 // AI Agent / WhatsApp Types
 // ========================
 
