@@ -2,10 +2,11 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 // Rotas que NUNCA exigem sessao.
+// - /health: health-check publico (story 1.1 AC5) — Vercel e smoke tests chamam sem sessao
 // - /login: pagina de autenticacao
 // - /api/webhooks: o webhook UAZAPI e chamado por um sistema externo (sem cookies)
 // - /api/diagnostics: diagnostico basico de ambiente para cutover e suporte
-const PUBLIC_PATHS = ['/login', '/api/webhooks', '/api/diagnostics']
+const PUBLIC_PATHS = ['/health', '/login', '/api/webhooks', '/api/diagnostics']
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some(
