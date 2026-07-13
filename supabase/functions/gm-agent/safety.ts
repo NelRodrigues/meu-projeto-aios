@@ -64,6 +64,9 @@ export function detectJailbreakAttempt(userMessage: string): boolean {
     /\bjailbreak\b/i,
     /bypass\s+(?:your|the)\s+(?:rules?|filter|safety)/i,
     /ignora\s+tudo|ignora\s+acima|esque(c|ç)a\s+(?:tudo|as\s+regras)/i,
+    // "ignora/ignore as instruções acima/anteriores" (PT — story 3.3, AC6).
+    // `normalized` já vem sem acentos (NFKD), por isso casa "instrucoes".
+    /ignor[ae]\s+(as\s+)?instrucoes\s+(acima|anteriores|previas)/i,
     /qual\s+(?:e|eh|é)\s+(?:o\s+)?(?:teu|seu)\s+(?:system\s+)?prompt/i,
     // Domínio GM: tentativas de forçar a auto-identificação como IA.
     /(es|és|e|eh|é)\s+(um|uma)\s+(bot|robo|robô|ia|inteligencia\s+artificial)/i,

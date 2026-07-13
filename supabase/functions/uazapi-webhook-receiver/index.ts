@@ -192,6 +192,55 @@ async function ensureConversation(
   return { id: conv.id as string, agentId: agent.id as string };
 }
 
+// ── Pausa por resposta humana (Story 3.3, AC4) ──────────────────────────────
+// Uma mensagem `fromMe`/owner é o número da GM a falar. Se veio de um humano
+// (resposta manual pela inbox/telemóvel) numa conversa activa, pausa o agente
+// nessa conversa (`status='paused_by_human'`), respeitando o setting
+// `auto_pause_after_human_reply`.
+//
+// Nota (brief 3.3): o próprio agente também envia como `fromMe`. Não há sinal
+// 100% fiável para distinguir no webhook, por isso o comportamento desejado é
+// conservador: uma resposta pelo número da GM pausa a conversa do lead — o
+// operador retoma o controlo. Aceite explicitamente na story.
+async function handleHumanReply(
+  supabase: SupabaseClient,
+  md: AnyRecord,
+  payload: AnyRecord,
+): Promise<void> {
+  try {
+    // Verifica o setting no agente activo.
+    const { data: agent } = await supabase
+      .from("ai_sales_agents")
+      .select("settings")
+      .eq("is_active", true)
+      .limit(1)
+      .maybeSingle();
+    const autoPause = (agent?.settings as Record<string, unknown> | undefined)?.auto_pause_after_human_reply;
+    if (autoPause === false) return; // desligado por configuração
+
+    // Resolve o número do DESTINATÁRIO (o lead) a partir do chat.
+    const remoteJid = extractRemoteJid(md, payload);
+    if (!remoteJid) return;
+    const lead = await ensureLead(supabase, String(remoteJid), null);
+    if (!lead) return;
+
+    // Pausa apenas conversas activas (não mexe em transferred/completed).
+    await supabase
+      .from("ai_agent_conversations")
+      .update({
+        status: "paused_by_human",
+        paused_at: new Date().toISOString(),
+        pause_reason: "human_request",
+      })
+      .eq("lead_id", lead.id)
+      .in("status", ["active", "paused_by_schedule"]);
+
+    logInfo(FN, "paused_by_human", { leadId: lead.id });
+  } catch (e) {
+    logWarn(FN, "human_reply_pause_failed", { err: e instanceof Error ? e.message : String(e) });
+  }
+}
+
 // ── Opt-out determinístico (pré-fila): pausa, despedida, revoga consentimento ─
 async function handleOptOut(
   supabase: SupabaseClient,

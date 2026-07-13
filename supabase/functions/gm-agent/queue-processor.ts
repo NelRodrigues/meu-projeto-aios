@@ -24,6 +24,9 @@ import { logInfo, logError } from "../_shared/log.ts";
 import { buildPrompt, FORBIDDEN_PHRASES } from "./prompt.ts";
 import { detectJailbreakAttempt, sanitizeForContext, stripInternalThinking } from "./safety.ts";
 import { AGENT_TOOLS, executeToolPlaceholder } from "./tools.ts";
+import { matchFaq } from "./knowledge.ts";
+import { isConversationalMessage, resolveEscalation } from "./escalation.ts";
+import { performHandoff } from "./handoff.ts";
 import type { AgentConfig, LeadContext, LeadLanguage, QueueMessage } from "./types.ts";
 
 const FN = "gm-agent";
@@ -157,9 +160,12 @@ async function generateResponse(
   history: Array<{ role: "user" | "assistant"; content: string }>,
   lastIncoming: string,
   apiKey: string,
+  softHint?: string | null,
 ): Promise<{ text: string; tokensIn: number; tokensOut: number; intent: string }> {
   const jailbreakDetected = detectJailbreakAttempt(lastIncoming);
-  const systemPrompt = buildPrompt({ agent, lead, idioma: lead.idioma, jailbreakDetected });
+  const basePrompt = buildPrompt({ agent, lead, idioma: lead.idioma, jailbreakDetected });
+  // Dica de escalação soft (§5.2) — sugere handoff, nunca força. Não altera L8.
+  const systemPrompt = softHint ? `${basePrompt}\n\n---\n\n${softHint}` : basePrompt;
 
   // Haiku classifica intenção/score (barato) — logado, não bloqueia o fluxo.
   let intent = "outro";
@@ -239,6 +245,134 @@ async function generateResponse(
   return { text: finalText, tokensIn, tokensOut, intent };
 }
 
+// ── Grava uma mensagem outgoing enviada + log (partilhado) ───────────────────
+async function recordOutgoing(
+  supabase: SupabaseClient,
+  leadId: string,
+  parts: string[],
+): Promise<void> {
+  for (const part of parts) {
+    await supabase.from("mensagens_whatsapp").insert({
+      lead_id: leadId,
+      conteudo: part,
+      direction: "outgoing",
+      // CHECK em mensagens_whatsapp (002): sender_type IN
+      // ('cliente','bot','humano','sistema'). O agente grava como 'bot'.
+      sender_type: "bot",
+    });
+  }
+}
+
+// ── Escalação determinística (§5.2) — pré-LLM. Transfere e notifica humano ────
+// Devolve true se escalou (o LLM NÃO deve ser chamado a seguir).
+async function handleEscalationIfNeeded(
+  supabase: SupabaseClient,
+  agent: AgentConfig,
+  uazapi: { url: string; token: string },
+  item: QueueMessage,
+  lead: LeadContext,
+  history: Array<{ role: "user" | "assistant"; content: string }>,
+  lastIncoming: string,
+  phone: string,
+): Promise<boolean> {
+  const lang: LeadLanguage = lead.idioma ?? "pt";
+  // Sinal da base de conhecimento (no_answer) — só se não for conversa social.
+  const social = isConversationalMessage(lastIncoming);
+  const knowledge = matchFaq(lastIncoming, lang);
+  const decision = resolveEscalation(lastIncoming, lang, knowledge, social);
+
+  if (!decision.escalate || !decision.pause_reason) return false;
+
+  // 1. Transfere a conversa (o LLM não é chamado).
+  await supabase
+    .from("ai_agent_conversations")
+    .update({
+      status: "transferred",
+      paused_at: new Date().toISOString(),
+      pause_reason: decision.pause_reason,
+    })
+    .eq("lead_id", item.lead_id);
+
+  // 2. Resposta fixa de transição ao lead (sem passar pelo LLM).
+  const reply = decision.reply ?? "";
+  let sentParts: string[] = [];
+  if (phone && reply) {
+    const deps = makeUazapiSendDeps(uazapi, phone);
+    const result = await sendHumanized(reply, deps, agent.settings);
+    sentParts = result.parts;
+    await recordOutgoing(supabase, lead.lead_id, sentParts);
+  }
+
+  // 3. Handoff: resumo + link + WhatsApp ao Rinaldo/Ana + INSERT notificacoes.
+  const handoff = await performHandoff(
+    supabase,
+    {
+      lead_id: lead.lead_id,
+      lead_nome: lead.nome,
+      pause_reason: decision.pause_reason,
+      idioma: lang,
+      history,
+      lastIncoming,
+    },
+    { settings: agent.settings, uazapi },
+  );
+
+  // 4. Log da escalação.
+  await supabase.from("ai_agent_logs").insert({
+    lead_id: lead.lead_id,
+    conversation_id: item.conversation_id,
+    agent_id: agent.id,
+    log_type: "escalation",
+    data: {
+      pause_reason: decision.pause_reason,
+      numbers_notified: handoff.numbers_notified,
+      notificacao_id: handoff.notificacao_id,
+      parts: sentParts.length,
+    },
+  });
+
+  logInfo(FN, "escalated", { leadId: lead.lead_id, reason: decision.pause_reason });
+  return true;
+}
+
+// ── Escalação SOFT (§5.2): N mensagens sem avanço de fase → sugere handoff ────
+// Devolve uma DICA para o prompt (não transfere à força). Simples: conta as
+// mensagens da conversa desde a última mudança de fase.
+async function softEscalationHint(
+  supabase: SupabaseClient,
+  agent: AgentConfig,
+  lead: LeadContext,
+  idioma: LeadLanguage,
+): Promise<string | null> {
+  const threshold = Number(agent.settings.soft_escalation_after_messages ?? 0);
+  if (!threshold || threshold <= 0) return null;
+
+  // Última mudança de fase do lead (mudancas_estagio; se não houver, usa a
+  // criação implícita — conta todas as mensagens).
+  const { data: lastChange } = await supabase
+    .from("mudancas_estagio")
+    .select("created_at")
+    .eq("lead_id", lead.lead_id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  let q = supabase
+    .from("mensagens_whatsapp")
+    .select("id", { count: "exact", head: true })
+    .eq("lead_id", lead.lead_id)
+    .neq("direction", "internal");
+  const since = (lastChange as { created_at?: string })?.created_at;
+  if (since) q = q.gt("created_at", since);
+  const { count } = await q;
+
+  if ((count ?? 0) < threshold) return null;
+
+  return idioma === "en"
+    ? "[SOFT-HANDOFF] The conversation has gone several messages without progress. If it feels stuck, gently OFFER to connect the lead with a Global Minds consultant — suggest it, never force it, and never talk about prices/payments yourself."
+    : "[SOFT-HANDOFF] A conversa já vai em várias mensagens sem avançar de fase. Se sentires que empancou, SUGERE com delicadeza passar o lead a um consultor da Global Minds — sugere, nunca forces, e nunca fales tu de preços/pagamentos.";
+}
+
 // ── Processa uma mensagem da fila (com lock por lead) ────────────────────────
 async function processOne(
   supabase: SupabaseClient,
@@ -247,10 +381,10 @@ async function processOne(
   uazapi: { url: string; token: string },
   item: QueueMessage,
 ): Promise<boolean> {
-  const leadId = item.lead_id;
-  const locked = await supabase.rpc("try_acquire_agent_lock", { p_lead_id: leadId });
+  const lid = item.lead_id;
+  const locked = await supabase.rpc("try_acquire_agent_lock", { p_lead_id: lid });
   if (locked.error || locked.data !== true) {
-    logInfo(FN, "lock_skip", { leadId });
+    logInfo(FN, "lock_skip", { leadId: lid });
     // Devolve o item à fila para outra passagem.
     await supabase.from("ai_agent_message_queue").update({ status: "pending" }).eq("id", item.id);
     return false;
@@ -258,7 +392,35 @@ async function processOne(
 
   try {
     const limit = Number(agent.settings.context_messages_limit ?? 250);
-    const { lead, history, lastIncoming } = await loadLeadContext(supabase, leadId, limit);
+    const { lead, history, lastIncoming } = await loadLeadContext(supabase, lid, limit);
+
+    // Resolve telefone do lead (necessário tanto para escalação como para envio).
+    const { data: leadRow } = await supabase.from("leads").select("telefone").eq("id", lid).maybeSingle();
+    const phone = normalizeAngolaPhone((leadRow as { telefone?: string })?.telefone || "");
+
+    // ── ESCALAÇÃO DETERMINÍSTICA (§5.2) — ANTES do LLM ──────────────────────
+    // Se dispara um gatilho hard (human_request/urgent/escalation_d5) ou
+    // no_answer, transfere a conversa e notifica o humano SEM chamar o modelo.
+    const escalated = await handleEscalationIfNeeded(
+      supabase,
+      agent,
+      uazapi,
+      item,
+      lead,
+      history,
+      lastIncoming,
+      phone,
+    );
+    if (escalated) {
+      await supabase
+        .from("ai_agent_message_queue")
+        .update({ status: "completed", processed_at: new Date().toISOString() })
+        .eq("id", item.id);
+      return true;
+    }
+
+    // ── ESCALAÇÃO SOFT: dica ao prompt se a conversa estagnou (não força) ────
+    const softHint = await softEscalationHint(supabase, agent, lead, lead.idioma ?? "pt");
 
     const { text, tokensIn, tokensOut, intent } = await generateResponse(
       agent,
@@ -266,12 +428,10 @@ async function processOne(
       history,
       lastIncoming,
       apiKey,
+      softHint,
     );
 
-    // Resolve telefone do lead para enviar.
-    const { data: leadRow } = await supabase.from("leads").select("telefone").eq("id", leadId).maybeSingle();
-    const phone = normalizeAngolaPhone((leadRow as { telefone?: string })?.telefone || "");
-
+    // Envia a resposta gerada (phone já resolvido acima).
     let sentParts: string[] = [];
     if (phone) {
       const deps = makeUazapiSendDeps(uazapi, phone);
@@ -280,20 +440,11 @@ async function processOne(
     }
 
     // Grava outgoing (uma linha por balão enviado).
-    for (const part of sentParts) {
-      await supabase.from("mensagens_whatsapp").insert({
-        lead_id: leadId,
-        conteudo: part,
-        direction: "outgoing",
-        // CHECK em mensagens_whatsapp (002): sender_type IN
-        // ('cliente','bot','humano','sistema'). O agente grava como 'bot'.
-        sender_type: "bot",
-      });
-    }
+    await recordOutgoing(supabase, lid, sentParts);
 
     // Log de tokens.
     await supabase.from("ai_agent_logs").insert({
-      lead_id: leadId,
+      lead_id: lid,
       conversation_id: item.conversation_id,
       agent_id: agent.id,
       log_type: "response_generated",
@@ -307,17 +458,17 @@ async function processOne(
       .update({ status: "completed", processed_at: new Date().toISOString() })
       .eq("id", item.id);
 
-    logInfo(FN, "processed", { leadId, tokensIn, tokensOut, parts: sentParts.length });
+    logInfo(FN, "processed", { leadId: lid, tokensIn, tokensOut, parts: sentParts.length });
     return true;
   } catch (e) {
-    logError(FN, "process_failed", { leadId, err: String(e) });
+    logError(FN, "process_failed", { leadId: lid, err: String(e) });
     await supabase
       .from("ai_agent_message_queue")
       .update({ status: "failed", error_message: String(e) })
       .eq("id", item.id);
     return false;
   } finally {
-    await supabase.rpc("release_agent_lock", { p_lead_id: leadId });
+    await supabase.rpc("release_agent_lock", { p_lead_id: lid });
   }
 }
 
