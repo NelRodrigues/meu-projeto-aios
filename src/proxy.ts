@@ -7,7 +7,17 @@ import { NextResponse, type NextRequest } from 'next/server'
 // - /api/webhooks: o webhook UAZAPI e chamado por um sistema externo (sem cookies)
 // - /api/diagnostics: diagnostico basico de ambiente para cutover e suporte
 // - /unsubscribe: pagina publica de opt-out do lead (futura — modulo marketing)
-const PUBLIC_PATHS = ['/health', '/login', '/unsubscribe', '/api/webhooks', '/api/diagnostics']
+// - /ficha: formulario publico de ficha de estudante (story 2.4 AC4) — link partilhavel
+// - /api/ficha-publica: route handler server-side do formulario publico (upsert lead+ficha)
+const PUBLIC_PATHS = [
+  '/health',
+  '/login',
+  '/unsubscribe',
+  '/ficha',
+  '/api/webhooks',
+  '/api/diagnostics',
+  '/api/ficha-publica',
+]
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some(

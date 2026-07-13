@@ -175,6 +175,45 @@ export interface CandidaturaCartao extends Candidatura {
 }
 
 // ========================
+// Ficha de estudante 360º (story 2.4)
+// ========================
+
+// Estado documental de item da checklist — enum `documento_estado` (§2.1),
+// aplicado por validação aplicacional (o JSONB não tem CHECK por item).
+export type DocumentoEstado = 'em_falta' | 'recebido' | 'validado' | 'rejeitado'
+
+// Item da checklist documental guardado em `fichas_estudante.documentos` (JSONB).
+export interface DocumentoItem {
+  tipo: string
+  estado: DocumentoEstado
+  url: string | null
+  updated_at: string
+}
+
+// Espelha a tabela `fichas_estudante` (migração 009). 1:1 com `leads` via
+// `lead_id UNIQUE`. `processo_em_curso` bloqueia a rotina de retenção de 2 anos.
+export interface FichaEstudante {
+  id: string
+  created_at: string
+  updated_at: string
+  lead_id: string
+  nome_completo: string | null
+  data_nascimento: string | null
+  nacionalidade: string | null
+  encarregado_nome: string | null
+  encarregado_contacto: string | null
+  encarregado_relacao: string | null
+  percurso_academico: string | null
+  nivel_linguistico: string | null
+  destino_pretendido: string | null
+  programa_pretendido_id: string | null
+  orcamento_faixa: string | null
+  processo_em_curso: boolean
+  documentos: DocumentoItem[] | null
+  notas: string | null
+}
+
+// ========================
 // AI Agent / WhatsApp Types
 // ========================
 
