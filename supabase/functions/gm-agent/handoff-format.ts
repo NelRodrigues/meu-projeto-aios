@@ -25,6 +25,9 @@ export const REASON_LABEL: Record<string, string> = {
   escalation_d5: "Custos / pagamento / negociação (regra D5)",
   no_answer: "Sem resposta na base de conhecimento",
   manual: "Transferência manual",
+  // Alerta POSITIVO (story 3.4): lead qualificado quente — NÃO é transferência
+  // (a conversa continua com o agente). Só notifica o consultor + move de fase.
+  lead_quente: "Lead quente qualificado (avançar para consulta)",
 };
 
 /**

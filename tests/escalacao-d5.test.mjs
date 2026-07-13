@@ -246,3 +246,33 @@ test('handoff: buildNotificationText junta resumo e link', () => {
   assert.ok(txt.includes('Motivo: X.'))
   assert.ok(txt.includes('https://gm.example.ao/inbox?lead=1'))
 })
+
+// ── no_answer só escala PERGUNTAS sem resposta, não mensagens de qualificação ──
+// Bug apanhado na validação da 3.4: uma mensagem declarativa de qualificação
+// ("sou encarregado, quero licenciatura em Portugal") não deve ser transferida
+// por no_answer — deve seguir para o agente qualificar (BANT/ficha).
+const NO_MATCH = { status: 'no_answer', escalate_reason: 'no_answer' }
+
+test('no_answer: mensagem de qualificação declarativa NÃO escala', () => {
+  const r = resolveEscalation(
+    'Sou encarregado do meu filho, ele terminou o 12º ano e queremos que faça uma licenciatura em Portugal já em Setembro. Temos orçamento para isso.',
+    'pt', NO_MATCH, false,
+  )
+  assert.equal(r.escalate, false, 'declarativa de qualificação segue para o agente, não transfere')
+})
+
+test('no_answer: "quero estudar no Reino Unido" (intenção) NÃO escala', () => {
+  const r = resolveEscalation('Quero estudar no Reino Unido no próximo ano.', 'pt', NO_MATCH, false)
+  assert.equal(r.escalate, false)
+})
+
+test('no_answer: PERGUNTA sem resposta na base ESCALA', () => {
+  const r = resolveEscalation('Vocês têm parceria com a universidade de Toronto?', 'pt', NO_MATCH, false)
+  assert.equal(r.escalate, true)
+  assert.equal(r.pause_reason, 'no_answer')
+})
+
+test('no_answer: pergunta EN sem resposta ESCALA', () => {
+  const r = resolveEscalation('Do you have a campus in Australia?', 'en', NO_MATCH, false)
+  assert.equal(r.escalate, true)
+})

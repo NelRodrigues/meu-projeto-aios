@@ -121,11 +121,25 @@ function layerL3(fase: string | null | undefined): string {
   const f = (fase || "lead").toLowerCase();
   let objectivo: string;
   if (f === "qualificado" || f === "consulta_agendada") {
-    objectivo = "Lead qualificado: conduz para a ficha de candidatura ou para marcar/confirmar a consulta.";
+    objectivo =
+      "Lead qualificado: conduz para a ficha de candidatura ou para marcar/confirmar a consulta. " +
+      "Quando tiveres os dados essenciais (nome, encarregado, destino/nível, faixa de orçamento), usa a ferramenta " +
+      "`criar_ficha_estudante` para abrir a ficha. Se o lead preferir, oferece o link do formulário.";
   } else if (f === "em_curso") {
     objectivo = "Processo em curso: dá o ponto de situação e responde a dúvidas de acompanhamento.";
   } else {
-    objectivo = "Lead a qualificar: percebe o objectivo, destino e nível. Uma pergunta de cada vez.";
+    // Fase `lead` — inclui a PORTA ABERTA HONESTA (story 3.4, AC5): se o lead não
+    // tem objectivo nenhum E não tem capacidade de avançar, não se força a venda.
+    objectivo =
+      "Lead a qualificar: percebe o objectivo, destino, nível, quem decide (encarregado/estudante) e o prazo. " +
+      "Uma pergunta de cada vez, sem interrogatório. " +
+      "IMPORTANTE — sempre que recolheres um sinal novo de qualificação (destino, nível, quem decide, prazo, " +
+      "faixa de orçamento indicada pelo lead), usa a ferramenta `qualify_lead` para o registar e pontuar o lead. " +
+      "Não anuncias que estás a usar ferramentas — continua a conversa com naturalidade. " +
+      "Quando já tens dados suficientes para a ficha, usa `criar_ficha_estudante`. " +
+      "PORTA ABERTA: se perceberes que o lead não tem objectivo definido E também não tem forma de avançar agora, " +
+      "não insistas nem forces a marcação. Encerra com cordialidade, deixa a porta aberta para quando fizer sentido " +
+      "(ex.: \"Quando quiser retomar, estamos por aqui\"), e não avances a fase à força. É melhor uma despedida honesta que uma pressão vazia.";
   }
   return `[L3] OBJECTIVO DESTA FASE: ${objectivo}`;
 }

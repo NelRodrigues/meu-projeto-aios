@@ -23,7 +23,8 @@ import { sendHumanized } from "../_shared/humanized-send.ts";
 import { logInfo, logError } from "../_shared/log.ts";
 import { buildPrompt, FORBIDDEN_PHRASES } from "./prompt.ts";
 import { detectJailbreakAttempt, sanitizeForContext, stripInternalThinking } from "./safety.ts";
-import { AGENT_TOOLS, executeToolPlaceholder } from "./tools.ts";
+import { AGENT_TOOLS } from "./tools.ts";
+import { executeTool } from "./tools-exec.ts";
 import { matchFaq } from "./knowledge.ts";
 import { isConversationalMessage, resolveEscalation } from "./escalation.ts";
 import { performHandoff } from "./handoff.ts";
@@ -155,7 +156,9 @@ async function loadLeadContext(
 
 // ── Gera a resposta: prompt → Haiku → Sonnet (loop tools) → guardrails ───────
 async function generateResponse(
+  supabase: SupabaseClient,
   agent: AgentConfig,
+  uazapi: { url: string; token: string },
   lead: LeadContext,
   history: Array<{ role: "user" | "assistant"; content: string }>,
   lastIncoming: string,
@@ -199,12 +202,23 @@ async function generateResponse(
 
     if (res.stop_reason === "tool_use") {
       const blocks = (res.raw_content as ContentBlock[]).filter((b) => b.type === "tool_use");
-      const toolResults = blocks.map((b) => ({
-        type: "tool_result" as const,
-        tool_use_id: b.id,
-        // Execução real é 3.4/3.5 — placeholder seguro para o loop continuar.
-        content: executeToolPlaceholder(b.name || "unknown"),
-      }));
+      // Execução REAL das tools (3.4): qualify_lead / criar_ficha_estudante.
+      // As restantes caem no placeholder seguro (3.5). Cada resultado é uma
+      // resposta de CONTINUIDADE (nunca fallback técnico) — o loop respeita maxIter.
+      const toolResults = await Promise.all(
+        blocks.map(async (b) => ({
+          type: "tool_result" as const,
+          tool_use_id: b.id,
+          content: await executeTool(b.name || "unknown", (b.input ?? {}) as Record<string, unknown>, {
+            supabase,
+            agent,
+            apiKey,
+            uazapi,
+            lead,
+            history,
+          }),
+        })),
+      );
       messages.push({ role: "assistant", content: res.raw_content });
       messages.push({ role: "user", content: toolResults });
       continue;
@@ -423,7 +437,9 @@ async function processOne(
     const softHint = await softEscalationHint(supabase, agent, lead, lead.idioma ?? "pt");
 
     const { text, tokensIn, tokensOut, intent } = await generateResponse(
+      supabase,
       agent,
+      uazapi,
       lead,
       history,
       lastIncoming,

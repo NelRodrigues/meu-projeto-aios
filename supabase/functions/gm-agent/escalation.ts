@@ -192,7 +192,25 @@ export function resolveEscalation(
   const hard = detectEscalation(text, lang);
   if (hard.escalate) return hard;
   if (isConversational) return { escalate: false };
+  // `no_answer` só escala quando a mensagem é uma PERGUNTA que a base não cobre.
+  // Mensagens declarativas (o lead a dar informação/intenção — ex.: "sou
+  // encarregado, quero licenciatura em Portugal") NÃO são perguntas sem resposta:
+  // seguem para o agente qualificar (BANT/ficha, story 3.4). Sem esta condição, o
+  // agente transferia qualquer mensagem que não batesse nas FAQ (agravado por 8/12
+  // FAQ estarem pendentes de validação) — bug apanhado na validação da 3.4.
+  if (!isQuestion(text)) return { escalate: false };
   return noAnswerEscalation(knowledge, lang);
+}
+
+// ── É uma pergunta? (só perguntas escalam por no_answer) ─────────────────────
+// Interrogativa explícita ('?') OU começada por partícula interrogativa PT/EN.
+const QUESTION_STARTERS =
+  /^\s*(qual|quais|quanto|quantos|quanta|como|onde|quando|porque|porquê|por\s+que|o\s+que|que\b|quem|posso|podem|poderia|tem|têm|há|existe|existem|what|which|how|where|when|why|who|can|could|do|does|is|are|any)\b/;
+
+export function isQuestion(text: string): boolean {
+  const norm = normalize(text);
+  if (norm.includes("?")) return true;
+  return QUESTION_STARTERS.test(norm);
 }
 
 // ── Conversa social: não escala por no_answer (saudações/agradecimentos) ─────

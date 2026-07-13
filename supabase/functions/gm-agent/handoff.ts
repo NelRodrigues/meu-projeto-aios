@@ -150,7 +150,10 @@ export async function performHandoff(
       .from("notificacoes")
       .insert({
         tipo: "takeover",
-        titulo: `Transferência: ${REASON_LABEL[ctx.pause_reason] ?? ctx.pause_reason}`,
+        // `lead_quente` é um ALERTA (o agente continua a conversa), não uma
+        // transferência — o rótulo distingue-o das escalações (D5/human/urgent/
+        // no_answer), que passam mesmo a conversa a um humano.
+        titulo: `${ctx.pause_reason === "lead_quente" ? "Alerta" : "Transferência"}: ${REASON_LABEL[ctx.pause_reason] ?? ctx.pause_reason}`,
         mensagem: summary,
         prioridade,
         lead_id: ctx.lead_id,
