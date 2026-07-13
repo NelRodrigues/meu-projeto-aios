@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { requireTenantAuth } from '@/lib/api-auth'
+import { requireAdmin } from '@/lib/api-auth'
 
 type Params = Promise<{ id: string }>
 
@@ -33,20 +33,13 @@ async function getSupabaseAdmin() {
 }
 
 async function getUazapiConfig(supabase: Awaited<ReturnType<typeof getSupabaseAdmin>>) {
-  const tenantId = await getTenantId()
-
-  let query = supabase
+  // ADR-01: `integration_keys` na GM não tem `tenant_id` (single-tenant).
+  const { data, error } = await supabase
     .from('integration_keys')
     .select('service,key_name,key_value,is_active')
     .eq('service', 'uazapi')
     .in('key_name', ['base_url', 'token'])
     .eq('is_active', true)
-
-  if (tenantId) {
-    query = query.eq('tenant_id', tenantId)
-  }
-
-  const { data, error } = await query
 
   if (error) throw new Error(error.message)
 
@@ -62,10 +55,6 @@ async function getUazapiConfig(supabase: Awaited<ReturnType<typeof getSupabaseAd
     url: normalizeUazapiUrl(rawUrl),
     token,
   }
-}
-
-async function getTenantId() {
-  return process.env.NEXT_PUBLIC_SHARED_TENANT_ID?.trim() || null
 }
 
 async function fetchStatus(instance: { api_url: string | null; api_key: string | null }) {
@@ -84,20 +73,14 @@ async function fetchStatus(instance: { api_url: string | null; api_key: string |
 }
 
 export async function GET(request: Request, context: { params: Params }) {
-  const auth = await requireTenantAuth(request)
+  const auth = await requireAdmin(request)
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status })
 
   try {
     const { id } = await context.params
     const supabase = await getSupabaseAdmin()
-    const tenantId = await getTenantId()
 
-    let query = supabase.from('whatsapp_instances').select('*').eq('id', id)
-    if (tenantId) {
-      query = query.eq('tenant_id', tenantId)
-    }
-
-    const { data, error } = await query.maybeSingle()
+    const { data, error } = await supabase.from('whatsapp_instances').select('*').eq('id', id).maybeSingle()
 
     if (error) throw error
     if (!data) {
@@ -116,7 +99,7 @@ export async function GET(request: Request, context: { params: Params }) {
 }
 
 export async function POST(request: Request, context: { params: Params }) {
-  const auth = await requireTenantAuth(request)
+  const auth = await requireAdmin(request)
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status })
 
   try {
@@ -125,15 +108,9 @@ export async function POST(request: Request, context: { params: Params }) {
     const action = String(body.action || 'status')
 
     const supabase = await getSupabaseAdmin()
-    const tenantId = await getTenantId()
     const uazapi = await getUazapiConfig(supabase)
 
-    let query = supabase.from('whatsapp_instances').select('*').eq('id', id)
-    if (tenantId) {
-      query = query.eq('tenant_id', tenantId)
-    }
-
-    const { data: instance, error } = await query.maybeSingle()
+    const { data: instance, error } = await supabase.from('whatsapp_instances').select('*').eq('id', id).maybeSingle()
 
     if (error) throw error
     if (!instance) {

@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { requireAdmin } from '@/lib/api-auth'
 
-const TENANT_ISI = process.env.NEXT_PUBLIC_SHARED_TENANT_ID?.trim() || '81bc8777-39f3-477a-8ad6-44f9dcf1eca8'
-const PERFIS_VALIDOS = ['admin', 'gestor', 'operador', 'visualizador']
+// ADR-01: GM é single-tenant. Papéis operacionais: apenas `admin` e `operacao`.
+const PERFIS_VALIDOS = ['admin', 'operacao']
 
 function getSupabaseAdmin() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -13,18 +14,6 @@ function getSupabaseAdmin() {
   })
 }
 
-async function requireAdmin(request: Request): Promise<{ ok: true; tenantId: string; userId: string } | { ok: false; status: number; error: string }> {
-  const token = (request.headers.get('authorization') || '').replace(/^Bearer\s+/i, '').trim()
-  if (!token) return { ok: false, status: 401, error: 'Não autenticado' }
-  const admin = getSupabaseAdmin()
-  const { data, error } = await admin.auth.getUser(token)
-  if (error || !data?.user) return { ok: false, status: 401, error: 'Sessão inválida' }
-  const meta = (data.user.app_metadata || {}) as Record<string, unknown>
-  if (String(meta.tenant_id || '') !== TENANT_ISI) return { ok: false, status: 403, error: 'Sem acesso' }
-  if (String(meta.role || '') !== 'admin') return { ok: false, status: 403, error: 'Apenas administradores' }
-  return { ok: true, tenantId: TENANT_ISI, userId: data.user.id }
-}
-
 // PATCH — actualizar perfil / activo
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireAdmin(request)
@@ -33,7 +22,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const body = await request.json().catch(() => ({}))
 
   const admin = getSupabaseAdmin()
-  const { data: membro } = await admin.from('team_members').select('id, auth_user_id, role').eq('id', id).eq('tenant_id', auth.tenantId).maybeSingle()
+  const { data: membro } = await admin.from('team_members').select('id, auth_user_id, role').eq('id', id).maybeSingle()
   if (!membro) return NextResponse.json({ error: 'Membro não encontrado' }, { status: 404 })
 
   const update: Record<string, unknown> = {}
@@ -46,15 +35,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   if (Object.keys(update).length === 0) return NextResponse.json({ error: 'Nada para actualizar' }, { status: 400 })
 
-  const { error } = await admin.from('team_members').update(update).eq('id', id).eq('tenant_id', auth.tenantId)
+  const { error } = await admin.from('team_members').update(update).eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Sincronizar role no auth (app_metadata) para o RLS funcionar
-  if (update.role && membro.auth_user_id) {
-    await admin.auth.admin.updateUserById(membro.auth_user_id, {
-      app_metadata: { tenant_id: auth.tenantId, role: update.role },
-    })
-  }
+  // Nota: na GM o papel vive só em `team_members` (o RLS lê via is_admin(auth.uid())).
+  // Não é preciso sincronizar app_metadata como na base multi-tenant ISILDA.
 
   return NextResponse.json({ ok: true })
 }
@@ -66,7 +51,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   const { id } = await params
 
   const admin = getSupabaseAdmin()
-  const { data: membro } = await admin.from('team_members').select('id, auth_user_id, email').eq('id', id).eq('tenant_id', auth.tenantId).maybeSingle()
+  const { data: membro } = await admin.from('team_members').select('id, auth_user_id, email').eq('id', id).maybeSingle()
   if (!membro) return NextResponse.json({ error: 'Membro não encontrado' }, { status: 404 })
 
   // Não permitir auto-eliminação do próprio admin logado
@@ -75,7 +60,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   }
 
   // Eliminar o registo da equipa
-  const { error: delErr } = await admin.from('team_members').delete().eq('id', id).eq('tenant_id', auth.tenantId)
+  const { error: delErr } = await admin.from('team_members').delete().eq('id', id)
   if (delErr) return NextResponse.json({ error: delErr.message }, { status: 500 })
 
   // Eliminar a conta de autenticação associada (best-effort)

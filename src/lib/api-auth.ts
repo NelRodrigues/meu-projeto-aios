@@ -2,7 +2,10 @@ import { createClient } from '@supabase/supabase-js'
 import type { User } from '@supabase/supabase-js'
 import { createClient as createServerSupabase } from '@/lib/supabase/server'
 
-const TENANT_ISI = process.env.NEXT_PUBLIC_SHARED_TENANT_ID?.trim() || '81bc8777-39f3-477a-8ad6-44f9dcf1eca8'
+// ADR-01: a Global Minds é single-tenant (projecto Supabase dedicado). NÃO há
+// `tenant_id` nem `NEXT_PUBLIC_SHARED_TENANT_ID`. A autorização faz-se via
+// `team_members` (Arquitectura §8.2): a partir de `auth_user_id = user.id`
+// confirmamos que o membro está activo e, se necessário, que é admin.
 
 function getSupabaseAdmin() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -14,7 +17,7 @@ function getSupabaseAdmin() {
 }
 
 export type AuthResult =
-  | { ok: true; tenantId: string; role: string; userId: string }
+  | { ok: true; role: string; userId: string; memberId: string }
   | { ok: false; status: number; error: string }
 
 // Resolve o utilizador autenticado: Bearer token OU sessão por cookies (@supabase/ssr).
@@ -38,27 +41,50 @@ async function getAuthenticatedUser(request: Request): Promise<User | null> {
 }
 
 /**
- * Valida o chamador (Bearer token ou sessão por cookies) e confirma que
- * pertence ao tenant Isi. Usar em TODA rota de API que opera com
- * service_role (bypass de RLS).
+ * Valida o chamador (Bearer token ou sessão por cookies) e confirma que é um
+ * membro ACTIVO da equipa Global Minds. Usar em TODA a rota de API que opera com
+ * service_role (bypass de RLS) — defesa em profundidade sobre o middleware.
  *
  * @param request  o Request do route handler
- * @param opts.requireAdmin  se true, exige role === 'admin' (default: false)
+ * @param opts.requireAdmin  se true, exige `role === 'admin'` (default: false)
  */
-export async function requireTenantAuth(
+export async function requireAuth(
   request: Request,
   opts: { requireAdmin?: boolean } = {}
 ): Promise<AuthResult> {
   const user = await getAuthenticatedUser(request)
   if (!user) return { ok: false, status: 401, error: 'Não autenticado' }
 
-  const meta = (user.app_metadata || {}) as Record<string, unknown>
-  const tenantId = String(meta.tenant_id || '')
-  const role = String(meta.role || '')
-  if (tenantId !== TENANT_ISI) return { ok: false, status: 403, error: 'Sem acesso a este tenant' }
+  // Resolver o membro da equipa a partir da conta de autenticação.
+  const admin = getSupabaseAdmin()
+  const { data: member, error } = await admin
+    .from('team_members')
+    .select('id, role, is_active')
+    .eq('auth_user_id', user.id)
+    .maybeSingle()
+
+  if (error) return { ok: false, status: 500, error: 'Falha ao verificar equipa' }
+  if (!member || !member.is_active) {
+    return { ok: false, status: 403, error: 'Sem acesso: conta não pertence à equipa activa' }
+  }
+
+  const role = String(member.role || '')
   if (opts.requireAdmin && role !== 'admin') {
     return { ok: false, status: 403, error: 'Apenas administradores têm acesso' }
   }
 
-  return { ok: true, tenantId, role, userId: user.id }
+  return { ok: true, role, userId: user.id, memberId: member.id }
 }
+
+/**
+ * Atalho para rotas exclusivas de admin. Equivale a `requireAuth(request, { requireAdmin: true })`.
+ */
+export async function requireAdmin(request: Request): Promise<AuthResult> {
+  return requireAuth(request, { requireAdmin: true })
+}
+
+/**
+ * @deprecated Herança ISILDA multi-tenant. Na GM (single-tenant) usar `requireAuth`.
+ * Mantido como alias para compatibilidade de importadores existentes.
+ */
+export const requireTenantAuth = requireAuth

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { requireTenantAuth } from '@/lib/api-auth'
+import { requireAdmin } from '@/lib/api-auth'
 
 type UazapiConfig = {
   url: string
@@ -56,24 +56,14 @@ async function getSupabaseAdmin() {
   })
 }
 
-async function getTenantId(): Promise<string | null> {
-  return process.env.NEXT_PUBLIC_SHARED_TENANT_ID?.trim() || null
-}
-
 async function getUazapiConfig(supabase: Awaited<ReturnType<typeof getSupabaseAdmin>>): Promise<UazapiConfig> {
-  const tenantId = await getTenantId()
-  let query = supabase
+  // ADR-01: `integration_keys` na GM não tem `tenant_id` (single-tenant).
+  const { data, error } = await supabase
     .from('integration_keys')
     .select('service,key_name,key_value,is_active')
     .eq('service', 'uazapi')
     .in('key_name', ['base_url', 'token'])
     .eq('is_active', true)
-
-  if (tenantId) {
-    query = query.eq('tenant_id', tenantId)
-  }
-
-  const { data, error } = await query
 
   if (error) {
     throw new Error(error.message)
@@ -127,23 +117,16 @@ async function setWebhook(uazapi: UazapiConfig, instanceToken: string) {
 }
 
 export async function GET(request: Request) {
-  const auth = await requireTenantAuth(request)
+  const auth = await requireAdmin(request)
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status })
 
   try {
     const supabase = await getSupabaseAdmin()
-    const tenantId = await getTenantId()
 
-    let query = supabase
+    const { data, error } = await supabase
       .from('whatsapp_instances')
       .select('*')
       .order('created_at', { ascending: false })
-
-    if (tenantId) {
-      query = query.eq('tenant_id', tenantId)
-    }
-
-    const { data, error } = await query
 
     if (error) {
       throw error
@@ -159,7 +142,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const auth = await requireTenantAuth(request)
+  const auth = await requireAdmin(request)
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status })
 
   try {
@@ -170,7 +153,6 @@ export async function POST(request: Request) {
     }
 
     const supabase = await getSupabaseAdmin()
-    const tenantId = await getTenantId()
     const uazapi = await getUazapiConfig(supabase)
 
     const createRes = await fetch(`${uazapi.url}/instance/init`, {
@@ -183,7 +165,7 @@ export async function POST(request: Request) {
         name,
         systemName: slugifySystemName(name),
         adminField01: 'globalminds',
-        adminField02: tenantId || 'tenant_shared',
+        adminField02: 'globalminds',
       }),
     })
     const createData = await createRes.json().catch(() => ({}))
@@ -212,7 +194,6 @@ export async function POST(request: Request) {
     const { data: savedInstance, error: insertError } = await supabase
       .from('whatsapp_instances')
       .insert({
-        tenant_id: tenantId,
         name: createData?.name || name,
         phone_number: null,
         teams: ['comercial'],
