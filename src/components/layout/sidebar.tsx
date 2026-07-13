@@ -8,6 +8,7 @@ import {
   Users,
   UsersRound,
   Settings,
+  GraduationCap,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -30,6 +31,7 @@ const navSections: NavSection[] = [
       { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
       { href: '/inbox', label: 'Inbox', icon: MessageCircle },
       { href: '/clientes', label: 'Clientes', icon: Users },
+      { href: '/catalogo', label: 'Catalogo', icon: GraduationCap },
     ],
   },
   {

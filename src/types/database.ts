@@ -77,6 +77,62 @@ export interface MessageTemplate {
 }
 
 // ========================
+// Catálogo: parceiros → destinos → programas (story 2.2)
+// ========================
+
+// Tipos de programa — CHECK na migração 008 (§2.5). Nunca enum na BD.
+export type ProgramaTipo =
+  | 'summer_camp'
+  | 'linguas'
+  | 'foundation'
+  | 'licenciatura'
+  | 'mestrado'
+  | 'voluntariado'
+  | 'outro'
+
+export interface Parceiro {
+  id: string
+  created_at: string
+  updated_at: string
+  nome: string
+  tipo: string | null
+  comissao_percent: number | null
+  website: string | null
+  brochura_url: string | null
+  notas: string | null
+  is_active: boolean
+}
+
+export interface Destino {
+  id: string
+  created_at: string
+  updated_at: string
+  parceiro_id: string | null
+  pais: string
+  cidade: string | null
+  custo_vida_faixa: string | null
+  custo_vida_currency: string | null
+  notas: string | null
+}
+
+export interface Programa {
+  id: string
+  created_at: string
+  updated_at: string
+  destino_id: string | null
+  nome: string
+  tipo: ProgramaTipo
+  custo_min: number | null
+  custo_max: number | null
+  currency: string | null
+  comissao_percent: number | null
+  duracao: string | null
+  brochura_url: string | null
+  link: string | null
+  is_active: boolean
+}
+
+// ========================
 // AI Agent / WhatsApp Types
 // ========================
 
