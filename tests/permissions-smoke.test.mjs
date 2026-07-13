@@ -81,3 +81,40 @@ test('(c) rota admin (/api/equipa) com sessão operacao devolve 403', { skip: 'r
   //   2. fetch(`${SITE_URL}/api/equipa`, { headers: { Authorization: `Bearer ${token}` }})
   //   3. assert: resposta.status === 403 (requireAdmin rejeita não-admin)
 })
+
+// ── (d) Financeiro/RFV são dado sensível: anónimo NÃO lê (stories 2.6/2.7) ───
+// financeiro/facturas têm RLS só-admin (`is_admin`); as MVs RFV têm REVOKE de
+// anon/authenticated + wrappers SECURITY DEFINER. Um cliente anónimo nunca deve
+// ver linhas nem obter dados das RPCs admin. Valida AC2 (2.6) e AC6 (2.7) em prod.
+test('(d) anónimo não lê financeiro/facturas nem RFV', async (t) => {
+  if (!URL || !ANON) {
+    t.skip('NEXT_PUBLIC_SUPABASE_URL/ANON_KEY em falta')
+    return
+  }
+  const anon = createClient(URL, ANON, { auth: { persistSession: false } })
+
+  // Tabelas sensíveis: RLS sem policy para anon → 0 linhas (ou 42501/PGRST116).
+  for (const tabela of ['financeiro', 'facturas', 'rfv_refresh_log']) {
+    const { data, error } = await anon.from(tabela).select('*').limit(5)
+    assert.ok(
+      !error || error.code === 'PGRST116' || error.code === '42501',
+      `${tabela}: erro inesperado ${error?.code} ${error?.message}`,
+    )
+    assert.equal(
+      (data ?? []).length,
+      0,
+      `${tabela}: anónimo NÃO devia ver linhas (viu ${(data ?? []).length})`,
+    )
+  }
+
+  // RPCs admin (SECURITY DEFINER com check current_user_is_admin): anónimo →
+  // erro OU zero linhas. Nunca deve devolver dados de valor agregado.
+  for (const rpc of ['get_rfv_leads', 'get_destinos_receita', 'get_rfv_last_refresh']) {
+    const { data, error } = await anon.rpc(rpc)
+    const bloqueado = !!error || data == null || (Array.isArray(data) && data.length === 0)
+    assert.ok(
+      bloqueado,
+      `${rpc}: anónimo NÃO devia obter dados (error=${error?.code}, linhas=${Array.isArray(data) ? data.length : typeof data})`,
+    )
+  }
+})

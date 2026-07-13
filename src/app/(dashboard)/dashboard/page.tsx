@@ -5,6 +5,7 @@ import { Users, MessageSquare, Bot } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { WhatsAppSenderType } from '@/types/database'
 import { BackendStatusBanner } from '@/components/system/backend-status-banner'
+import { Pareto80Card } from '@/components/rfv/pareto-80-card'
 
 interface MensagemRow {
   sender_type: WhatsAppSenderType
@@ -71,6 +72,10 @@ export default function DashboardPage() {
           <KpiCard icon={Bot} label="Automacao bot" value={`${taxaAutomacao.toFixed(0)}%`} color="bg-blue-500" />
         </div>
       )}
+
+      {/* Cartão 80/20 — receita por destino (story 2.7). Só renderiza para admin
+          (a RPC de receita é só-admin); operação não vê valores agregados. */}
+      <Pareto80Card />
     </div>
   )
 }
