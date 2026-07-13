@@ -10,6 +10,7 @@ import {
   Settings,
   GraduationCap,
   KanbanSquare,
+  Wallet,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -34,6 +35,7 @@ const navSections: NavSection[] = [
       { href: '/kanban', label: 'Kanban', icon: KanbanSquare },
       { href: '/clientes', label: 'Clientes', icon: Users },
       { href: '/catalogo', label: 'Catalogo', icon: GraduationCap },
+      { href: '/financeiro', label: 'Financeiro', icon: Wallet },
     ],
   },
   {

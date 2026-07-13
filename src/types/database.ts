@@ -175,6 +175,52 @@ export interface CandidaturaCartao extends Candidatura {
 }
 
 // ========================
+// Financeiro: honorários, comissões multi-moeda e facturas (story 2.6)
+// ========================
+
+// Espelham os CHECK da migração 025. Moeda é sempre CHAR(3) livre (string),
+// NUNCA enum — ISO 4217 validado por regex (§2.1).
+export type FinanceiroTipo = 'honorario' | 'comissao'
+export type FinanceiroEstado = 'previsto' | 'facturado' | 'recebido' | 'anulado'
+export type FacturaEstado = 'pendente' | 'enviada' | 'paga' | 'vencida' | 'cancelada'
+
+// Espelha a tabela `financeiro` (migração 025). `contravalor_aoa = valor × taxa`,
+// calculado à taxa do dia editável (input manual, nunca buscado). Consumido por
+// `v_rfv_leads` (story 2.7) como dimensão Valor — registos sem contravalor não contam.
+export interface Financeiro {
+  id: string
+  created_at: string
+  updated_at: string
+  candidatura_id: string | null
+  lead_id: string | null
+  parceiro_id: string | null
+  tipo: FinanceiroTipo
+  valor: number
+  currency: string
+  taxa_cambio_aoa: number | null
+  contravalor_aoa: number | null
+  percentagem: number | null
+  estado: FinanceiroEstado
+  notas: string | null
+}
+
+// Espelha a tabela `facturas` (migração 025). `lembrete_d5_enviado` garante a
+// idempotência do lembrete interno D-5 (função `financeiro_lembretes_d5`).
+export interface Factura {
+  id: string
+  created_at: string
+  updated_at: string
+  financeiro_id: string | null
+  lead_id: string | null
+  numero: string | null
+  valor: number
+  currency: string
+  vencimento: string // ISO date
+  estado: FacturaEstado
+  lembrete_d5_enviado: boolean
+}
+
+// ========================
 // Ficha de estudante 360º (story 2.4)
 // ========================
 
