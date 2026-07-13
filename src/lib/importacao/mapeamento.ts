@@ -5,10 +5,10 @@
 // correspondente do pipeline (8 fases, §2.1). O mapa estado→fase vive AQUI e é
 // documentado por escrito em `docs/importacao-mapeamento-excels.md`.
 //
-// ⚠️ PLACEHOLDER: os valores de estado abaixo são o FORMATO ESPERADO com base no
-// domínio (as 8 fases). Os rótulos EXACTOS que o cliente usa nas planilhas só se
-// conhecem quando os Excels reais chegarem — nessa altura preenche-se o mapa
-// definitivo. Estado desconhecido NÃO é adivinhado: devolve null e o registo vai
+// ✅ MAPA REAL: os rótulos abaixo são os ESTADOS OFICIAIS da Global Minds,
+// extraídos da folha "Legenda e Indicadores" do ficheiro
+// `PRIORITY - Acompanhamento_processos_Global Minds.xlsx` (dados reais do cliente,
+// recebidos). Estado desconhecido NÃO é adivinhado: devolve null e o registo vai
 // para revisão (regra da casa sem-fallbacks). Nada de fase inventada às cegas.
 // ============================================================
 
@@ -25,37 +25,41 @@ export function normalizarEstado(estado: string): string {
     .replace(/\s+/g, ' ')
 }
 
-// Mapa placeholder estado-Excel → fase. Chaves já normalizadas.
-// A PREENCHER/CONFIRMAR com os rótulos reais das planilhas do cliente.
+// Mapa estado-GM → fase. Chaves já normalizadas (minúsculas, sem acentos).
+// Fonte: legenda oficial do ficheiro de acompanhamento (11 estados) + variantes
+// observadas na coluna "Estado do Processo" dos 15 processos reais.
 const MAPA_ESTADO_FASE: Record<string, PipelineFase> = {
-  // lead / contacto inicial
+  // ── Estados da legenda oficial da Global Minds ──────────────────────────
+  // "Proposta a Enviar" (cotação/proposta ainda por enviar) → antes da proposta.
+  // A GM não tem estado explícito de "consulta agendada" no acompanhamento
+  // (a consulta acontece antes de entrar aqui); estes processos já passaram a
+  // consulta, por isso "a enviar proposta" fica em consulta_agendada (pré-proposta).
+  'proposta a enviar': 'consulta_agendada',
+  // "Aguarda Contrato" (contrato por assinar/receber) → proposta já enviada,
+  // a caminho da formalização.
+  'aguarda contrato': 'proposta_enviada',
+  // "Pagamento Pendente" → formalização/pagamento.
+  'pagamento pendente': 'formalizacao_pagamento',
+  // "Em Curso" (processo activo e a decorrer) → em_curso.
+  'em curso': 'em_curso',
+  // "Concluído" (finalizado com sucesso) → concluido.
+  concluido: 'concluido',
+  // "Cancelado" → concluido (terminal; a UI distingue por notas/tag).
+  cancelado: 'concluido',
+  // ── Estados de acompanhamento operacional (não são fases; um processo activo
+  //    que aguarda algo continua "em curso" — a acção pendente vai para notas) ──
+  'aguarda documentos': 'em_curso',
+  'aguarda decisao': 'em_curso',
+  'aguarda decisao familia': 'em_curso',
+  'seguimento necessario': 'em_curso',
+  'sem resposta': 'em_curso',
+  'verificar situacao': 'em_curso',
+  // ── Variantes genéricas toleradas (segurança) ───────────────────────────
   lead: 'lead',
   novo: 'lead',
-  contacto: 'lead',
-  // qualificado
   qualificado: 'qualificado',
-  interessado: 'qualificado',
-  // consulta
-  'consulta agendada': 'consulta_agendada',
-  reuniao: 'consulta_agendada',
-  // proposta
   'proposta enviada': 'proposta_enviada',
-  proposta: 'proposta_enviada',
-  // pagamento / formalização
-  'formalizacao': 'formalizacao_pagamento',
-  pagamento: 'formalizacao_pagamento',
-  matriculado: 'formalizacao_pagamento',
-  // candidatura submetida
   'candidatura submetida': 'candidatura_submetida',
-  submetido: 'candidatura_submetida',
-  // em curso (processo activo)
-  'em curso': 'em_curso',
-  ativo: 'em_curso',
-  activo: 'em_curso',
-  acompanhamento: 'em_curso',
-  // concluído
-  concluido: 'concluido',
-  finalizado: 'concluido',
 }
 
 // Fases que representam um processo ACTIVO (protegido da rotina de retenção de

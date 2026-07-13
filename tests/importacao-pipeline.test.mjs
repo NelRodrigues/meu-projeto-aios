@@ -13,15 +13,17 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 
 // ── espelho de mapeamento.ts ────────────────────────────────────────────────
+// Mapa REAL dos estados da Global Minds (legenda oficial do ficheiro de acompanhamento).
 const MAPA_ESTADO_FASE = {
-  lead: 'lead', novo: 'lead', contacto: 'lead',
-  qualificado: 'qualificado', interessado: 'qualificado',
-  'consulta agendada': 'consulta_agendada', reuniao: 'consulta_agendada',
-  'proposta enviada': 'proposta_enviada', proposta: 'proposta_enviada',
-  formalizacao: 'formalizacao_pagamento', pagamento: 'formalizacao_pagamento', matriculado: 'formalizacao_pagamento',
-  'candidatura submetida': 'candidatura_submetida', submetido: 'candidatura_submetida',
-  'em curso': 'em_curso', ativo: 'em_curso', activo: 'em_curso', acompanhamento: 'em_curso',
-  concluido: 'concluido', finalizado: 'concluido',
+  'proposta a enviar': 'consulta_agendada',
+  'aguarda contrato': 'proposta_enviada',
+  'pagamento pendente': 'formalizacao_pagamento',
+  'em curso': 'em_curso',
+  concluido: 'concluido', cancelado: 'concluido',
+  'aguarda documentos': 'em_curso', 'aguarda decisao': 'em_curso', 'aguarda decisao familia': 'em_curso',
+  'seguimento necessario': 'em_curso', 'sem resposta': 'em_curso', 'verificar situacao': 'em_curso',
+  lead: 'lead', novo: 'lead', qualificado: 'qualificado',
+  'proposta enviada': 'proposta_enviada', 'candidatura submetida': 'candidatura_submetida',
 }
 const FASES_PROCESSO_ACTIVO = new Set(['formalizacao_pagamento', 'candidatura_submetida', 'em_curso'])
 
@@ -55,10 +57,12 @@ function chaveDedup(tel, email) {
 
 // ── testes ──────────────────────────────────────────────────────────────────
 
-test('estado → fase: acentos e maiúsculas normalizados', () => {
+test('estado → fase: estados REAIS da GM (legenda oficial)', () => {
   assert.equal(mapearEstadoParaFase('Em Curso').fase, 'em_curso')
-  assert.equal(mapearEstadoParaFase('ACTIVO').fase, 'em_curso')
-  assert.equal(mapearEstadoParaFase('Consulta Agendada').fase, 'consulta_agendada')
+  assert.equal(mapearEstadoParaFase('Aguarda Documentos').fase, 'em_curso') // acompanhamento activo
+  assert.equal(mapearEstadoParaFase('Proposta a Enviar').fase, 'consulta_agendada')
+  assert.equal(mapearEstadoParaFase('Pagamento Pendente').fase, 'formalizacao_pagamento')
+  assert.equal(mapearEstadoParaFase('Cancelado').fase, 'concluido')
 })
 
 test('estado desconhecido/vazio → fase null (revisão, não inventa)', () => {
@@ -68,10 +72,11 @@ test('estado desconhecido/vazio → fase null (revisão, não inventa)', () => {
 })
 
 test('processo_em_curso = true só nas fases activas', () => {
-  assert.equal(mapearEstadoParaFase('em curso').processo_em_curso, true)
-  assert.equal(mapearEstadoParaFase('matriculado').processo_em_curso, true)
-  assert.equal(mapearEstadoParaFase('lead').processo_em_curso, false)
-  assert.equal(mapearEstadoParaFase('concluido').processo_em_curso, false)
+  assert.equal(mapearEstadoParaFase('Em Curso').processo_em_curso, true)
+  assert.equal(mapearEstadoParaFase('Pagamento Pendente').processo_em_curso, true) // formalizacao_pagamento
+  assert.equal(mapearEstadoParaFase('Aguarda Documentos').processo_em_curso, true) // em_curso
+  assert.equal(mapearEstadoParaFase('Proposta a Enviar').processo_em_curso, false) // consulta_agendada
+  assert.equal(mapearEstadoParaFase('Cancelado').processo_em_curso, false) // concluido
 })
 
 test('telefone: 923..., espaços, +244 → 244XXXXXXXXX', () => {
