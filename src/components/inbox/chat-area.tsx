@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import { ArrowLeft, Bot, Hand } from 'lucide-react'
 import { MessageBubble } from './message-bubble'
 import { ChatInput } from './chat-input'
-import type { ConversaActiva, MensagemWhatsApp } from '@/types/database'
+import type { ConversaActiva, ConversationStatus, MensagemWhatsApp } from '@/types/database'
 
 interface ChatAreaProps {
   conversa: ConversaActiva
@@ -18,13 +18,16 @@ interface ChatAreaProps {
   readOnly?: boolean
 }
 
-function ModoBadge({ modo }: { modo: string }) {
-  const config: Record<string, { label: string; bg: string; text: string }> = {
-    bot: { label: 'Bot', bg: 'bg-emerald-100', text: 'text-emerald-700' },
-    humano: { label: 'Humano', bg: 'bg-blue-100', text: 'text-blue-700' },
-    pausado: { label: 'Pausado', bg: 'bg-yellow-100', text: 'text-yellow-700' },
+// Badge por ESTADO real (os 5 do enum) — rótulos pt-AO óbvios (AC1).
+function ModoBadge({ estado }: { estado: ConversationStatus }) {
+  const config: Record<ConversationStatus, { label: string; bg: string; text: string }> = {
+    active: { label: 'IA activa', bg: 'bg-emerald-100', text: 'text-emerald-700' },
+    paused_by_human: { label: 'Assumida', bg: 'bg-blue-100', text: 'text-blue-700' },
+    transferred: { label: 'Transferida', bg: 'bg-orange-100', text: 'text-orange-700' },
+    paused_by_schedule: { label: 'Fora de horas', bg: 'bg-yellow-100', text: 'text-yellow-700' },
+    completed: { label: 'Concluída', bg: 'bg-gray-100', text: 'text-gray-600' },
   }
-  const c = config[modo] || config.bot
+  const c = config[estado] || config.active
   return (
     <span className={cn('text-xs font-medium px-2 py-0.5 rounded-full', c.bg, c.text)}>
       {c.label}
@@ -57,7 +60,7 @@ export function ChatArea({ conversa, mensagens, loading, onEnviar, onAssumir, on
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold truncate">{nomeCliente}</span>
-            <ModoBadge modo={conversa.modo} />
+            <ModoBadge estado={conversa.estado} />
           </div>
           {conversa.telefone && (
             <span className="text-[11px] text-gray-400">{conversa.telefone}</span>

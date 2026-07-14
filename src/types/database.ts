@@ -267,7 +267,10 @@ export type WhatsAppSenderType = 'cliente' | 'bot' | 'humano' | 'sistema'
 export type WhatsAppDirection = 'incoming' | 'outgoing' | 'internal'
 export type WhatsAppMessageStatus = 'sent' | 'delivered' | 'read' | 'failed'
 export type ConversationStatus = 'active' | 'paused_by_human' | 'paused_by_schedule' | 'transferred' | 'completed'
-export type ModoConversa = 'bot' | 'humano' | 'pausado'
+// `modo` derivado na view v_conversas_activas (035): filtro rápido da inbox.
+export type ModoConversa = 'bot' | 'humano' | 'transferida' | 'pausada' | 'pausado'
+export type ScoreConfidence = 'low' | 'medium' | 'high'
+export type Temperature = 'quente' | 'morno' | 'frio'
 
 export interface MensagemWhatsApp {
   id: string
@@ -313,11 +316,25 @@ export interface ConversaActiva {
   telefone: string | null
   modo: ModoConversa
   estado: ConversationStatus
+  pause_reason: string | null
   total_messages_sent: number
   ultima_mensagem: string | null
   ultimo_remetente: WhatsAppSenderType | null
   ultima_mensagem_em: string | null
   estagio: ClienteEstagio
+  // Painel do contacto (AC1) — enriquecido pela view 035.
+  fase: PipelineFase | null
+  sales_score: number | null
+  score_confidence: ScoreConfidence | null
+  temperature: Temperature | null
+  bant_budget: string | null
+  bant_authority: string | null
+  bant_need: string | null
+  bant_timeline: string | null
+  destino: string | null
+  nivel: string | null
+  orcamento: string | null
+  idioma_pref: string | null
 }
 
 // ========================

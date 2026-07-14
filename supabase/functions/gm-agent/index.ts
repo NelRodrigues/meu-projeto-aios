@@ -7,6 +7,7 @@
 //
 // Acções:
 //   - process_queue : consome a fila, gera e envia respostas (default).
+//   - lembretes_tick : lembrete D-1 das consultas (cron `lembretes-tick`, 3.5).
 //   - test_prompt    : monta o prompt em camadas e devolve-o (não envia).
 //   - ping           : health-check simples.
 // ============================================================================
@@ -15,7 +16,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { logInfo, logError } from "../_shared/log.ts";
-import { handleProcessQueue, handleTestPrompt } from "./queue-processor.ts";
+import { handleProcessQueue, handleTestPrompt, handleLembretesTick } from "./queue-processor.ts";
 
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
@@ -39,6 +40,10 @@ serve(async (req) => {
         break;
       case "test_prompt":
         result = await handleTestPrompt(supabase, body.lead_id);
+        break;
+      case "lembretes_tick":
+        // Lembrete D-1 da Consulta de Orientação (Story 3.5) — cron lembretes-tick.
+        result = await handleLembretesTick(supabase);
         break;
       case "ping":
         result = { pong: true };

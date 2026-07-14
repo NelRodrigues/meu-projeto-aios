@@ -20,7 +20,7 @@ import {
 } from "../_shared/llm-client.ts";
 import { getIntegrationKeyWithClient, normalizeUazapiUrl, normalizeAngolaPhone } from "../_shared/get-integration-key.ts";
 import { sendHumanized } from "../_shared/humanized-send.ts";
-import { logInfo, logError } from "../_shared/log.ts";
+import { logInfo, logError, logWarn } from "../_shared/log.ts";
 import { buildPrompt, FORBIDDEN_PHRASES } from "./prompt.ts";
 import { detectJailbreakAttempt, sanitizeForContext, stripInternalThinking } from "./safety.ts";
 import { AGENT_TOOLS } from "./tools.ts";
@@ -28,6 +28,16 @@ import { executeTool } from "./tools-exec.ts";
 import { matchFaq } from "./knowledge.ts";
 import { isConversationalMessage, resolveEscalation } from "./escalation.ts";
 import { performHandoff } from "./handoff.ts";
+import { isDueForReminder, buildReminderMessage, type ConsultationRow } from "./reminders.ts";
+import {
+  isWithinWorkingHours,
+  outOfHoursMessage,
+  checkLimits,
+  limitReachedMessage,
+  pauseStateForLimit,
+  type LimitCounts,
+} from "./agent-limits.ts";
+import { detectLanguage } from "./language.ts";
 import type { AgentConfig, LeadContext, LeadLanguage, QueueMessage } from "./types.ts";
 
 const FN = "gm-agent";
@@ -82,14 +92,6 @@ function makeUazapiSendDeps(cfg: { url: string; token: string }, phone: string) 
   };
 }
 
-// ── Idioma: usa idioma_pref do lead; heurística leve como reforço ────────────
-function detectLanguage(pref: string | null | undefined, text: string): LeadLanguage {
-  if (pref === "en") return "en";
-  if (pref === "pt") return "pt";
-  const t = (text || "").toLowerCase();
-  const enHits = /\b(hello|hi|please|thanks|thank you|how much|cost|study|university|which|when)\b/.test(t);
-  return enHits ? "en" : "pt";
-}
 
 // ── Carrega a config do agente activo ────────────────────────────────────────
 async function loadAgent(supabase: SupabaseClient): Promise<AgentConfig | null> {
@@ -387,6 +389,140 @@ async function softEscalationHint(
     : "[SOFT-HANDOFF] A conversa já vai em várias mensagens sem avançar de fase. Se sentires que empancou, SUGERE com delicadeza passar o lead a um consultor da Global Minds — sugere, nunca forces, e nunca fales tu de preços/pagamentos.";
 }
 
+// ── Idioma: persiste idioma_pref no lead se mudou (AC3) ──────────────────────
+async function persistIdiomaPref(supabase: SupabaseClient, leadId: string, idioma: LeadLanguage): Promise<void> {
+  try {
+    const { data } = await supabase.from("leads").select("idioma_pref").eq("id", leadId).maybeSingle();
+    const atual = (data as { idioma_pref?: string })?.idioma_pref ?? null;
+    if (atual !== idioma) {
+      await supabase.from("leads").update({ idioma_pref: idioma }).eq("id", leadId);
+    }
+  } catch (e) {
+    logWarn(FN, "persist_idioma_failed", { leadId, err: String(e) });
+  }
+}
+
+// ── Pausa da conversa (helper partilhado horário/limites) ────────────────────
+async function pauseConversation(
+  supabase: SupabaseClient,
+  leadId: string,
+  status: string,
+  pauseReason: string,
+): Promise<void> {
+  await supabase
+    .from("ai_agent_conversations")
+    .update({ status, pause_reason: pauseReason, paused_at: new Date().toISOString() })
+    .eq("lead_id", leadId);
+}
+
+// ── Fora de horas (AC2): resposta digna + paused_by_schedule ─────────────────
+async function handleOutOfHours(
+  supabase: SupabaseClient,
+  agent: AgentConfig,
+  uazapi: { url: string; token: string },
+  item: QueueMessage,
+  lead: LeadContext,
+  phone: string,
+): Promise<void> {
+  const idioma: LeadLanguage = lead.idioma ?? "pt";
+  const msg = outOfHoursMessage(agent.settings, idioma);
+  if (phone) {
+    const deps = makeUazapiSendDeps(uazapi, phone);
+    const result = await sendHumanized(msg, deps, agent.settings);
+    await recordOutgoing(supabase, lead.lead_id, result.parts);
+  }
+  // Pausa por horário: o lock (status='active') deixa de ser adquirível; a
+  // retoma é feita por resume_scheduled_conversations() quando reabre.
+  await pauseConversation(supabase, lead.lead_id, "paused_by_schedule", "fora_de_horas");
+  // A mensagem entrante fica tratada — marca o item como completed (o conteúdo
+  // do lead permanece no histórico e será respondido na retoma, se ainda fizer
+  // sentido; não deixamos a fila a acumular tentativas fora de horas).
+  await supabase
+    .from("ai_agent_message_queue")
+    .update({ status: "completed", processed_at: new Date().toISOString() })
+    .eq("id", item.id);
+  logInfo(FN, "out_of_hours_paused", { leadId: lead.lead_id });
+}
+
+// ── Rate limits (AC1): mensagem digna + pausa se atingiu limite ──────────────
+// Devolve true se um limite foi atingido (o LLM NÃO deve ser chamado a seguir).
+async function handleRateLimitIfReached(
+  supabase: SupabaseClient,
+  agent: AgentConfig,
+  uazapi: { url: string; token: string },
+  item: QueueMessage,
+  lead: LeadContext,
+  phone: string,
+): Promise<boolean> {
+  // Contadores actuais: conversa (total_messages_sent) + janelas hora/dia.
+  const { data: conv } = await supabase
+    .from("ai_agent_conversations")
+    .select("total_messages_sent")
+    .eq("lead_id", lead.lead_id)
+    .maybeSingle();
+  const conversation = Number((conv as { total_messages_sent?: number })?.total_messages_sent ?? 0);
+
+  let hour = 0;
+  let day = 0;
+  try {
+    const { data: counts } = await supabase.rpc("get_agent_send_counts", { p_lead_id: lead.lead_id });
+    const row = Array.isArray(counts) ? counts[0] : counts;
+    hour = Number((row as { hour_count?: number })?.hour_count ?? 0);
+    day = Number((row as { day_count?: number })?.day_count ?? 0);
+  } catch (e) {
+    logWarn(FN, "get_send_counts_failed", { leadId: lead.lead_id, err: String(e) });
+  }
+
+  const counts: LimitCounts = { conversation, hour, day };
+  const decision = checkLimits(agent.settings, counts);
+  if (decision.allowed || !decision.hit) return false;
+
+  // Limite atingido: mensagem digna (nunca silêncio) + pausa.
+  const idioma: LeadLanguage = lead.idioma ?? "pt";
+  const msg = limitReachedMessage(decision.hit, idioma);
+  if (phone) {
+    const deps = makeUazapiSendDeps(uazapi, phone);
+    const result = await sendHumanized(msg, deps, agent.settings);
+    await recordOutgoing(supabase, lead.lead_id, result.parts);
+  }
+  const { status, pause_reason } = pauseStateForLimit(decision.hit);
+  await pauseConversation(supabase, lead.lead_id, status, pause_reason);
+
+  // Notifica um humano (REUSE handoff) — o lead ficou pausado por limite; alguém
+  // tem de assumir. Distinto da escalação D5: aqui já se enviou a mensagem digna.
+  await performHandoff(
+    supabase,
+    { lead_id: lead.lead_id, lead_nome: lead.nome, pause_reason: "manual", idioma, history: [] },
+    { settings: agent.settings, uazapi },
+  );
+
+  await supabase
+    .from("ai_agent_message_queue")
+    .update({ status: "completed", processed_at: new Date().toISOString() })
+    .eq("id", item.id);
+  logInfo(FN, "rate_limit_paused", { leadId: lead.lead_id, hit: decision.hit, counts });
+  return true;
+}
+
+// ── Incrementa contadores após envio (AC1) ───────────────────────────────────
+async function recordAgentSend(supabase: SupabaseClient, leadId: string): Promise<void> {
+  try {
+    // Janelas hora/dia — atómico via RPC (INSERT ON CONFLICT, migração 034).
+    await supabase.rpc("record_agent_send", { p_lead_id: leadId });
+    // total_messages_sent da conversa (+1 por resposta). Leitura+escrita simples
+    // — protegida pelo lock por lead já detido em processOne (sem race aqui).
+    const { data } = await supabase
+      .from("ai_agent_conversations")
+      .select("total_messages_sent")
+      .eq("lead_id", leadId)
+      .maybeSingle();
+    const cur = Number((data as { total_messages_sent?: number })?.total_messages_sent ?? 0);
+    await supabase.from("ai_agent_conversations").update({ total_messages_sent: cur + 1 }).eq("lead_id", leadId);
+  } catch (e) {
+    logWarn(FN, "record_send_failed", { leadId, err: String(e) });
+  }
+}
+
 // ── Processa uma mensagem da fila (com lock por lead) ────────────────────────
 async function processOne(
   supabase: SupabaseClient,
@@ -411,6 +547,26 @@ async function processOne(
     // Resolve telefone do lead (necessário tanto para escalação como para envio).
     const { data: leadRow } = await supabase.from("leads").select("telefone").eq("id", lid).maybeSingle();
     const phone = normalizeAngolaPhone((leadRow as { telefone?: string })?.telefone || "");
+
+    // Persiste o idioma detectado no lead (AC3) — para as próximas mensagens já
+    // arrancarem no idioma certo (idioma_pref alimenta L2 do prompt). Só escreve
+    // se mudou, para não fazer UPDATEs inúteis.
+    await persistIdiomaPref(supabase, lid, lead.idioma ?? "pt");
+
+    // ── HORÁRIO DE FUNCIONAMENTO (§AC2) — ANTES de tudo ─────────────────────
+    // Fora de horas: resposta digna + pausa por horário. A retoma automática é
+    // feita por resume_scheduled_conversations() no início do process_queue.
+    const wh = isWithinWorkingHours(agent.settings, new Date());
+    if (!wh.open) {
+      await handleOutOfHours(supabase, agent, uazapi, item, lead, phone);
+      return true;
+    }
+
+    // ── RATE LIMITS (§AC1) — ANTES do LLM ───────────────────────────────────
+    // Contadores: conversa (total_messages_sent) + janelas hora/dia (BD, §8.5).
+    // Se um limite já foi atingido: mensagem digna + pausa (nunca silêncio).
+    const limited = await handleRateLimitIfReached(supabase, agent, uazapi, item, lead, phone);
+    if (limited) return true;
 
     // ── ESCALAÇÃO DETERMINÍSTICA (§5.2) — ANTES do LLM ──────────────────────
     // Se dispara um gatilho hard (human_request/urgent/escalation_d5) ou
@@ -457,6 +613,12 @@ async function processOne(
 
     // Grava outgoing (uma linha por balão enviado).
     await recordOutgoing(supabase, lid, sentParts);
+
+    // Incrementa contadores de rate limit (AC1): 1 RESPOSTA do agente = 1 envio
+    // (não conta balões). Só se algo foi realmente enviado.
+    if (sentParts.length > 0) {
+      await recordAgentSend(supabase, lid);
+    }
 
     // Log de tokens.
     await supabase.from("ai_agent_logs").insert({
@@ -508,6 +670,20 @@ export async function handleProcessQueue(supabase: SupabaseClient): Promise<{ pr
     return { processed: 0 };
   }
 
+  // Retoma automática (AC2): se estamos DENTRO do horário, reactiva as conversas
+  // que ficaram pausadas por horário (paused_by_schedule) — a fila pendente volta
+  // a ser processada. Só reactiva pausas por HORÁRIO (nunca por humano/transfer).
+  if (isWithinWorkingHours(agent.settings, new Date()).open) {
+    try {
+      const { data: resumed } = await supabase.rpc("resume_scheduled_conversations");
+      if (typeof resumed === "number" && resumed > 0) {
+        logInfo(FN, "scheduled_resumed", { count: resumed });
+      }
+    } catch (e) {
+      logWarn(FN, "resume_scheduled_failed", { err: String(e) });
+    }
+  }
+
   const batch = Number(agent.settings.queue_batch_size ?? 5);
   const { data: claimed, error } = await supabase.rpc("claim_queue_messages", { p_batch_size: batch });
   if (error) {
@@ -522,6 +698,82 @@ export async function handleProcessQueue(supabase: SupabaseClient): Promise<{ pr
     if (ok) processed++;
   }
   return { processed };
+}
+
+// ── Entrada: lembretes_tick (do cron `lembretes-tick`, migração 032) ─────────
+// Lembrete D-1 da Consulta de Orientação (Story 3.5, AC5). Selecciona consultas
+// vivas nas próximas 24h ainda não lembradas, envia UM lembrete WhatsApp ao lead
+// e marca `lembrete_24h_enviado=true` (idempotente — a flag evita duplicados).
+export async function handleLembretesTick(supabase: SupabaseClient): Promise<{ reminded: number }> {
+  const uazapi = await getUazapiConfig(supabase);
+  if (!uazapi) {
+    logError(FN, "lembretes_no_uazapi", {});
+    return { reminded: 0 };
+  }
+
+  const now = new Date();
+  const in24h = new Date(now.getTime() + 24 * 3600000).toISOString();
+
+  // Query enxuta: só consultas vivas, não lembradas, dentro da próxima janela de
+  // 24h. O índice parcial idx_consultations_scheduled cobre estado; a régra de
+  // tempo é reconfirmada em memória por isDueForReminder (dupla-verificação).
+  const { data, error } = await supabase
+    .from("consultations")
+    .select("id, lead_id, scheduled_at, timezone, estado, lembrete_24h_enviado")
+    .in("estado", ["agendada", "confirmada"])
+    .eq("lembrete_24h_enviado", false)
+    .gt("scheduled_at", now.toISOString())
+    .lte("scheduled_at", in24h);
+
+  if (error) {
+    logError(FN, "lembretes_query_failed", { err: error.message });
+    return { reminded: 0 };
+  }
+
+  const rows = (data as ConsultationRow[]) ?? [];
+  let reminded = 0;
+
+  for (const c of rows) {
+    if (!isDueForReminder(c, now)) continue;
+
+    // Resolve telefone + idioma do lead.
+    const { data: leadRow } = await supabase
+      .from("leads")
+      .select("telefone, idioma_pref")
+      .eq("id", c.lead_id)
+      .maybeSingle();
+    const lr = (leadRow as { telefone?: string; idioma_pref?: string }) ?? {};
+    const phone = normalizeAngolaPhone(lr.telefone || "");
+    if (!phone) {
+      logWarn(FN, "lembrete_no_phone", { consultationId: c.id, leadId: c.lead_id });
+      continue;
+    }
+    const idioma: LeadLanguage = lr.idioma_pref === "en" ? "en" : "pt";
+
+    const text = buildReminderMessage(c, idioma);
+    const deps = makeUazapiSendDeps(uazapi, phone);
+    let sent: string | null = null;
+    try {
+      sent = await deps.sendText(text);
+    } catch (e) {
+      logError(FN, "lembrete_send_error", { consultationId: c.id, err: String(e) });
+    }
+
+    // Só marca a flag se o envio foi aceite (senão volta a tentar no próximo tick).
+    if (sent) {
+      await supabase
+        .from("consultations")
+        .update({ lembrete_24h_enviado: true, updated_at: new Date().toISOString() })
+        .eq("id", c.id);
+      // Regista o outgoing na conversa (rasto no inbox/timeline).
+      await recordOutgoing(supabase, c.lead_id, [text]);
+      reminded++;
+      logInfo(FN, "lembrete_sent", { consultationId: c.id, leadId: c.lead_id });
+    }
+  }
+
+  logInfo(FN, "lembretes_tick_done", { candidates: rows.length, reminded });
+  return { reminded };
 }
 
 // ── Entrada de teste: test_prompt (monta o prompt e devolve, sem enviar) ─────

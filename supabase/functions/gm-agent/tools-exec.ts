@@ -1,11 +1,12 @@
 // ============================================================================
-// Execução REAL das tools do agente — Story 3.4 (AC1, AC4, AC6).
+// Execução REAL das tools do agente — Stories 3.4 e 3.5.
 // ----------------------------------------------------------------------------
-// Substitui o `executeToolPlaceholder` (tools.ts) para as tools desta story:
-//   • qualify_lead          → invoca a inteligência de lead (Haiku + score + UPDATE)
-//   • criar_ficha_estudante → upsert em `fichas_estudante` SEM inventar (AC4)
-// As outras 3 tools (check_availability, schedule_consultation) ficam para a
-// 3.5 e continuam a devolver o placeholder seguro.
+// Substitui o `executeToolPlaceholder` (tools.ts) para as tools destas stories:
+//   • qualify_lead          → invoca a inteligência de lead (Haiku + score + UPDATE)   [3.4]
+//   • criar_ficha_estudante → upsert em `fichas_estudante` SEM inventar (AC4)          [3.4]
+//   • check_availability    → FreeBusy do Google × janelas → 2–3 slots livres          [3.5]
+//   • schedule_consultation → cria evento + fase + consultations + confirma            [3.5]
+// A tool `notificar_humano` é mecânica pré-LLM (3.3) e cai no placeholder aqui.
 //
 // Regras transversais:
 //   • Resposta de CONTINUIDADE (AC6): o resultado devolvido ao loop é sempre um
@@ -34,6 +35,14 @@ import {
 } from "./lead-intelligence.ts";
 import { performHandoff } from "./handoff.ts";
 import { executeToolPlaceholder } from "./tools.ts";
+import {
+  parseWindows,
+  generateSlots,
+  buildSlotsMessage,
+  validateChosenSlot,
+  formatSlotLabel,
+} from "./scheduling.ts";
+import { getGoogleCalendarClient } from "../_shared/google-calendar.ts";
 import type { AgentConfig, LeadContext, LeadLanguage } from "./types.ts";
 
 const FN = "gm-agent-tools";
@@ -243,9 +252,263 @@ async function execCriarFicha(
   );
 }
 
+// ── Escalação por indisponibilidade da agenda Google (AC6) ───────────────────
+// Quando o Google Calendar está indisponível (sem credenciais / token expirado /
+// API em erro), NUNCA se inventa disponibilidade. Notifica-se um consultor
+// (REUSE performHandoff da 3.3) e dá-se ao lead uma resposta de continuidade.
+async function escalateAgendaUnavailable(
+  supabase: SupabaseClient,
+  agent: AgentConfig,
+  uazapi: { url: string; token: string } | null,
+  idioma: LeadLanguage,
+  lead: LeadContext,
+  history: Array<{ role: "user" | "assistant"; content: string }>,
+): Promise<void> {
+  try {
+    await performHandoff(
+      supabase,
+      {
+        lead_id: lead.lead_id,
+        lead_nome: lead.nome ?? null,
+        pause_reason: "urgent",
+        idioma,
+        history,
+      },
+      { settings: agent.settings, uazapi },
+    );
+  } catch (e) {
+    logError(FN, "agenda_escalation_failed", { leadId: lead.lead_id, err: String(e) });
+  }
+}
+
+// ── Executor: check_availability (AC1, AC2, AC4) ─────────────────────────────
+// Intersecta as janelas acordadas (settings.consulta_windows, placeholder até
+// 14/07) com a ocupação FreeBusy do Google → 2–3 slots FUTUROS. Falha Google →
+// continuidade + escalação (AC6). Nunca inventa disponibilidade.
+async function execCheckAvailability(
+  supabase: SupabaseClient,
+  agent: AgentConfig,
+  uazapi: { url: string; token: string } | null,
+  lead: LeadContext,
+  history: Array<{ role: "user" | "assistant"; content: string }>,
+): Promise<string> {
+  const idioma: LeadLanguage = lead.idioma ?? "pt";
+  const cfg = parseWindows(agent.settings.consulta_windows);
+  const now = new Date();
+
+  let gcal;
+  try {
+    gcal = await getGoogleCalendarClient(supabase);
+  } catch (e) {
+    logError(FN, "gcal_client_error", { err: String(e) });
+    gcal = null;
+  }
+
+  // Sem credenciais/cliente → NÃO inventa agenda. Escala + continuidade (AC6).
+  if (!gcal) {
+    logInfo(FN, "check_availability_no_gcal", { leadId: lead.lead_id });
+    await escalateAgendaUnavailable(supabase, agent, uazapi, idioma, lead, history);
+    return continuity(
+      false,
+      "Não consigo consultar a agenda automaticamente agora. Diz ao lead que um consultor vai combinar o melhor horário para a consulta, sem mencionar problemas técnicos.",
+      { degraded: true, escalated: true },
+    );
+  }
+
+  // Horizonte de procura: de agora até horizonte_dias à frente.
+  const timeMin = now.toISOString();
+  const timeMax = new Date(now.getTime() + cfg.horizonte_dias * 86400000).toISOString();
+
+  let busy;
+  try {
+    busy = await gcal.freeBusy(timeMin, timeMax);
+  } catch (e) {
+    logError(FN, "freebusy_failed", { leadId: lead.lead_id, err: String(e) });
+    await escalateAgendaUnavailable(supabase, agent, uazapi, idioma, lead, history);
+    return continuity(
+      false,
+      "Não consegui obter a disponibilidade agora. Diz ao lead que um consultor vai combinar o horário da consulta, com naturalidade.",
+      { degraded: true, escalated: true },
+    );
+  }
+
+  const slots = generateSlots(cfg, busy, now, 3);
+  logInfo(FN, "check_availability_slots", { leadId: lead.lead_id, count: slots.length });
+
+  // Sem slots livres → mensagem honesta + oferta de handoff (não escala já; o
+  // agente oferece encaminhar). Com slots → oferece 2–3 ao lead com fuso.
+  return continuity(
+    slots.length > 0,
+    buildSlotsMessage(slots, cfg.timezone, idioma),
+    { slots, timezone: cfg.timezone },
+  );
+}
+
+// ── Executor: schedule_consultation (AC3, AC4, AC5) ──────────────────────────
+// Valida o slot (futuro + dentro da janela), cria/reagenda o evento no Google,
+// grava a linha em `consultations` (INSERT ou UPDATE do MESMO evento — nunca
+// duplica), avança candidaturas.fase='consulta_agendada' + mudancas_estagio, e
+// confirma na conversa com data/hora + fuso explícito.
+async function execScheduleConsultation(
+  supabase: SupabaseClient,
+  agent: AgentConfig,
+  uazapi: { url: string; token: string } | null,
+  lead: LeadContext,
+  history: Array<{ role: "user" | "assistant"; content: string }>,
+  input: Record<string, unknown>,
+): Promise<string> {
+  const idioma: LeadLanguage = lead.idioma ?? "pt";
+  const cfg = parseWindows(agent.settings.consulta_windows);
+  const now = new Date();
+
+  const slotIso = typeof input.slot_iso === "string" ? input.slot_iso : "";
+  const nomeLead = typeof input.nome_lead === "string" ? input.nome_lead : (lead.nome ?? null);
+
+  // AC4: nunca no passado + dentro da janela acordada.
+  const v = validateChosenSlot(cfg, slotIso, now);
+  if (!v.ok || !v.iso) {
+    const motivo =
+      v.reason === "past"
+        ? "Esse horário já passou. Oferece um horário futuro (usa check_availability se precisares)."
+        : v.reason === "out_of_window"
+          ? "Esse horário está fora das janelas de consulta disponíveis. Volta a oferecer os horários livres com check_availability."
+          : "Não percebi bem o horário. Confirma com o lead uma data e hora e usa check_availability para oferecer opções válidas.";
+    logInfo(FN, "schedule_slot_rejected", { leadId: lead.lead_id, reason: v.reason });
+    return continuity(false, motivo, { rejected: v.reason });
+  }
+
+  const startIso = v.iso;
+  const endIso = new Date(Date.parse(startIso) + cfg.duracao_minutos * 60000).toISOString();
+  const label = formatSlotLabel(cfg.timezone, new Date(startIso));
+
+  let gcal;
+  try {
+    gcal = await getGoogleCalendarClient(supabase);
+  } catch (e) {
+    logError(FN, "gcal_client_error", { err: String(e) });
+    gcal = null;
+  }
+  if (!gcal) {
+    logInfo(FN, "schedule_no_gcal", { leadId: lead.lead_id });
+    await escalateAgendaUnavailable(supabase, agent, uazapi, idioma, lead, history);
+    return continuity(
+      false,
+      "Não consigo confirmar a marcação na agenda automaticamente agora. Diz ao lead que um consultor vai confirmar a consulta em breve, com naturalidade.",
+      { degraded: true, escalated: true },
+    );
+  }
+
+  // Reagendamento (AC5): existe já uma consulta activa deste lead? → PATCH do
+  // MESMO evento e UPDATE da MESMA linha (nunca duplica no calendar nem na BD).
+  const { data: existing } = await supabase
+    .from("consultations")
+    .select("id, google_event_id")
+    .eq("lead_id", lead.lead_id)
+    .in("estado", ["agendada", "confirmada"])
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const existingRow = existing as { id: string; google_event_id: string | null } | null;
+
+  const summary = `Consulta de Orientação — Global Minds${nomeLead ? ` (${nomeLead})` : ""}`;
+  const description = `Consulta de Orientação agendada pelo assistente. Lead: ${nomeLead ?? lead.lead_id}.`;
+
+  let eventId: string;
+  try {
+    if (existingRow?.google_event_id) {
+      await gcal.patchEvent(existingRow.google_event_id, { summary, description, startIso, endIso, timezone: cfg.timezone });
+      eventId = existingRow.google_event_id;
+    } else {
+      const created = await gcal.createEvent({ summary, description, startIso, endIso, timezone: cfg.timezone });
+      eventId = created.eventId;
+    }
+  } catch (e) {
+    logError(FN, "gcal_event_failed", { leadId: lead.lead_id, err: String(e) });
+    await escalateAgendaUnavailable(supabase, agent, uazapi, idioma, lead, history);
+    return continuity(
+      false,
+      "Não consegui gravar a marcação na agenda agora. Diz ao lead que um consultor vai confirmar a consulta, sem mencionar problemas técnicos.",
+      { degraded: true, escalated: true },
+    );
+  }
+
+  // Grava a linha em `consultations` (INSERT ou UPDATE da existente — AC3/AC5).
+  try {
+    if (existingRow?.id) {
+      await supabase
+        .from("consultations")
+        .update({
+          google_event_id: eventId,
+          scheduled_at: startIso,
+          timezone: cfg.timezone,
+          estado: "agendada",
+          lembrete_24h_enviado: false, // reinicia o lembrete para o novo horário
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", existingRow.id);
+    } else {
+      await supabase.from("consultations").insert({
+        lead_id: lead.lead_id,
+        google_event_id: eventId,
+        scheduled_at: startIso,
+        timezone: cfg.timezone,
+        estado: "agendada",
+      });
+    }
+  } catch (e) {
+    logError(FN, "consultation_persist_failed", { leadId: lead.lead_id, err: String(e) });
+    // O evento no calendar já existe; não escala (o lembrete/dashboard pode
+    // recuperar). Continua a conversa confirmando o horário.
+  }
+
+  // Avança a candidatura para 'consulta_agendada' + mudancas_estagio (AC3). O
+  // trigger 017 audita mudanças de fase em `candidaturas`; ao actualizar a fase
+  // aqui, o registo em mudancas_estagio é feito por esse trigger.
+  await advanceCandidaturaToConsulta(supabase, lead.lead_id);
+
+  const fuso = cfg.timezone === "Africa/Luanda" ? (idioma === "en" ? "Luanda time" : "hora de Luanda") : cfg.timezone;
+  logInfo(FN, "consultation_scheduled", { leadId: lead.lead_id, eventId, when: startIso, reschedule: !!existingRow });
+  return continuity(
+    true,
+    `Consulta ${existingRow ? "reagendada" : "marcada"} para ${label} (${fuso}). Confirma ao lead com a data, hora e fuso, agradece e diz que recebe um lembrete no dia anterior.`,
+    { scheduled_at: startIso, timezone: cfg.timezone, reschedule: !!existingRow },
+  );
+}
+
+// Avança a candidatura activa do lead para 'consulta_agendada'. Se não houver
+// candidatura, cria uma leve (o pipeline de candidaturas é o registo de fase).
+// O trigger 017 audita a mudança em mudancas_estagio.
+async function advanceCandidaturaToConsulta(
+  supabase: SupabaseClient,
+  leadId: string,
+): Promise<void> {
+  try {
+    const { data: cand } = await supabase
+      .from("candidaturas")
+      .select("id, fase")
+      .eq("lead_id", leadId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const row = cand as { id: string; fase: string } | null;
+
+    if (row?.id) {
+      // Não regride quem já passou de 'consulta_agendada'.
+      const ordem = ["lead", "qualificado", "consulta_agendada"];
+      if (ordem.includes(row.fase)) {
+        await supabase.from("candidaturas").update({ fase: "consulta_agendada", fase_desde: new Date().toISOString() }).eq("id", row.id);
+      }
+    } else {
+      await supabase.from("candidaturas").insert({ lead_id: leadId, fase: "consulta_agendada" });
+    }
+  } catch (e) {
+    logError(FN, "advance_candidatura_failed", { leadId, err: String(e) });
+  }
+}
+
 // ── Ponto de entrada: executa uma tool pelo nome ─────────────────────────────
 // Devolve SEMPRE uma string JSON de continuidade para o `tool_result` do loop.
-// As tools não implementadas nesta story caem no placeholder seguro (3.5).
+// A tool `notificar_humano` (mecânica pré-LLM 3.3) cai no placeholder seguro.
 export interface ExecToolContext {
   supabase: SupabaseClient;
   agent: AgentConfig;
@@ -273,7 +536,24 @@ export async function executeTool(
         );
       case "criar_ficha_estudante":
         return await execCriarFicha(ctx.supabase, ctx.lead, input);
-      // check_availability / schedule_consultation / notificar_humano → 3.5 / pré-LLM.
+      case "check_availability":
+        return await execCheckAvailability(
+          ctx.supabase,
+          ctx.agent,
+          ctx.uazapi,
+          ctx.lead,
+          ctx.history,
+        );
+      case "schedule_consultation":
+        return await execScheduleConsultation(
+          ctx.supabase,
+          ctx.agent,
+          ctx.uazapi,
+          ctx.lead,
+          ctx.history,
+          input,
+        );
+      // notificar_humano → mecânica pré-LLM (3.3); aqui cai no placeholder seguro.
       default:
         return executeToolPlaceholder(name);
     }

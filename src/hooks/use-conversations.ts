@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { ConversaActiva, ConversationStatus } from '@/types/database'
 
-type FiltroModo = 'todas' | 'bot' | 'humano' | 'pendentes'
+type FiltroModo = 'todas' | 'bot' | 'humano' | 'pendentes' | 'transferidas'
 
 const PAGE_SIZE = 30
 
@@ -29,11 +29,13 @@ export function useConversations() {
       .range(from, to)
 
     if (currentFiltro === 'bot') {
-      query = query.eq('modo', 'bot')
+      query = query.eq('estado', 'active')
     } else if (currentFiltro === 'humano') {
-      query = query.eq('modo', 'humano')
+      query = query.eq('estado', 'paused_by_human')
     } else if (currentFiltro === 'pendentes') {
       query = query.eq('estado', 'paused_by_human')
+    } else if (currentFiltro === 'transferidas') {
+      query = query.eq('estado', 'transferred')
     }
 
     if (currentSearch.trim()) {
@@ -102,9 +104,15 @@ export function useConversations() {
   }, [supabase, fetchConversas])
 
   const assumirConversa = useCallback(async (conversaId: string) => {
+    // AC2: assumir → paused_by_human COM pause_reason='manual' (o operador tomou
+    // o controlo manualmente pela inbox).
     const { error } = await supabase
       .from('ai_agent_conversations')
-      .update({ status: 'paused_by_human' as ConversationStatus })
+      .update({
+        status: 'paused_by_human' as ConversationStatus,
+        pause_reason: 'manual',
+        paused_at: new Date().toISOString(),
+      })
       .eq('id', conversaId)
 
     if (error) throw new Error(`Falha ao assumir conversa: ${error.message}`)

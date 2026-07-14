@@ -1,8 +1,8 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { Bot, Hand, AlertCircle } from 'lucide-react'
-import type { ConversaActiva } from '@/types/database'
+import { Bot, Hand, Clock, PhoneForwarded, CheckCircle2 } from 'lucide-react'
+import type { ConversaActiva, ConversationStatus } from '@/types/database'
 
 interface ConversationItemProps {
   conversa: ConversaActiva
@@ -30,16 +30,21 @@ function truncar(texto: string | null, max: number): string {
   return texto.slice(0, max) + '...'
 }
 
-const MODO_CONFIG = {
-  bot: { label: 'Bot', icon: Bot, bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
-  humano: { label: 'Humano', icon: Hand, bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-  pausado: { label: 'Pausado', icon: AlertCircle, bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200' },
-} as const
+// Badge por ESTADO real (os 5 valores do enum), rótulos pt-AO óbvios para a
+// Ana e o Rinaldo (não-técnicos). AC1: estado do agente sempre visível.
+const ESTADO_CONFIG: Record<ConversationStatus, { label: string; icon: typeof Bot; bg: string; text: string; border: string }> = {
+  active: { label: 'IA activa', icon: Bot, bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+  paused_by_human: { label: 'Assumida', icon: Hand, bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
+  transferred: { label: 'Transferida', icon: PhoneForwarded, bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-300' },
+  paused_by_schedule: { label: 'Fora de horas', icon: Clock, bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200' },
+  completed: { label: 'Concluída', icon: CheckCircle2, bg: 'bg-gray-50', text: 'text-gray-600', border: 'border-gray-200' },
+}
 
 export function ConversationItem({ conversa, isSelected, onClick }: ConversationItemProps) {
-  const modoKey = conversa.modo as keyof typeof MODO_CONFIG
-  const modo = MODO_CONFIG[modoKey] || MODO_CONFIG.bot
+  const modo = ESTADO_CONFIG[conversa.estado] ?? ESTADO_CONFIG.active
   const ModoIcon = modo.icon
+  // AC5: conversas transferidas destacadas para triagem rápida.
+  const isTransferida = conversa.estado === 'transferred'
   const nomeCliente = conversa.cliente_nome || 'Cliente sem nome'
   const avatar = nomeCliente.charAt(0).toUpperCase()
 
@@ -50,7 +55,9 @@ export function ConversationItem({ conversa, isSelected, onClick }: Conversation
         'w-full flex items-start gap-3 px-4 py-3.5 text-left transition-all border-b border-brand-50',
         isSelected
           ? 'bg-rose-50 border-l-2 border-l-rose-500'
-          : 'hover:bg-rose-50/50 border-l-2 border-l-transparent'
+          : isTransferida
+            ? 'bg-orange-50/60 border-l-2 border-l-orange-400 hover:bg-orange-50'
+            : 'hover:bg-rose-50/50 border-l-2 border-l-transparent'
       )}
     >
       {/* Avatar */}

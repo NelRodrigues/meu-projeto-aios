@@ -1,10 +1,11 @@
 // ============================================================================
 // Declaração das tools do agente (formato Anthropic tool-use). Story 3.2.
 //
-// AQUI só há DECLARAÇÃO/schema — a EXECUÇÃO real é das stories 3.4/3.5.
-// Enquanto não há execução, `executeToolPlaceholder` devolve uma continuação
-// segura (nunca fallback técnico ao lead). O schema tem de coincidir com o
-// seed em `029_seed_agent.sql` (ai_agent_tools).
+// AQUI só há DECLARAÇÃO/schema — a EXECUÇÃO real vive em tools-exec.ts (stories
+// 3.4 e 3.5). `executeToolPlaceholder` é a rede de segurança para tools ainda
+// sem executor (hoje só `notificar_humano`, cuja mecânica é pré-LLM na 3.3):
+// devolve uma continuação segura, nunca um fallback técnico ao lead. O schema
+// tem de coincidir com o seed em `029_seed_agent.sql` (ai_agent_tools).
 // ============================================================================
 
 export type ToolDefinition = {

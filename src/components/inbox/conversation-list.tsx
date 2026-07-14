@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import { ConversationItem } from './conversation-item'
 import type { ConversaActiva } from '@/types/database'
 
-type FiltroModo = 'todas' | 'bot' | 'humano' | 'pendentes'
+type FiltroModo = 'todas' | 'bot' | 'humano' | 'pendentes' | 'transferidas'
 
 interface ConversationListProps {
   conversas: ConversaActiva[]
@@ -23,9 +23,9 @@ interface ConversationListProps {
 
 const FILTROS = [
   { id: 'todas', label: 'Todas' },
-  { id: 'bot', label: 'Bot' },
-  { id: 'humano', label: 'Humano' },
-  { id: 'pendentes', label: 'Pendentes' },
+  { id: 'bot', label: 'IA activa' },
+  { id: 'humano', label: 'Assumidas' },
+  { id: 'transferidas', label: 'Transferidas' },
 ] as const
 
 export function ConversationList({
