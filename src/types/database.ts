@@ -1,0 +1,391 @@
+// ============================================================
+// SIC Global Minds — Database Types
+// ============================================================
+
+// ========================
+// ENUM Types
+// ========================
+
+export type ClienteEstagio =
+  | 'novo'
+  | 'contactado'
+  | 'orcamento'
+  | 'activo'
+  | 'vip'
+  | 'inactivo'
+
+export type OrigemCanal =
+  | 'whatsapp'
+  | 'instagram'
+  | 'referencia'
+  | 'outro'
+
+export type InteractionType =
+  | 'nota'
+  | 'chamada'
+  | 'mensagem_whatsapp'
+  | 'email'
+  | 'visita'
+  | 'seguimento'
+
+// ========================
+// Table Interfaces
+// ========================
+
+// Contacto nuclear do CRM. Na base de dados a tabela chama-se `leads`
+// (renomeada a partir de `clientes` na migracao 002); mantemos o nome de
+// dominio "Cliente"/"Lead" no frontend para leitura clara.
+export interface Cliente {
+  id: string
+  created_at: string
+  updated_at: string
+  nome: string
+  telefone: string | null
+  whatsapp_id: string | null
+  email: string | null
+  estagio: ClienteEstagio
+  origem: OrigemCanal | null
+  notas: string | null
+  morada: string | null
+  data_aniversario: string | null
+  lead_intelligence: Record<string, unknown> | null
+  lead_intelligence_at: string | null
+  total_pedidos: number
+  total_gasto: number
+  ticket_medio: number
+  ultima_compra: string | null
+  criado_por_bot: boolean
+}
+
+export interface Interacao {
+  id: string
+  created_at: string
+  lead_id: string
+  tipo: InteractionType | null
+  conteudo: string | null
+  criado_por: string | null
+}
+
+export interface MessageTemplate {
+  id: string
+  created_at: string
+  updated_at: string
+  nome: string
+  categoria: string | null
+  conteudo: string
+  activo: boolean
+}
+
+// ========================
+// Catálogo: parceiros → destinos → programas (story 2.2)
+// ========================
+
+// Tipos de programa — CHECK na migração 008 (§2.5). Nunca enum na BD.
+export type ProgramaTipo =
+  | 'summer_camp'
+  | 'linguas'
+  | 'foundation'
+  | 'licenciatura'
+  | 'mestrado'
+  | 'voluntariado'
+  | 'outro'
+
+export interface Parceiro {
+  id: string
+  created_at: string
+  updated_at: string
+  nome: string
+  tipo: string | null
+  comissao_percent: number | null
+  website: string | null
+  brochura_url: string | null
+  notas: string | null
+  is_active: boolean
+}
+
+export interface Destino {
+  id: string
+  created_at: string
+  updated_at: string
+  parceiro_id: string | null
+  pais: string
+  cidade: string | null
+  custo_vida_faixa: string | null
+  custo_vida_currency: string | null
+  notas: string | null
+}
+
+export interface Programa {
+  id: string
+  created_at: string
+  updated_at: string
+  destino_id: string | null
+  nome: string
+  tipo: ProgramaTipo
+  custo_min: number | null
+  custo_max: number | null
+  currency: string | null
+  comissao_percent: number | null
+  duracao: string | null
+  brochura_url: string | null
+  link: string | null
+  is_active: boolean
+}
+
+// ========================
+// Candidaturas: pipeline 8 fases (story 2.3)
+// ========================
+
+// As 8 fases reais do enum `pipeline_fase` (§2.1). Rótulos/ordem em lib/pipeline-fases.ts.
+export type PipelineFase =
+  | 'lead'
+  | 'qualificado'
+  | 'consulta_agendada'
+  | 'proposta_enviada'
+  | 'formalizacao_pagamento'
+  | 'candidatura_submetida'
+  | 'em_curso'
+  | 'concluido'
+
+// Espelha a tabela `candidaturas` (migração 009). `fase_desde`/`prazo_fase_dias`
+// alimentam o "tempo em fase" e a sinalização de atraso; o trigger 017 mantém
+// `fase_desde`, a auditoria e o espelhamento em `leads.pipeline_fase`.
+export interface Candidatura {
+  id: string
+  created_at: string
+  updated_at: string
+  lead_id: string
+  ficha_id: string | null
+  programa_id: string | null
+  parceiro_id: string | null
+  fase: PipelineFase
+  fase_desde: string | null
+  prazo_fase_dias: number | null
+  estado_documental: string | null
+  notas: string | null
+}
+
+// Cartão do kanban — candidatura enriquecida com o essencial para decisão
+// (nome do lead, programa/destino via catálogo, temperature do lead).
+export interface CandidaturaCartao extends Candidatura {
+  lead_nome: string
+  lead_temperature: 'quente' | 'morno' | 'frio' | null
+  programa_nome: string | null
+  destino_pais: string | null
+}
+
+// ========================
+// Financeiro: honorários, comissões multi-moeda e facturas (story 2.6)
+// ========================
+
+// Espelham os CHECK da migração 025. Moeda é sempre CHAR(3) livre (string),
+// NUNCA enum — ISO 4217 validado por regex (§2.1).
+export type FinanceiroTipo = 'honorario' | 'comissao'
+export type FinanceiroEstado = 'previsto' | 'facturado' | 'recebido' | 'anulado'
+export type FacturaEstado = 'pendente' | 'enviada' | 'paga' | 'vencida' | 'cancelada'
+
+// Espelha a tabela `financeiro` (migração 025). `contravalor_aoa = valor × taxa`,
+// calculado à taxa do dia editável (input manual, nunca buscado). Consumido por
+// `v_rfv_leads` (story 2.7) como dimensão Valor — registos sem contravalor não contam.
+export interface Financeiro {
+  id: string
+  created_at: string
+  updated_at: string
+  candidatura_id: string | null
+  lead_id: string | null
+  parceiro_id: string | null
+  tipo: FinanceiroTipo
+  valor: number
+  currency: string
+  taxa_cambio_aoa: number | null
+  contravalor_aoa: number | null
+  percentagem: number | null
+  estado: FinanceiroEstado
+  notas: string | null
+}
+
+// Espelha a tabela `facturas` (migração 025). `lembrete_d5_enviado` garante a
+// idempotência do lembrete interno D-5 (função `financeiro_lembretes_d5`).
+export interface Factura {
+  id: string
+  created_at: string
+  updated_at: string
+  financeiro_id: string | null
+  lead_id: string | null
+  numero: string | null
+  valor: number
+  currency: string
+  vencimento: string // ISO date
+  estado: FacturaEstado
+  lembrete_d5_enviado: boolean
+}
+
+// ========================
+// Ficha de estudante 360º (story 2.4)
+// ========================
+
+// Estado documental de item da checklist — enum `documento_estado` (§2.1),
+// aplicado por validação aplicacional (o JSONB não tem CHECK por item).
+export type DocumentoEstado = 'em_falta' | 'recebido' | 'validado' | 'rejeitado'
+
+// Item da checklist documental guardado em `fichas_estudante.documentos` (JSONB).
+export interface DocumentoItem {
+  tipo: string
+  estado: DocumentoEstado
+  url: string | null
+  updated_at: string
+}
+
+// Espelha a tabela `fichas_estudante` (migração 009). 1:1 com `leads` via
+// `lead_id UNIQUE`. `processo_em_curso` bloqueia a rotina de retenção de 2 anos.
+export interface FichaEstudante {
+  id: string
+  created_at: string
+  updated_at: string
+  lead_id: string
+  nome_completo: string | null
+  data_nascimento: string | null
+  nacionalidade: string | null
+  encarregado_nome: string | null
+  encarregado_contacto: string | null
+  encarregado_relacao: string | null
+  percurso_academico: string | null
+  nivel_linguistico: string | null
+  destino_pretendido: string | null
+  programa_pretendido_id: string | null
+  orcamento_faixa: string | null
+  processo_em_curso: boolean
+  documentos: DocumentoItem[] | null
+  notas: string | null
+}
+
+// ========================
+// AI Agent / WhatsApp Types
+// ========================
+
+export type WhatsAppSenderType = 'cliente' | 'bot' | 'humano' | 'sistema'
+export type WhatsAppDirection = 'incoming' | 'outgoing' | 'internal'
+export type WhatsAppMessageStatus = 'sent' | 'delivered' | 'read' | 'failed'
+export type ConversationStatus = 'active' | 'paused_by_human' | 'paused_by_schedule' | 'transferred' | 'completed'
+// `modo` derivado na view v_conversas_activas (035): filtro rápido da inbox.
+export type ModoConversa = 'bot' | 'humano' | 'transferida' | 'pausada' | 'pausado'
+export type ScoreConfidence = 'low' | 'medium' | 'high'
+export type Temperature = 'quente' | 'morno' | 'frio'
+
+export interface MensagemWhatsApp {
+  id: string
+  created_at: string
+  lead_id: string
+  sender_type: WhatsAppSenderType
+  conteudo: string
+  direction: WhatsAppDirection
+  message_status: WhatsAppMessageStatus
+  whatsapp_message_id: string | null
+  media_url: string | null
+  media_type: string | null
+  intencao_classificada: string | null
+  confianca_resposta: number | null
+  modelo_llm: string | null
+  tokens_input: number | null
+  tokens_output: number | null
+  latencia_ms: number | null
+}
+
+export interface AiAgentConversation {
+  id: string
+  created_at: string
+  updated_at: string
+  lead_id: string
+  agent_id: string
+  status: ConversationStatus
+  total_messages_sent: number
+  paused_by: string | null
+  paused_at: string | null
+  pause_reason: string | null
+  last_processed_at: string | null
+}
+
+// ========================
+// View: v_conversas_activas
+// ========================
+
+export interface ConversaActiva {
+  conversa_id: string
+  lead_id: string
+  cliente_nome: string
+  telefone: string | null
+  modo: ModoConversa
+  estado: ConversationStatus
+  pause_reason: string | null
+  total_messages_sent: number
+  ultima_mensagem: string | null
+  ultimo_remetente: WhatsAppSenderType | null
+  ultima_mensagem_em: string | null
+  estagio: ClienteEstagio
+  // Painel do contacto (AC1) — enriquecido pela view 035.
+  fase: PipelineFase | null
+  sales_score: number | null
+  score_confidence: ScoreConfidence | null
+  temperature: Temperature | null
+  bant_budget: string | null
+  bant_authority: string | null
+  bant_need: string | null
+  bant_timeline: string | null
+  destino: string | null
+  nivel: string | null
+  orcamento: string | null
+  idioma_pref: string | null
+}
+
+// ========================
+// Notifications
+// ========================
+
+export type NotificacaoTipo = 'takeover' | 'pagamento' | 'urgente' | 'conflito_calendario' | 'recompra' | 'sistema'
+
+export interface Notificacao {
+  id: string
+  created_at: string
+  lead_id: string | null
+  tipo: NotificacaoTipo
+  mensagem: string
+  lida: boolean
+  lida_em: string | null
+}
+
+// ========================
+// Integration Keys
+// ========================
+
+export interface IntegrationKey {
+  id: string
+  created_at: string
+  updated_at: string
+  service: string
+  key_name: string
+  key_value: string
+  is_active: boolean
+}
+
+// ========================
+// WhatsApp Instances
+// ========================
+
+export type WhatsAppInstanceStatus = 'disconnected' | 'connecting' | 'connected' | 'error'
+
+// single-tenant (ADR-01): a tabela `whatsapp_instances` NAO tem coluna tenant_id.
+export interface WhatsAppInstance {
+  id: string
+  created_at: string
+  updated_at: string
+  name: string
+  phone_number: string | null
+  teams: string[] | null
+  status: WhatsAppInstanceStatus
+  api_key: string | null
+  api_url: string | null
+  webhook_url: string | null
+  bypass_disconnect: boolean | null
+  purpose: string | null
+  metadata: Record<string, unknown> | null
+}
